@@ -1,0 +1,27 @@
+<div>
+	<!--<div ng-show="tab=='songs'">-->
+	<div ng-show="false">
+		<span translate>Search</span>: <input ng-model="query">
+	</div>
+	<ul ng-class="{'song-list': 1, 'queue-list': {{tab=='queue'}}}">
+		<li ng-repeat="song in songs | filter:query">
+			<a href="{{song.link}}">
+				<div class="queue-index" len="{{(''+(song.idx+1)).length}}">
+					<div><div> <!-- ugh vertical alignment -->
+					{{song.idx+1}}
+					</div></div>
+				</div>
+				<img ng-src="{{song.coverUrl}}">
+				<div>
+					<p class="title">{{song.meta.title}}</p>
+					<p class="seenon">{{song.meta.seenon}}</p>
+					<p class="sub">{{song.meta.artist}} / {{song.meta.album}}</p>
+				</div>
+			</a>
+		</li>
+	</ul>
+	<div style="text-align: center" ng-show="tab=='queue' && songs.length == 0">
+		<h1 translate>No queued songs!</h1>
+		<a class="button green" href="#/songs" translate>Choose a song</a>
+	</div>
+</div>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html ng-app="karaoke">
+<head>
+	<title>BlitzLoop</title>
+	<script type="text/javascript" src="s/js/angular.min.js"></script>
+	<script type="text/javascript" src="s/js/ng-translate.min.js"></script>
+	<script type="text/javascript" src="cfg.js"></script>
+	<script type="text/javascript" src="s/js/app.js"></script>
+	<link rel="stylesheet" type="text/css" href="s/css/main.css"></link>
+	<meta name="viewport" content="width=800, user-scalable=0" />
+</head>
+<body>
+	<div id="topbar" ng-controller="MenuCtrl">
+		<div id="topleft">
+			<span id="tabs">
+				<a href="#/songs" translate ng-class="{selected: tab=='songs'}">Songs</a>
+				<a href="#/queue" translate ng-class="{selected: tab=='queue'}">Queue</a>
+				<a href="#/queue/now" translate ng-class="{selected: tab=='now'}">Now Playing</a>
+				<a href="#/settings" translate ng-class="{selected: tab=='settings'}">Settings</a>
+			</span>
+		</div>
+		<div id="topright">
+			<div id="latinselect">
+				<a ng-class="{selected: latin}" ng-click="setLatin(true)">A</a><!--
+				--><a ng-class="{selected: !latin}" ng-click="setLatin(false)">本</a>
+			</div>
+			<div id="langselect">
+				<img ng-class="{selected: lang=='en-gb'}" ng-click="setLang('en-gb')" src="s/img/flag/gb.png"><!--
+				--><img ng-class="{selected: lang=='es-es'}" ng-click="setLang('es-es')" src="s/img/flag/es.png"><!--
+				--><img ng-class="{selected: lang=='es-eu'}" ng-click="setLang('es-eu')" src="s/img/flag/basque.png"><!--
+				--><img ng-class="{selected: lang=='de-de'}" ng-click="setLang('de-de')" src="s/img/flag/de.png"><!--
+				--><!--<img ng-class="{selected: lang=='ja-jp'}" ng-click="setLang('ja-jp')" src="s/img/flag/jp.png">-->
+			</div>
+		</div>
+	</div>
+	<div id="view" ng-view></div>
+</body>

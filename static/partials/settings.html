@@ -1,0 +1,14 @@
+<div id="settings">
+	<div class="section">
+		<h2 translate>Music</h2>
+		<slider ng-model="settings.volume" min="0" max="100">Volume</slider>
+		<slider ng-model="settings.headstart" min="0" max="50">Sync</slider>
+	</div>
+	<div class="section">
+		<h2 translate>Microphone</h2>
+		<slider ng-model="settings.mic_volume" min="0" max="100">Volume</slider>
+		<slider ng-model="settings.mic_feedback" min="0" max="50">Echo</slider>
+		<slider ng-model="settings.mic_delay" min="5" max="25">Delay</slider>
+	</div>
+	<a class="button red" ng-click="reset()" translate>Reset to defaults</a>
+</div>

@@ -1,0 +1,518 @@
+/* http://meyerweb.com/eric/tools/css/reset/
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+	display: block;
+}
+body {
+	line-height: 1;
+}
+ol, ul {
+	list-style: none;
+}
+blockquote, q {
+	quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+	content: '';
+	content: none;
+}
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+
+/* style */
+a {
+	text-decoration: none;
+	color: inherit;
+	cursor: pointer;
+}
+
+body {
+	font-family: sans-serif;
+	width: 800px;
+}
+
+#topbar {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 800px;
+	height: 36px;
+	background-color: #48c;
+	z-index: 10;
+}
+
+#topleft {
+	width: auto;
+	float: left;
+	margin-left: 10px;
+	padding-top: 6px;
+	color: white;
+}
+
+#tabs {
+	font-size: 20px;
+}
+
+#tabs a {
+	display: inline-block;
+	vertical-align: bottom;
+	padding-top: 4px;
+	-webkit-border-top-left-radius: 10px;
+	-webkit-border-top-right-radius: 10px;
+	-moz-border-radius-topleft: 10px;
+	-moz-border-radius-topright: 10px;
+	border-top-left-radius: 10px;
+	border-top-right-radius: 10px;
+	border: 2px solid #246;
+	border-bottom: none;
+	background-color: #369;
+	padding-left: 4px;
+	padding-right: 4px;
+	height: 24px;
+}
+
+#tabs a.selected {
+	background-color: white;
+	color: black;
+}
+
+#topright {
+	float: right;
+	margin-right: 10px;
+	padding-top: 6px;
+}
+
+#langselect,#latinselect {
+	display: inline-block;
+	vertical-align: top;
+	height: 19px;
+	border: 2px solid #246;
+	border-radius: 5px;
+	margin-left: 2px;
+	margin-right: 2px;
+}
+
+#langselect img {
+	display: inline-block;
+	height: 11px;
+	width: 16px;
+	padding: 4px;
+	border-radius: 2px;
+	cursor: pointer;
+}
+
+#langselect img.selected {
+	background-color: #7bf;
+}
+
+#latinselect a {
+	display: inline-block;
+	vertical-align: top;
+	height: 17px;
+	width: 24px;
+	border-radius: 2px;
+	text-align: center;
+	padding-top: 2px;
+	font-size: 15px;
+}
+
+#latinselect a.selected {
+	background-color: #7bf;
+}
+
+#view {
+	padding-top: 45px;
+	padding-bottom: 10px;
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+.song-list li {
+	display: block;
+	margin-bottom: 4px;
+}
+
+.song-list li a {
+	display: block;
+	height: 70px;
+	border: 3px solid #77A0BF;
+	border-radius: 3px;
+	background-color: #B6E0FF;
+	color: black;
+	font-size: 18px;
+	padding-right: 6px;
+}
+
+.song-list li a img {
+	float: left;
+	vertical-align: top;
+	margin-right: 6px;
+	width: 70px;
+	height: 70px;
+}
+
+.song-list li a div {
+	overflow: hidden;
+}
+
+.song-list li a div.queue-index {
+	display: none;
+}
+
+.queue-list li a div.queue-index {
+	display: table;
+	float: left;
+	width: 20px;
+	padding-right: 2px;
+	background-color: #77A0BF;
+	height: 100%;
+	color: white;
+	text-align: center;
+	font-weight: bold;
+	font-size: 28px;
+}
+.queue-list li a div.queue-index div {
+	display: table-cell;
+	vertical-align: middle;
+}
+.queue-list li a div.queue-index div div {
+	width: 20px;
+}
+
+.queue-list li a div[len="2"].queue-index {
+	font-size: 16px;
+}
+
+.queue-list li a div[len="3"].queue-index {
+	font-size: 11px;
+}
+
+.queue-list li:first-child a div.queue-index {
+	background-color:  #77BFA0;
+}
+
+.queue-list li:first-child a {
+	border: 3px solid #77BFA0;
+	background-color:  #B6FFE0;
+}
+
+.song-list .title {
+	float: left;
+	font-size: 34px;
+	padding-right: 16px;
+	margin-top: 4px;
+	margin-bottom: 3px;
+	height: 40px;
+	white-space: nowrap;
+}
+
+.song-list .seenon {
+	overflow: hidden;
+	text-align: right;
+	font-size: 18px;
+	padding-top: 3px;
+	height: 37px;
+}
+
+.song-list .sub {
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	clear: left;
+	padding-bottom: 3px;
+	padding-left: 1px;
+}
+
+.song {
+	display: block;
+	border: 3px solid #77A0BF;
+	border-radius: 3px;
+	background-color: #B6E0FF;
+	color: black;
+	font-size: 18px;
+	margin-top: 2px;
+}
+
+.song img {
+	float: left;
+	width: 200px;
+	height: 200px;
+}
+
+.song .meta {
+	height: 196px;
+	overflow: hidden;
+	font-size: 20px;
+	padding-left: 6px;
+	padding-right: 6px;
+	padding-top: 4px;
+}
+
+.song .meta p {
+	padding-top: 13px;
+	padding-bottom: 4px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	border-bottom: 1px solid #77A0BF;
+}
+
+.song .meta p:last-child {
+	border-bottom: none;
+}
+
+.song .meta p.title {
+	font-size: 30px;
+}
+
+.song .meta p span{
+	position: absolute;
+	margin-top: -6px;
+	font-size: 12px;
+	width: 50%;
+	color: #246;
+}
+
+.choice {
+	margin: 4px;
+	clear: both;
+	font-size: 28px;
+	text-align: center;
+}
+
+.choice div {
+	display: inline-block;
+	vertical-align: baseline;
+	margin-left: 2px;
+	margin-right: 2px;
+}
+
+.choice div a {
+	display: inline-block;
+	vertical-align: baseline;
+	border-radius: 6px;
+	text-align: center;
+	padding: 4px;
+	margin-right: 10px;
+	border: 2px solid #246;
+}
+.choice div a:last-child {
+	margin-right: 0;
+}
+
+.choice div a.selected {
+	background-color: #7bf;
+}
+
+.actions {
+	text-align: center;
+}
+
+hr {
+	clear: both;
+	border: 1px solid #77A0BF;
+	margin-top: 8px;
+	margin-bottom: 8px;
+}
+
+.actions {
+	margin: 8px;
+}
+
+@font-face {
+	font-family: 'FontAwesome';
+	src: url('/s/font/fontawesome-webfont.eot');
+	src: url('/s/font/fontawesome-webfont.eot?#iefix&v=3.0.1') format('embedded-opentype'),
+	url('/s/font/fontawesome-webfont.woff?v=3.0.1') format('woff'),
+	url('/s/font/fontawesome-webfont.ttf?v=3.0.1') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+}
+
+.icon {
+	font-family: "FontAwesome";
+}
+
+.button {
+	display: inline-block;
+	vertical-align: top;
+	border-radius: 6px;
+	text-align: center;
+	padding: 4px;
+	padding-left: 7px;
+	padding-right: 7px;
+	margin-right: 10px;
+	border: 2px solid #246;
+	font-size: 28px;
+	height: 30px;
+	line-height: 30px;
+}
+
+.button.icon {
+	font-size: 20px;
+	line-height: 30px;
+	padding-left: 10px;
+	padding-right: 10px;
+	width: 21px;
+	text-align: center;
+}
+
+.button.green {
+	border-color: #264;
+	background-color: #77BFA0
+}
+
+.button.red {
+	border-color: #722;
+	background-color: #dd9999;
+}
+
+div.slider {
+	margin-top: 3px;
+}
+
+div.slider div.value {
+	display: table;
+	float: left;
+	height: 35px;
+}
+
+div.slider div.value div {
+	display: table-cell;
+	vertical-align: middle;
+}
+
+div.slider div.value div div {
+	text-align: center;
+}
+
+div.slider .label,div.slider div.value,div.slider div.value div div {
+	width: 50px;
+}
+
+#settings div.slider .label,#settings div.slider div.value,#settings div.slider div.value div div {
+	width: 80px;
+}
+
+div.slider > span {
+	font-size: 20px;
+	line-height: 30px;
+}
+
+div.slider div.outer {
+	overflow: hidden;
+	height: 35px;
+}
+
+div.slider div.bar {
+	height: 10px;
+	background-color: #77A0BF;
+	border: 2px solid #246;
+	border-radius: 8px;
+	margin-top: 10px;
+	margin-bottom: 10px;
+	margin-left: 15px;
+	margin-right: 16px;
+	position: relative;
+}
+
+div.slider div.bar div.knob {
+	margin-left: -17px;
+	margin-top: -11px;
+	border-radius: 20px;
+	height: 30px;
+	width: 30px;
+	position: relative;
+	left: 0%;
+	border: 2px solid #246;
+	background-color: #def;
+}
+
+div.slider div.bar div.chunk {
+	position: absolute;
+	background-color: #7bf	;
+	width: 10%;
+	top: 0;
+	height: 10px;
+	border-radius: 5px;
+}
+
+div.slider .label {
+	position: absolute;
+	text-align: center;
+	font-size: 12px;
+	color: #246;
+	margin-top: -4px;
+}
+
+.sliders {
+	margin: 8px;
+}
+
+.sliders > div.wide {
+	clear: both;
+}
+
+.sliders .left {
+	width: 50%;
+	float: left;
+}
+.sliders .right {
+	width: 50%;
+	float: right;
+}
+
+#settings .section {
+	display: block;
+	border: 3px solid #77A0BF;
+	border-radius: 3px;
+	background-color: #B6E0FF;
+	color: black;
+	font-size: 18px;
+	margin-top: 2px;
+	margin-bottom: 8px;
+	padding: 8px;
+}
+
+h1 {
+	text-align: center;
+	font-size: 30px;
+	margin-bottom: 10px;
+}
+
+h2 {
+	text-align: center;
+	font-size: 25px;
+}
+
+#settings {
+	text-align: center;
+}

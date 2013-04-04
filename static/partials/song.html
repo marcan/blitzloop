@@ -1,0 +1,44 @@
+<div ng-class="{song: true, now: tab=='now'}" ng-show="loaded">
+	<img ng-src="{{coverUrl}}" width="200" height="200">
+	<div class="meta">
+		<p class="title"><span translate>Title</span>{{song.meta.title}}</p>
+		<p><span translate>Artist</span>{{song.meta.artist}}</p>
+		<p><span translate>Album</span>{{song.meta.album}}</p>
+		<p><span translate>Seen on</span>{{song.meta.seenon}}</p>
+		<p><span translate>Lyrics</span>{{variant.snippet}}</p>
+	</div>
+	<hr style="margin-top: 0">
+	<div class="sliders" ng-hide="tab=='songs'">
+		<div class="left">
+			<slider ng-model="song.config.pitch" min="-12" max="12" plus>Pitch</slider>
+			<slider ng-model="song.config.speed" min="-12" max="12" plus>Tempo</slider>
+		</div>
+		<div class="right" ng-show="song.channels > 0">
+			<slider ng-model="song.config.channels[0]" min="0" max="20">Vocals</slider>
+		</div>
+		<div class="wide"></div>
+	</div>
+	<div class="choice" ng-show="tab!='now'">
+		<span translate>Style</span>:
+		<div>
+			<a ng-repeat="v in song.variants" ng-click="song.config.variant = {{v.id}}" ng-class="{selected: variant.id==v.id}">
+				{{v.name}}
+			</a>
+		</div>
+	</div>
+	<hr>
+	<div class="actions" ng-show="tab=='songs'">
+		<a class="button" href="#{{backUrl}}" translate>Back</a>
+		<a class="button green" ng-click="addToQueue()" translate>Add to queue</a>
+	</div>
+	<div class="actions" ng-show="tab=='queue'">
+		<a class="button" href="#{{backUrl}}" translate>Back</a>
+		<a class="button red" ng-click="removeFromQueue()" translate>Remove from queue</a>
+	</div>
+	<div class="actions" ng-show="tab=='now'">
+	<a class="button" href="#{{backUrl}}" translate>Back</a>
+	<a class="button icon" ng-hide="song.config.pause" ng-click="song.config.pause=true">&#xf04c;</a><!-- pause -->
+	<a class="button icon" ng-show="song.config.pause" ng-click="song.config.pause=false">&#xf04b;</a><!-- play -->
+	<a class="button icon red" ng-click="removeFromQueue()">&#xf04d;</a><!-- stop -->
+	</div>
+</div>
