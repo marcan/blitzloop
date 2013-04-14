@@ -85,8 +85,10 @@ def render():
 
 a.set_channel(0, vocals_i/10.0)
 
+pause = False
+
 def key(k):
-	global speed_i, pitch_i, vocals_i
+	global speed_i, pitch_i, vocals_i, pause
 	if k == '\033':
 		a.shutdown()
 		os._exit(0)
@@ -114,6 +116,9 @@ def key(k):
 		vocals_i -= 1
 		print "Vocals: %d" % vocals_i
 		a.set_channel(0, vocals_i/10.0)
+	elif k == ' ':
+		pause = not pause
+		a.set_pause(pause)
 
 try:
 	a.play(file)
