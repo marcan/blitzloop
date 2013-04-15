@@ -101,6 +101,7 @@ def main_render():
 		videofile = video.BackgroundVideo(qe.song)
 		display.set_aspect(videofile.aspect)
 	else:
+		videofile = None
 		display.set_aspect(None)
 
 	if qe.song.aspect:
