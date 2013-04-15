@@ -82,6 +82,7 @@ def main_render():
 	if not qe:
 		idle_screen.reset()
 		for f in idle_screen:
+			audio_config.update()
 			yield None
 			if not qe:
 				with queue.lock:
