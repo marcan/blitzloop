@@ -18,6 +18,7 @@
 
 import time, math
 import OpenGL.GL as gl
+import OpenGL.GLU as glu
 import PIL
 
 class ImageTexture(object):
@@ -26,12 +27,13 @@ class ImageTexture(object):
 		self.texid = gl.glGenTextures(1)
 
 		gl.glBindTexture(gl.GL_TEXTURE_2D, self.texid)
-		gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR);
+		gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR_MIPMAP_NEAREST);
 		gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR);
+		gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S, gl.GL_CLAMP);
+		gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T, gl.GL_CLAMP);
 
-		gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGBA,
-						self.width, self.height, 0,
-						gl.GL_RGBA, gl.GL_UNSIGNED_BYTE, self.image.tostring())
+		glu.gluBuild2DMipmaps(gl.GL_TEXTURE_2D, 4, self.width, self.height, gl.GL_RGBA,
+				      gl.GL_UNSIGNED_BYTE, self.image.tostring())
 
 	@property
 	def width(self):
