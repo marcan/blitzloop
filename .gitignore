@@ -2,3 +2,4 @@
 *.pyo
 *~
 build
+_audio.cpp
