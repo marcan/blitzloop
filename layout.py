@@ -483,6 +483,26 @@ class SongLayout(object):
 			rows[l.row].append(l)
 			sortrow(l.row)
 
+		def canmovetop(l):
+			return True
+
+		def movetop(l):
+				if l.row == 0:
+					# FIXME: this can cause another line to violate the
+					# "no jumping ahead" rule. meh.
+					for row in range(len(rows)):
+						if collides(l, row):
+							need_row = row + 1
+				else:
+					need_row = l.row - 1
+					for l2 in collides(l, need_row):
+						movetop(l2)
+				rows[l.row].remove(l)
+				sortrow(l.row)
+				l.row = need_row
+				rows[l.row].append(l)
+				sortrow(l.row)
+
 		if not top:
 			for i, l in enumerate(lines):
 				if l.want_row and not collides(l, l.want_row):
@@ -511,9 +531,21 @@ class SongLayout(object):
 			for i, l in enumerate(lines):
 				for row in range(len(rows)):
 					if not collides(l, row):
-						l.row = row
-						rows[row].append(l)
+						need_row = row
 						break
+				if i == 0 or need_row <= (lines[i-1].row + 1):
+					l.row = need_row
+					rows[need_row].append(l)
+				else:
+					for want_row in (lines[i-1].row, lines[i-1].row + 1):
+						if canmovetop(rows[want_row][-1]):
+							movetop(rows[want_row][-1])
+							l.row = want_row
+							rows[want_row].append(l)
+							break
+					else:
+						l.row = need_row
+						rows[need_row].append(l)
 
 		max_ascender = max(l.ascender for l in lines)
 		min_descender = min(l.descender for l in lines)
