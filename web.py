@@ -11,6 +11,8 @@ LANGUAGES = ("en-gb", "es-es", "ja-jp", "de-de", "es-eu")
 
 nonce = random.randint(0, 2**32)
 
+DEFAULT_WIDTH = 1024
+
 @hook("before_request")
 def pre_req():
 	request.lang = request.get_cookie('lang')
@@ -52,15 +54,21 @@ def send_static(filename):
 
 @route("/")
 def index():
-	return static_file("index.html", root="static", mimetype="text/html; charset=UTF-8")
+	return index_xw(DEFAULT_WIDTH)
 
 @route("/xs")
-def index():
+def index_xs():
+	return index_xw(DEFAULT_WIDTH, True)
+
+@route("/xw=<width:int>")
+def index_xw(width, user_scalable=False):
 	with open("static/index.html") as fd:
-		# horrible hack!
-		data = fd.read().replace("user-scalable=0","user-scalable=1")
+		data = fd.read()
+	data = data.replace("%SCALABLE%", "1" if user_scalable else "0")
+	data = data.replace("%WIDTH%", str(width))
 	response.content_type = "text/html; charset=UTF-8"
 	return data
+
 
 def get_song_meta(song):
 	d = {}

@@ -7,7 +7,12 @@
 	<script type="text/javascript" src="cfg.js"></script>
 	<script type="text/javascript" src="s/js/app.js"></script>
 	<link rel="stylesheet" type="text/css" href="s/css/main.css"></link>
-	<meta name="viewport" content="width=800, user-scalable=0" />
+	<meta name="viewport" content="width=%WIDTH%, user-scalable=%SCALABLE%" />
+	<style type="text/css">
+		body, #topbar {
+			width: %WIDTH%px;
+		}
+	</style>
 </head>
 <body>
 	<div id="topbar" ng-controller="MenuCtrl">
