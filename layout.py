@@ -257,7 +257,7 @@ class DisplayLine(object):
 				glyph.set_timing(atom_x, self.px, start, end)
 			self.glyphs += glyphs
 			# if the atom has subatomic particles (ruby text)
-			if atom.particles is not None:
+			if atom.particles is not None and ruby_font:
 				# ruby pen. we will adjust X later when centering over atom.
 				ruby_px = 0
 				ruby_py = self.display.round_coord(atom_y + font.ascender - ruby_font.descender)
@@ -392,6 +392,8 @@ class SongLayout(object):
 	def _get_font(self, style, ruby=False):
 		font = style.font if not ruby else style.ruby_font
 		size = style.size if not ruby else style.ruby_size
+		if size == 0:
+			return None
 		ident = (font, size, style.border_width, style.outline_width)
 		if ident in self.fonts:
 			return self.fonts[ident]
