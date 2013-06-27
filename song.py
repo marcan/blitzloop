@@ -527,7 +527,10 @@ class Variant(object):
 			if key in ("name", "style"):
 				setattr(self, key, value)
 			elif key == "tags":
-				self.tag_list = [i.strip() for i in value.split(",")]
+				if value:
+					self.tag_list = [i.strip() for i in value.split(",")]
+				else:
+					self.tag_list = []
 			elif "." in key:
 				tag, key = key.split(".", 1)
 				if tag not in self.tag_data:
