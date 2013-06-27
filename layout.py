@@ -120,11 +120,14 @@ void main() {
 		border_color = v_border_color;
 		fill_color = v_fill_color;
 	}
+	
+	float a = (outline + border + fill);
 
 	gl_FragColor.rgb = outline_color * outline;
 	gl_FragColor.rgb += border_color * border;
 	gl_FragColor.rgb += fill_color * fill;
-	gl_FragColor.a = (outline + border + fill) * v_alpha;
+	gl_FragColor.rgb /= a;
+	gl_FragColor.a = a * v_alpha;
 }
 """
 
