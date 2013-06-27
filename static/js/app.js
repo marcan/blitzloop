@@ -210,6 +210,12 @@ app.controller('SongDetailCtrl', function($scope, $rootScope, $routeParams, $htt
 				pitch: 0,
 				pause: false
 			};
+			for (var i = 0; i < data.variants.length; i++) {
+				if (data.variants[i].default) {
+					$scope.song.config.variant = i;
+					break;
+				}
+			}
 			$scope.variant = data.variants[$scope.song.config.variant];
 			if (!$scope.loaded) {
 				nudge(); // WTF webkit

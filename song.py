@@ -521,6 +521,7 @@ class Variant(object):
 		self.tags = None
 		self.tag_list = None
 		self.style = None
+		self.default = False
 		self.tag_data = {}
 
 		for key, value in self.data.items():
@@ -531,6 +532,8 @@ class Variant(object):
 					self.tag_list = [i.strip() for i in value.split(",")]
 				else:
 					self.tag_list = []
+			elif key == "default":
+				self.default = value.lower() in ("1", "true")
 			elif "." in key:
 				tag, key = key.split(".", 1)
 				if tag not in self.tag_data:

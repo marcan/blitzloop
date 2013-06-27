@@ -80,7 +80,7 @@ def get_song_meta(song):
 	return d
 
 def get_song_variants(song):
-	return [{"id": i, "name": v.name,
+	return [{"id": i, "name": v.name, "default": v.default,
 	         "snippet": song.get_lyric_snippet(k)}
 	        for i, (k, v) in enumerate(song.variants.items())]
 
