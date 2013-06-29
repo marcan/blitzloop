@@ -73,6 +73,8 @@ class BackgroundVideo(object):
 		gl.glBindTexture(gl.GL_TEXTURE_2D, self.texid)
 		gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR);
 		gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR);
+		gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S, gl.GL_CLAMP);
+		gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T, gl.GL_CLAMP);
 
 		gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, 3,
 						self.width, self.height, 0,
