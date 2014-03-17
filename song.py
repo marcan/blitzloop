@@ -234,7 +234,7 @@ class RomajiMolecule(Molecule):
 
 class LatinMolecule(Molecule):
 	SPACE = " "
-	VOWELS = u"aeiouáéíóú"
+	VOWELS = u"aeiouáéíóúäëïöü"
 	CONSONANTS = u"bcdfghjklmnñpqrstvwxyz0123456789'"
 	VOWELS_END = VOWELS
 	CONSONANTS_END = CONSONANTS
