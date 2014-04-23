@@ -47,63 +47,63 @@ compound = None
 compounds = iter(s.compounds)
 
 def render():
-	while True:
-		gl.glClearColor(0, 0.3, 0, 1)
-		gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
-		gl.glLoadIdentity()
-		renderer.draw(step, layout)
-		yield None
+    while True:
+        gl.glClearColor(0, 0.3, 0, 1)
+        gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
+        gl.glLoadIdentity()
+        renderer.draw(step, layout)
+        yield None
 
 def round_beat(b):
-	return song.MixedFraction(int(round(quant * float(b))))
+    return song.MixedFraction(int(round(quant * float(b))))
 
 def key(k):
-	global step, compound, cur_beat
-	song_time = a.song_time() or 0
-	beat = s.timing.time2beat(song_time)
-	if k == ' ':
-		if compound is not None:
-			time = song.MixedFraction(round_beat(beat - cur_beat), quant)
-			cur_beat += time
-			compound.timing.append(time)
-			print time,
-			sys.stdout.flush()
-			if len(compound.timing) < (compound.steps-1):
-				step += 1
-				return
-			elif len(compound.timing) == (compound.steps-1):
-				step += 0.5
-			else:
-				step += 0.5
-				compound = None
-				print
-		if compound is None:
-			start = song.MixedFraction(round_beat(beat), quant)
-			cur_beat = start
-			try:
-				compound = compounds.next()
-			except StopIteration:
-				d = s.dump()
-				s.save(sys.argv[1] + ".new")
-				return
-			compound.start = start
-			compound.timing = []
-			print start, " ",
-			sys.stdout.flush()
-			if compound.steps == 1:
-				step += 0.5
-			else:
-				step += 1
-		song_time = a.song_time() or 0
-		beat = s.timing.time2beat(song_time)
-	elif k == '\r':
-		if compound and len(compound.timing) == (compound.steps - 1):
-			time = song.MixedFraction(round_beat(beat - cur_beat), quant)
-			compound.timing.append(time)
-			step += 0.5
-			compound = None
-			print time
-      
+    global step, compound, cur_beat
+    song_time = a.song_time() or 0
+    beat = s.timing.time2beat(song_time)
+    if k == ' ':
+        if compound is not None:
+            time = song.MixedFraction(round_beat(beat - cur_beat), quant)
+            cur_beat += time
+            compound.timing.append(time)
+            print time,
+            sys.stdout.flush()
+            if len(compound.timing) < (compound.steps-1):
+                step += 1
+                return
+            elif len(compound.timing) == (compound.steps-1):
+                step += 0.5
+            else:
+                step += 0.5
+                compound = None
+                print
+        if compound is None:
+            start = song.MixedFraction(round_beat(beat), quant)
+            cur_beat = start
+            try:
+                compound = compounds.next()
+            except StopIteration:
+                d = s.dump()
+                s.save(sys.argv[1] + ".new")
+                return
+            compound.start = start
+            compound.timing = []
+            print start, " ",
+            sys.stdout.flush()
+            if compound.steps == 1:
+                step += 0.5
+            else:
+                step += 1
+        song_time = a.song_time() or 0
+        beat = s.timing.time2beat(song_time)
+    elif k == '\r':
+        if compound and len(compound.timing) == (compound.steps - 1):
+            time = song.MixedFraction(round_beat(beat - cur_beat), quant)
+            compound.timing.append(time)
+            step += 0.5
+            compound = None
+            print time
+
 a.play(file)
 display.set_render_gen(render)
 display.set_keyboard_handler(key)

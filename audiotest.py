@@ -33,10 +33,10 @@ a.play(file)
 te = []
 
 try:
-	while True:
-		time.sleep(0.01)
-		print a.song_time()
+    while True:
+        time.sleep(0.01)
+        print a.song_time()
 except KeyboardInterrupt:
-	print "KeyboardInterrupt!"
-	a.shutdown()
-	file.close()
+    print "KeyboardInterrupt!"
+    a.shutdown()
+    file.close()

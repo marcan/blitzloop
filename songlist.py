@@ -21,74 +21,74 @@ import os, os.path, time
 from song import Song
 
 class SongDatabase(object):
-	def __init__(self, root):
-		self.songs = []
-		self.load(root)
+    def __init__(self, root):
+        self.songs = []
+        self.load(root)
 
-	def load(self, root):
-		for dirpath, dirnames, filenames in os.walk(root, followlinks=True):
-			for name in filenames:
-				if not name.endswith(".txt"):
-					continue
-				path = os.path.join(dirpath, name)
-				print path
-				song = Song(path)
-				song.id = len(self.songs)
-				self.songs.append(song)
+    def load(self, root):
+        for dirpath, dirnames, filenames in os.walk(root, followlinks=True):
+            for name in filenames:
+                if not name.endswith(".txt"):
+                    continue
+                path = os.path.join(dirpath, name)
+                print path
+                song = Song(path)
+                song.id = len(self.songs)
+                self.songs.append(song)
 
 class SongQueueEntry(object):
-	def __init__(self, song):
-		self.song = song
-		self.qid = None
-		self.variant = 0
-		self.channels = [3]
-		self.speed = 0
-		self.pitch = 0
-		self.pause = False
-		self.stop = False
+    def __init__(self, song):
+        self.song = song
+        self.qid = None
+        self.variant = 0
+        self.channels = [3]
+        self.speed = 0
+        self.pitch = 0
+        self.pause = False
+        self.stop = False
 
 class SongQueue(object):
-	def __init__(self):
-		self.lock = threading.RLock()
-		self.queue = []
-		self.qid = 0
-		self.qidmap = {}
+    def __init__(self):
+        self.lock = threading.RLock()
+        self.queue = []
+        self.qid = 0
+        self.qidmap = {}
 
-	def add(self, queue_entry):
-		with self.lock:
-			queue_entry.qid = self.qid
-			self.qid += 1
-			self.queue.append(queue_entry)
-			self.qidmap[queue_entry.qid] = queue_entry
+    def add(self, queue_entry):
+        with self.lock:
+            queue_entry.qid = self.qid
+            self.qid += 1
+            self.queue.append(queue_entry)
+            self.qidmap[queue_entry.qid] = queue_entry
 
-	def remove(self, qid):
-		with self.lock:
-			entry = self.qidmap[qid]
-			index = self.queue.index(entry)
-			entry.stop = True
-			del self.queue[index]
-			del self.qidmap[qid]
+    def remove(self, qid):
+        with self.lock:
+            entry = self.qidmap[qid]
+            index = self.queue.index(entry)
+            entry.stop = True
+            del self.queue[index]
+            del self.qidmap[qid]
 
-	def pop(self, qid):
-		with self.lock:
-			top = self.queue[0]
-			if top.qid == qid:
-				del self.queue[0]
-				del self.qidmap[top.qid]
+    def pop(self, qid):
+        with self.lock:
+            top = self.queue[0]
+            if top.qid == qid:
+                del self.queue[0]
+                del self.qidmap[top.qid]
 
-	def get(self, qid):
-		return self.qidmap[qid]
+    def get(self, qid):
+        return self.qidmap[qid]
 
-	def index(self, qid):
-		with self.lock:
-			return self.queue.index(self.qidmap[qid])
+    def index(self, qid):
+        with self.lock:
+            return self.queue.index(self.qidmap[qid])
 
-	def __len__(self):
-		return len(self.queue)
+    def __len__(self):
+        return len(self.queue)
 
-	def __getitem__(self, idx):
-		return self.queue[0]
+    def __getitem__(self, idx):
+        return self.queue[0]
 
-	def __iter__(self):
-		return iter(self.queue)
+    def __iter__(self):
+        return iter(self.queue)
 

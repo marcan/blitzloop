@@ -32,10 +32,10 @@ print "Loaded"
 
 a.play(file)
 try:
-	while True:
-		song_time = a.song_time() or 0
-		beat = s.timing.time2beat(song_time)
-		print beat
-		time.sleep(0.01)
+    while True:
+        song_time = a.song_time() or 0
+        beat = s.timing.time2beat(song_time)
+        print beat
+        time.sleep(0.01)
 finally:
-	a.shutdown()
+    a.shutdown()

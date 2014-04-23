@@ -4,12 +4,12 @@ from distutils.extension import Extension
 from Cython.Distutils import build_ext
 
 setup(
-	ext_modules=[
-		Extension("_audio",
-			["_audio.pyx"],
-			language="c++",
-			libraries=["jack", "samplerate", "sndfile", "rubberband"]
-			)
-	],
-	cmdclass={"build_ext": build_ext}
+    ext_modules=[
+        Extension("_audio",
+            ["_audio.pyx"],
+            language="c++",
+            libraries=["jack", "samplerate", "sndfile", "rubberband"]
+            )
+    ],
+    cmdclass={"build_ext": build_ext}
 )

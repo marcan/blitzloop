@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 def map_from(x, min, max):
-	return (x-min) / (max-min)
+    return (x-min) / (max-min)
 
 def map_to(x, min, max):
-	return min + x * (max - min)
+    return min + x * (max - min)
