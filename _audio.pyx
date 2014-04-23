@@ -20,12 +20,15 @@ from threading import Thread
 
 from libc.stdint cimport *
 from libc.stdio cimport puts
-from libc.stdlib cimport malloc, free, _Exit
+from libc.stdlib cimport malloc, free
 from libc.string cimport memcpy, memset
 
 cdef extern from *:
 	ctypedef int vint "volatile int"
 	void __sync_synchronize() nogil
+
+cdef extern from "stdlib.h" nogil:
+	void _exit (int status)
 
 cdef extern from "jack/jack.h":
 	enum:
@@ -359,7 +362,7 @@ cdef int _process_cb(jack_nframes_t nframes, void *arg) nogil:
 
 cdef void _shutdown_cb(void *arg) nogil:
 	puts("JACK shutdown called, dying rudely\n")
-	_Exit(1)
+	_exit(1)
 
 cdef class AudioEngine:
 	cdef:
