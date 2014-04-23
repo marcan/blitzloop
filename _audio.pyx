@@ -168,11 +168,11 @@ cdef class AudioFile:
 		
 		AtomicInt die
 		AtomicInt first_time_full
+		AtomicInt eof
 
 		double src_ratio
 
 		object thread
-		int eof
 
 	def __init__(self, filename, target_rate, init_pos=0):
 		self.die = AtomicInt()
@@ -180,7 +180,8 @@ cdef class AudioFile:
 		self.first_time_full = AtomicInt()
 		self.first_time_full.set(0)
 		self.info.format = 0
-		self.eof = 0
+		self.eof = AtomicInt()
+		self.eof.set(0)
 
 		self.fd = sf_open(filename, SFM_READ, &self.info)
 		if self.fd == NULL:
@@ -215,7 +216,7 @@ cdef class AudioFile:
 
 		self.thread = Thread(target = self.thread_func)
 		self.thread.start()
-		while not self.first_time_full.get():
+		while not self.first_time_full.get() and not self.eof.get():
 			time.sleep(0.1)
 
 	cdef long src_read(self, float **data) nogil:
@@ -243,7 +244,7 @@ cdef class AudioFile:
 			with nogil:
 				got = src_callback_read(self.src, self.src_ratio, buf_free, &self.buf[wptr * self.info.channels])
 			if not got:
-				self.eof = 1
+				self.eof.set(1)
 				return
 			assert got <= buf_free
 			wptr += got
@@ -466,7 +467,8 @@ cdef class AudioEngine:
 		cdef int i
 		cdef jack_nframes_t nframes_left = nframes
 		cdef float *o_p[2]
-		cdef float *b_l, *b_r
+		cdef float *b_l
+		cdef float *b_r
 		cdef long file_pos = -1
 		cdef TimingEntry timing, last_timing
 		cdef jack_nframes_t jack_time = jack_last_frame_time(self.client)
@@ -517,7 +519,7 @@ cdef class AudioEngine:
 					b_r = self.rb_buf[1]
 
 					left = want
-					at_eof = self.cur_file.eof
+					at_eof = self.cur_file.eof.get()
 
 					for i in range(2):
 						if left == 0:
