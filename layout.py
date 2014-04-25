@@ -510,7 +510,7 @@ class SongLayout(object):
 
         if not top:
             for i, l in enumerate(lines):
-                if l.want_row and not collides(l, l.want_row):
+                if l.want_row is not None and not collides(l, l.want_row):
                     l.row = l.want_row
                     rows[l.want_row].append(l)
                 elif not collides(l, 1):
