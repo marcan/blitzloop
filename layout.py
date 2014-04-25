@@ -576,7 +576,10 @@ class SongLayout(object):
                 else:
                     l.x = self.margin + (self.wrapwidth - l.width) / 2.0 # center
             if max_end > l.start and prev_l:
-                l.start = max(min(l.start,prev_l.lim_start), l.start - 5)
+                orig_start = l.start
+                l.start = max(min(l.start, prev_l.lim_start), l.start - 5)
+                if prev_l.row < l.row:
+                    l.start = min(orig_start, max(l.start, prev_l.start + 1.5))
                 prev_in_row = rows[l.row].index(l) - 1
                 if prev_in_row >= 0:
                     l.start = max(l.start, rows[l.row][prev_in_row].end)
