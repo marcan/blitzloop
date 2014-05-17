@@ -1,25 +1,41 @@
 Dependencies:
 
-Core:
- Python 2.6 or 2.7
- Cython
+ Core:
+  Python 2.6 or 2.7
+  Cython
 
-Libs and headers (for _audio.pyx):
- JACK
- libsndfile
+ Libs and headers (for _audio.pyx):
+  JACK
+  libsndfile
+  libsamplerate
+  librubberband
 
-Python modules/bindings:
- numpy
- ffms
- freetype-py
- pyopengl
+ Python modules/bindings:
+  numpy
+  ffms
+  freetype-py
+  pyopengl
 
-Note: ffms/ffmpeg is only required (for now) for the video support in play.py,
-everything else will work without it.
+On Debian:
+$ sudo apt-get install \
+	cython \
+	python-numpy \
+	python-opengl \
+	python-pip \
+	libjack-jackd2-dev \
+	libsndfile-dev \
+	libsamplerate-dev \
+	librubberband-dev \
+	libffms2-dev \
+	libfreetype6-dev
+$ sudo easy_install freetype-py 3to2
+(ffms doesn't work with easy_install for some reason)
+$ wget https://bitbucket.org/spirit/ffms/downloads/ffms-0.3a2.tar.bz2
+$ tar xvzf ffms-0.3a2.tar.bz2
+$ cd ffms-0.3a2
+$ sudo python2 setup.py install
 
-$ sudo pip install numpy freetype-py ffms pyopengl
-
-Build _audio module:
+Then build the _audio module:
 $ python setup.py build
 $ export PYTHONPATH=$(echo `pwd`/build/lib.*)
 
