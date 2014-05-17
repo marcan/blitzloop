@@ -15,6 +15,9 @@ Dependencies:
   ffms
   freetype-py
   pyopengl
+  bottle
+  paste
+  PIL
 
 On Debian:
 $ sudo apt-get install \
@@ -22,6 +25,9 @@ $ sudo apt-get install \
 	python-numpy \
 	python-opengl \
 	python-pip \
+	python-bottle \
+	python-paste \
+	python-imaging \
 	libjack-jackd2-dev \
 	libsndfile-dev \
 	libsamplerate-dev \
