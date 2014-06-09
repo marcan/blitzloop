@@ -37,7 +37,7 @@ $ sudo apt-get install \
 $ sudo easy_install freetype-py 3to2
 (ffms doesn't work with easy_install for some reason)
 $ wget https://bitbucket.org/spirit/ffms/downloads/ffms-0.3a2.tar.bz2
-$ tar xvzf ffms-0.3a2.tar.bz2
+$ tar xvf ffms-0.3a2.tar.bz2
 $ cd ffms-0.3a2
 $ sudo python2 setup.py install
 
