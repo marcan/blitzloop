@@ -606,6 +606,8 @@ class Song(object):
         for line in codecs.open(filename, encoding='utf-8', mode='r'):
             self.line += 1
             line = line.replace("\n","").replace("\r","")
+            if line.startswith("#"):
+                continue
             if section is None:
                 if not line:
                     continue
