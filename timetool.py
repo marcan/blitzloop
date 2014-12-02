@@ -75,9 +75,26 @@ except KeyboardInterrupt:
     file.close()
 finally:
     beat = 0
+    bmap = []
+    t = 0
     for off, beatlist in beats:
+        if len(beatlist) < 2:
+            continue
         first_t, last_t, last = build_bpms(beatlist)
-        print "@%f=%d" % (off + first_t, beat)
-        print "@%f=%d" % (off + last_t, last + beat)
-        beat += last + 1
+        bmap.append((off + first_t - t, beat))
+        bmap.append((last_t - first_t, last))
+        beat = 1
+        t = off + last_t
+
+    i = 0
+    last = None
+    t = 0
+    beat = 0
+    for i, (when, delta) in enumerate(bmap):
+        t += when
+        if i != 0 and when < last * 0.1 and delta == 1:
+            continue
+        beat += delta
+        print "@%f=%d" % (t, beat)
+        last = when
     #print "@%f=%d" % (last_time, last)
