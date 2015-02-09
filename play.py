@@ -46,6 +46,7 @@ variant = int(sys.argv[3]) if len(sys.argv) >= 4 else 0
 headstart = 0.3
 
 a = AudioEngine()
+a.set_mic_volume(0)
 
 print "Sample Rate: %dHz" % a.sample_rate
 
