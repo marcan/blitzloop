@@ -30,7 +30,7 @@ class Display(object):
         glut.glutInit(sys.argv)
         glut.glutInitDisplayMode(glut.GLUT_DOUBLE | glut.GLUT_RGB | glut.GLUT_DEPTH)
         glut.glutInitWindowPosition(0, 0)
-        glut.glutCreateWindow("Karaoke")
+        glut.glutCreateWindow("BlitzLoop Karaoke")
         if not fullscreen:
             glut.glutReshapeWindow(width, height)
         else:
