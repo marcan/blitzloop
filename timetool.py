@@ -21,6 +21,7 @@ from _audio import *
 import time, sys
 
 a = AudioEngine()
+a.set_mic_volume(0)
 
 print "Sample Rate: %dHz" % a.sample_rate
 

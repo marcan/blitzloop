@@ -28,6 +28,7 @@ speed = float(sys.argv[3]) if len(sys.argv) >= 4 else 1.0
 
 a = AudioEngine()
 a.set_speed(speed)
+a.set_mic_volume(0)
 
 print "Sample Rate: %dHz" % a.sample_rate
 
