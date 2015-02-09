@@ -25,6 +25,8 @@ import OpenGL.GL as gl
 s = song.Song(sys.argv[1], ignore_steps=True)
 quant = int(sys.argv[2])
 speed = float(sys.argv[3]) if len(sys.argv) >= 4 else 1.0
+pos = float(sys.argv[4]) if len(sys.argv) >= 5 else 0.0
+
 
 a = AudioEngine()
 a.set_speed(speed)
@@ -33,7 +35,7 @@ a.set_mic_volume(0)
 print "Sample Rate: %dHz" % a.sample_rate
 
 print "Loading audio file..."
-file = AudioFile(s.audiofile, a.sample_rate)
+file = AudioFile(s.audiofile, a.sample_rate, pos)
 print "Loaded"
 
 display = graphics.Display(1280,720)
