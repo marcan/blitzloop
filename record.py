@@ -41,7 +41,7 @@ file = AudioFile(s.audiofile, 48000)
 length = file.frames / float(file.rate)
 
 if s.videofile is not None:
-    v = video.BackgroundVideo(s)
+    v = video.BackgroundVideo(s, async=False)
 else:
     v = None
 
