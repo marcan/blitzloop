@@ -26,7 +26,7 @@ class VideoThread(threading.Thread):
         self.lock = threading.Lock()
         self.cond = threading.Condition(self.lock)
         self.fn = 0
-        self.count = 5
+        self.count = 10
         self.frames = {}
         self.die = False
         self.maxframe = maxframe
@@ -35,7 +35,7 @@ class VideoThread(threading.Thread):
     def run(self):
         with self.lock:
             while not self.die:
-                while len(self.frames) >= (self.count*2) and not self.die:
+                while len(self.frames) >= self.count and not self.die:
                     self.cond.wait()
                 if self.die:
                     return
@@ -57,6 +57,7 @@ class VideoThread(threading.Thread):
                 for i in self.frames.keys():
                     if i < num or i >= (num + self.count):
                         del self.frames[i]
+                self.cond.notifyAll()
                 return self.frames[num]
             else:
                 best = None
@@ -69,7 +70,7 @@ class VideoThread(threading.Thread):
                 ret = self.frames[best]
                 print "Dropped video frame %d, got %d" % (num, best)
                 for i in self.frames.keys():
-                    if i < best or i >= (num + self.count):
+                    if i < best or i >= (num + self.count/2):
                         del self.frames[i]
                 self.fn = min(num + 2, self.maxframe)
                 self.cond.notifyAll()
