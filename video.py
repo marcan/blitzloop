@@ -97,9 +97,10 @@ class BackgroundVideo(object):
         self.frame = None
         self.timecodes = self.vsource.track.timecodes
         self.texid = gl.glGenTextures(1)
-        self.frame = self.vsource.get_frame(0)
-        self.width = self.frame.ScaledWidth
-        self.height = self.frame.ScaledHeight
+        frame = self.vsource.get_frame(0)
+        self.width = frame.ScaledWidth
+        self.height = frame.ScaledHeight
+        self.frame = frame.planes[0].copy()
         self.sar = self.vsource.properties.SARNum / float(self.vsource.properties.SARDen)
         if self.sar == 0:
             self.sar = 1
