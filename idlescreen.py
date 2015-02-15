@@ -90,6 +90,7 @@ class IdleScreen(object):
         self.logo = ImageTexture("logo.png", (0,0,0))
         self.tablet = ImageTexture("tablet.png", (0,0,0))
         self.hand = ImageTexture("hand.png", (255,255,255))
+        self.silhouette = ImageTexture("silhouette.png", (0,0,0))
         self.reset()
 
     def reset(self):
@@ -113,12 +114,18 @@ class IdleScreen(object):
         elif self.fade < 1:
             self.fade = min(1, self.fade + 0.015)
 
-        gl.glClearColor(1, 1, 1, 1)
+        gl.glClearColor(0, 0, 0, 1)
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
-        self.logo.draw(y=(1 / self.display.aspect) - (1 / self.logo.aspect))
-        self.tablet.draw(x=0.4, y=0.12, width=0.2)
+        sfac = self.silhouette.aspect / self.display.aspect
+        self.silhouette.draw(x=0, width=sfac)
+        lx = sfac * 0.7
+        lw = 1.0-lx
+        self.logo.draw(y=(1.0 / self.display.aspect) - (lw / self.logo.aspect) - 0.02, x=lx, width=lw)
+        tx = lx + lw/2 - 0.1
+        ty = 0.2
+        self.tablet.draw(x=tx, y=ty, width=0.2)
         d = math.sin(t / 0.5 * math.pi) * 0.02
-        self.hand.draw(x=0.5 - 0.6 * d, y=0.03 + d, width=0.1)
+        self.hand.draw(x=tx + 0.1 - 0.6 * d, y=ty - 0.09 + d, width=0.1)
 
         self.display.set_aspect(None)
         gl.glBegin(gl.GL_TRIANGLE_STRIP)
