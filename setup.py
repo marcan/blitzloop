@@ -8,7 +8,8 @@ setup(
         Extension("_audio",
             ["_audio.pyx"],
             language="c++",
-            libraries=["jack", "samplerate", "sndfile", "rubberband"]
+            libraries=["jack", "samplerate", "sndfile", "rubberband",
+                       "portaudio"]
             )
     ],
     cmdclass={"build_ext": build_ext}

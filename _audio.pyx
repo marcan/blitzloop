@@ -15,6 +15,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+import os
 import time
 from threading import Thread
 
@@ -22,6 +23,7 @@ from libc.stdint cimport *
 from libc.stdio cimport puts
 from libc.stdlib cimport malloc, free
 from libc.string cimport memcpy, memset
+from posix.time cimport clock_gettime, CLOCK_MONOTONIC, timespec
 
 cdef extern from *:
     ctypedef int vint "volatile int"
@@ -64,7 +66,7 @@ cdef extern from "jack/jack.h":
     void *jack_port_get_buffer(jack_port_t *, jack_nframes_t) nogil
     void jack_port_get_latency_range(jack_port_t * port, jack_latency_callback_mode_t mode, jack_latency_range_t * range)
     jack_nframes_t jack_last_frame_time(jack_client_t *client) nogil
-    jack_nframes_t jack_frame_time (jack_client_t *client)
+    jack_nframes_t jack_frame_time (jack_client_t *client) nogil
     int jack_client_close(jack_client_t *)
 
 cdef extern from "sndfile.h":
@@ -135,6 +137,43 @@ cdef extern from "rubberband/RubberBandStretcher.h" namespace "RubberBand":
         void process(float **input, size_t samples, int final) nogil
         int available() nogil
         size_t retrieve(float **output, size_t samples) nogil
+
+cdef extern from "portaudio.h" nogil:
+    ctypedef void PaStream
+    ctypedef int PaError
+    enum:
+        paNoError
+    ctypedef unsigned long PaSampleFormat
+    enum:
+        paFloat32
+        paNonInterleaved
+    ctypedef unsigned long PaStreamCallbackFlags
+    ctypedef double PaTime
+    ctypedef struct PaStreamCallbackTimeInfo:
+        PaTime inputBufferAdcTime
+        PaTime currentTime
+        PaTime outputBufferDacTime
+    enum:
+        paContinue
+    ctypedef int PaStreamCallback(const void *input, void *output,
+            unsigned long buffer_size, const PaStreamCallbackTimeInfo *timing,
+            PaStreamCallbackFlags status, void *userdata)
+    ctypedef struct PaStreamInfo:
+        int structVersion
+        PaTime inputLatency
+        PaTime outputLatency
+        double sampleRate
+
+    PaError Pa_Initialize()
+    PaError Pa_Terminate()
+    const char *Pa_GetErrorText(PaError error)
+    PaError Pa_OpenDefaultStream(PaStream **stream, int num_input, int num_output,
+            PaSampleFormat format, double sample_rate, unsigned long buffer_size,
+            PaStreamCallback *callback, void *userdata)
+    PaError Pa_StartStream(PaStream *stream)
+    PaError Pa_CloseStream(PaStream *stream)
+    const PaStreamInfo *Pa_GetStreamInfo(PaStream *stream)
+    PaTime Pa_GetStreamTime(PaStream *stream)
 
 class AudioFileError(Exception):
     pass
@@ -306,7 +345,7 @@ cdef class AudioFile:
         self.close()
 
 ctypedef struct TimingEntry:
-    jack_nframes_t jack_time
+    unsigned int backend_time
     long file_time
 
 cdef class LockfreeQueue:
@@ -357,25 +396,232 @@ ctypedef enum State:
 class AudioEngineError(Exception):
     pass
 
-cdef int _process_cb(jack_nframes_t nframes, void *arg) nogil:
+ctypedef enum AudioChannel:
+    OUT_L
+    OUT_R
+    IN_MIC
+
+cdef class AudioBackend:
+    """Base class for audio backends. Default behavior is a "null" backend."""
+
+    cdef:
+        int (*user_process_callback)(unsigned int, void *) nogil
+        void (*user_shutdown_callback)(void *) nogil
+        void *user_callback_arg
+
+    cdef void register_callbacks(self,
+            int (*user_process_callback)(unsigned int, void *) nogil,
+            void (*user_shutdown_callback)(void *) nogil,
+            void *user_callback_arg):
+        """Registers callbacks to be used for frame processing and on shutdown."""
+        self.user_process_callback = user_process_callback
+        self.user_shutdown_callback = user_shutdown_callback
+        self.user_callback_arg = user_callback_arg
+
+    cdef unsigned int latency(self) nogil:
+        """Returns the end-to-end playback latency estimated by the backend.
+
+        Measured in frames.
+        """
+        return 0
+
+    cdef unsigned int sample_rate(self) nogil:
+        """Returns the sample rate of the audio backend."""
+        return 0
+
+    cdef unsigned int current_frame_time(self) nogil:
+        """Returns an approximate timestamp of the currently processing frame."""
+        return 0
+
+    cdef unsigned int last_frame_time(self) nogil:
+        """Returns the timestamp of the last frame processed."""
+        return 0
+
+    cdef float *get_buffer(self, AudioChannel channel, unsigned int nframes) nogil:
+        """Returns an audio buffer for the requested channel."""
+        return NULL
+
+    def activate(self):
+        """Starts audio processing through the backend."""
+
+    def shutdown(self):
+        """Stops audio processing through the backend."""
+
+cdef class JackBackend(AudioBackend):
+    cdef:
+        jack_client_t *client
+        jack_port_t *in_mic
+        jack_port_t *out_l
+        jack_port_t *out_r
+        int _sample_rate
+        unsigned int _latency
+
+    def __init__(self):
+        self.client = jack_client_open("AudioEngine", JackNullOption, NULL)
+        if self.client == NULL:
+            raise AudioEngineError("Could not create JACK client")
+        jack_set_process_callback(self.client, self.process_callback, <void *>self)
+        jack_on_shutdown(self.client, self.shutdown_callback, <void *>self)
+
+        self.in_mic = jack_port_register(self.client, "mic", JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0)
+        self.out_l = jack_port_register(self.client, "l", JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0)
+        self.out_r = jack_port_register(self.client, "r", JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0)
+
+        self._sample_rate = jack_get_sample_rate(self.client)
+
+        cdef jack_latency_range_t r
+        jack_port_get_latency_range(self.out_l, JackPlaybackLatency, &r)
+        self._latency = (r.min + r.max) / 2
+
+    @staticmethod
+    cdef int process_callback(jack_nframes_t nframes, void *arg) nogil:
+        return (<JackBackend>arg).user_process_callback(nframes, (<JackBackend>arg).user_callback_arg)
+
+    @staticmethod
+    cdef void shutdown_callback(void *arg) nogil:
+        (<JackBackend>arg).user_shutdown_callback((<JackBackend>arg).user_callback_arg)
+
+    cdef unsigned int latency(self) nogil:
+        return self._latency
+
+    cdef unsigned int sample_rate(self) nogil:
+        return self._sample_rate
+
+    cdef unsigned int current_frame_time(self) nogil:
+        return jack_frame_time(self.client)
+
+    cdef unsigned int last_frame_time(self) nogil:
+        return jack_last_frame_time(self.client)
+
+    cdef float *get_buffer(self, AudioChannel channel, unsigned int nframes) nogil:
+        if channel == OUT_L:
+            return <float *>jack_port_get_buffer(self.out_l, nframes)
+        elif channel == OUT_R:
+            return <float *>jack_port_get_buffer(self.out_r, nframes)
+        elif channel == IN_MIC:
+            return <float *>jack_port_get_buffer(self.in_mic, nframes)
+        else:
+            return NULL
+
+    def activate(self):
+        jack_activate(self.client)
+
+        jack_connect(self.client, "system:capture_1", jack_port_name(self.in_mic))
+        jack_connect(self.client, jack_port_name(self.out_l), "system:playback_1")
+        jack_connect(self.client, jack_port_name(self.out_r), "system:playback_2")
+
+    def shutdown(self):
+        jack_client_close(self.client)
+
+cdef double _monotonic_clock_secs() nogil:
+    cdef timespec ts
+    clock_gettime(CLOCK_MONOTONIC, &ts)
+    return ts.tv_sec + (ts.tv_nsec / 1.0e9)
+
+cdef class PortAudioBackend(AudioBackend):
+    cdef:
+        PaStream *stream
+
+        int _sample_rate
+        unsigned int _latency
+        unsigned int _last_frame_time
+        double _last_frame_ts
+
+        float *out_l
+        float *out_r
+        float *in_mic
+
+        float test
+
+    def __init__(self):
+        self._sample_rate = 48000  # Hardcoded for now...
+
+        err = Pa_Initialize()
+        if err != paNoError:
+            raise AudioEngineError("Could not initialize PortAudio: %s" % Pa_GetErrorText(err))
+
+        err = Pa_OpenDefaultStream(
+                &self.stream, 1, 2, paFloat32 | paNonInterleaved, self._sample_rate,
+                0, self.c_stream_callback, <void *>self)
+        if err != paNoError:
+            raise AudioEngineError("Could not open PortAudio stream: %s" % Pa_GetErrorText(err))
+
+        info = Pa_GetStreamInfo(self.stream)
+        self._latency = <unsigned int>(info.outputLatency * info.sampleRate)
+
+    cdef unsigned int latency(self) nogil:
+        return self._latency
+
+    cdef unsigned int sample_rate(self) nogil:
+        return self._sample_rate
+
+    cdef unsigned int current_frame_time(self) nogil:
+        return self._last_frame_time + <unsigned int>((_monotonic_clock_secs() - self._last_frame_ts) * self._sample_rate)
+
+    cdef unsigned int last_frame_time(self) nogil:
+        return self._last_frame_time
+
+    cdef float *get_buffer(self, AudioChannel channel, unsigned int nframes) nogil:
+        if channel == OUT_L:
+            return self.out_l
+        elif channel == OUT_R:
+            return self.out_r
+        elif channel == IN_MIC:
+            return self.in_mic
+        else:
+            return NULL
+
+    def activate(self):
+        self._last_frame_time = 0
+        self._last_frame_ts = _monotonic_clock_secs()
+        self.test = 0
+        err = Pa_StartStream(self.stream)
+        if err != paNoError:
+            raise AudioEngineError("Could not start PortAudio stream: %s" % Pa_GetErrorText(err))
+
+    def shutdown(self):
+        Pa_CloseStream(self.stream)
+        Pa_Terminate()
+
+    @staticmethod
+    cdef int c_stream_callback(const void *input, void *output, unsigned long nframes,
+            const PaStreamCallbackTimeInfo* timing, PaStreamCallbackFlags status,
+            void *userdata) nogil:
+        (<PortAudioBackend>userdata).stream_callback(input, output, nframes, timing, status)
+        return paContinue
+
+    cdef void stream_callback(self, const void *input, void *output, unsigned long nframes,
+            const PaStreamCallbackTimeInfo* timing, PaStreamCallbackFlags status) nogil:
+        self.in_mic = (<float **>input)[0]
+        cdef float **output_chans = <float **>output
+        self.out_l = output_chans[0]
+        self.out_r = output_chans[1]
+
+        self.user_process_callback(nframes, self.user_callback_arg)
+
+        self._last_frame_ts = _monotonic_clock_secs()
+        self._last_frame_time += nframes
+
+cdef int _process_cb(unsigned int nframes, void *arg) nogil:
     return (<AudioEngine>arg).process(nframes)
 
 cdef void _shutdown_cb(void *arg) nogil:
-    puts("JACK shutdown called, dying rudely\n")
+    puts("Audio backend shutdown called, dying rudely\n")
     _exit(1)
+
+def get_audio_backend():
+    backends = {
+        "jack": JackBackend,
+        "portaudio": PortAudioBackend,
+    }
+    return backends[os.environ.get("BLITZLOOP_AUDIO_BACKEND", "jack")]()
 
 cdef class AudioEngine:
     cdef:
         AtomicInt state
         AtomicInt next_state
 
-        jack_client_t *client
-        jack_port_t *in_mic
-        jack_port_t *out_l
-        jack_port_t *out_r
-        int _sample_rate
-        jack_nframes_t latency
-
+        AudioBackend audio_backend
         AudioFile cur_file
 
         int dead
@@ -385,6 +631,7 @@ cdef class AudioEngine:
         float mic_volume
         float mic_feedback
         float mic_delay
+        unsigned int _sample_rate
 
         float *rb_buf[2]
         float *delay_buf
@@ -414,18 +661,9 @@ cdef class AudioEngine:
         self.speed = self.cur_speed = 1.0
         self.pitch = self.cur_pitch = 1.0
         self.delay_ptr = 0;
-
-        self.client = jack_client_open("AudioEngine", JackNullOption, NULL)
-        if self.client == NULL:
-            raise AudioEngineError("Could not create JACK client")
-        jack_set_process_callback(self.client, _process_cb, <void *>self)
-        jack_on_shutdown(self.client, _shutdown_cb, NULL)
-
-        self.in_mic = jack_port_register(self.client, "mic", JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0)
-        self.out_l = jack_port_register(self.client, "l", JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0)
-        self.out_r = jack_port_register(self.client, "r", JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0)
-
-        self._sample_rate = jack_get_sample_rate(self.client)
+        self.audio_backend = get_audio_backend()
+        self.audio_backend.register_callbacks(_process_cb, _shutdown_cb, <void *>self)
+        self._sample_rate = self.audio_backend.sample_rate()
 
         self.rb_buf[0] = <float *>malloc(self._sample_rate * sizeof(float))
         self.rb_buf[1] = <float *>malloc(self._sample_rate * sizeof(float))
@@ -440,20 +678,12 @@ cdef class AudioEngine:
         self.timing_queue = LockfreeQueue(128, sizeof(TimingEntry))
         self.timing = []
 
-        cdef jack_latency_range_t r
-        jack_port_get_latency_range(self.out_l, JackPlaybackLatency, &r)
-        self.latency = (r.min + r.max) / 2
+        self.audio_backend.activate()
 
-        jack_activate(self.client)
-
-        jack_connect(self.client, "system:capture_1", jack_port_name(self.in_mic))
-        jack_connect(self.client, jack_port_name(self.out_l), "system:playback_1")
-        jack_connect(self.client, jack_port_name(self.out_r), "system:playback_2")
-
-    cdef int process(self, jack_nframes_t nframes) nogil:
-        cdef float *i_mic = <float *>jack_port_get_buffer(self.in_mic, nframes)
-        cdef float *o_l = <float *>jack_port_get_buffer(self.out_l, nframes)
-        cdef float *o_r = <float *>jack_port_get_buffer(self.out_r, nframes)
+    cdef int process(self, unsigned int nframes) nogil:
+        cdef float *i_mic = self.audio_backend.get_buffer(IN_MIC, nframes)
+        cdef float *o_l = self.audio_backend.get_buffer(OUT_L, nframes)
+        cdef float *o_r = self.audio_backend.get_buffer(OUT_R, nframes)
         cdef float *f_data
 
         if self.state.get() != self.next_state.get():
@@ -468,18 +698,18 @@ cdef class AudioEngine:
         cdef int channels
         cdef int got, want, left, block
         cdef int i
-        cdef jack_nframes_t nframes_left = nframes
+        cdef unsigned int nframes_left = nframes
         cdef float *o_p[2]
         cdef float *b_l
         cdef float *b_r
         cdef long file_pos = -1
         cdef TimingEntry timing, last_timing
-        cdef jack_nframes_t jack_time = jack_last_frame_time(self.client)
+        cdef unsigned int backend_time = self.audio_backend.last_frame_time()
         cdef int at_eof
 
         cdef float k_i, k_v
 
-        last_timing.jack_time = 0
+        last_timing.backend_time = 0
         last_timing.file_time = 0
 
         o_p[0] = o_l;
@@ -504,7 +734,7 @@ cdef class AudioEngine:
                     o_p[1][i] *= self.volume
                 o_p[0] += got
                 o_p[1] += got
-                jack_time += got
+                backend_time += got
 
                 if got == 0:
                     want = self.rb.getSamplesRequired()
@@ -546,11 +776,11 @@ cdef class AudioEngine:
                         break
 
                     if file_pos != -1:
-                        timing.jack_time = jack_time
-                        timing.jack_time += self.latency
-                        timing.jack_time += self.rb.getLatency()
+                        timing.backend_time = backend_time
+                        timing.backend_time += self.audio_backend.latency()
+                        timing.backend_time += self.rb.getLatency()
                         timing.file_time = file_pos
-                        if timing.jack_time != last_timing.jack_time and timing.file_time != last_timing.file_time:
+                        if timing.backend_time != last_timing.backend_time and timing.file_time != last_timing.file_time:
                             self.timing_queue.put(&timing)
                             last_timing = timing
                     self.rb.process(self.rb_buf, want - left, False)
@@ -597,20 +827,20 @@ cdef class AudioEngine:
             return
         self.stop()
         self.sync_state()
-        jack_client_close(self.client)
+        self.audio_backend.shutdown()
         self.dead = True
         del self.rb
         free(self.rb_buf[0])
         free(self.rb_buf[1])
 
     def _current_time(self):
-        return jack_frame_time(self.client)
+        return self.audio_backend.current_frame_time()
 
     def _get_timing(self):
         l = []
         cdef TimingEntry te
         while self.timing_queue.get(&te):
-            l.append((te.jack_time, te.file_time))
+            l.append((te.backend_time, te.file_time))
         return l
 
     def song_time(self):
@@ -620,17 +850,17 @@ cdef class AudioEngine:
             return None
         self.timing += self._get_timing()
         self.timing = self.timing[-2:]
-        jack_t = self._current_time()
+        backend_t = self._current_time()
         if len(self.timing) != 2:
             return None
 
-        jack_a, song_a = self.timing[0]
-        jack_b, song_b = self.timing[1]
+        backend_a, song_a = self.timing[0]
+        backend_b, song_b = self.timing[1]
 
-        if jack_a == jack_b or song_a == song_b:
+        if backend_a == backend_b or song_a == song_b:
             return None
 
-        song_pos = song_a + ((jack_t - jack_a) / float(jack_b - jack_a)) * (song_b - song_a)
+        song_pos = song_a + ((backend_t - backend_a) / float(backend_b - backend_a)) * (song_b - song_a)
         song_pos /= self._sample_rate
         return song_pos
 

@@ -9,6 +9,7 @@ Dependencies:
   libsndfile
   libsamplerate
   librubberband
+  portaudio
 
  Python modules/bindings:
   numpy
@@ -33,7 +34,8 @@ $ sudo apt-get install \
 	libsamplerate-dev \
 	librubberband-dev \
 	libffms2-dev \
-	libfreetype6-dev
+	libfreetype6-dev \
+  libportaudio-dev
 $ sudo easy_install freetype-py 3to2
 (ffms doesn't work with easy_install for some reason)
 $ wget https://bitbucket.org/spirit/ffms/downloads/ffms-0.3a2.tar.bz2
