@@ -21,6 +21,7 @@ import os.path
 import codecs
 import re
 import fractions
+import decimal
 from collections_substitute import OrderedDict
 
 class ParseError(Exception):
@@ -433,6 +434,7 @@ class BeatCounter(object):
         return beat1 + frac * (beat2 - beat1)
 
     def beat2time(self, beat):
+        beat = float(beat)
         beat1 = None
         for time2, beat2 in self.beats:
             if beat2 > beat:
@@ -466,6 +468,13 @@ class MixedFraction(fractions.Fraction):
             return "%d/%d" % (part.numerator, part.denominator)
         else:
             return "%d+%d/%d" % (whole, part.numerator, part.denominator)
+
+def parse_time(t):
+    if re.match(r"-?\d+\.\d*", t):
+        return decimal.Decimal(t)
+    else:
+        return MixedFraction(t)
+
 
 class Style(object):
     def __init__(self, data):
@@ -740,7 +749,7 @@ class Song(object):
             if tag == "@":
                 if self.ignore_steps:
                     continue
-                timing = map(MixedFraction, text.split())
+                timing = map(parse_time, text.split())
                 compound.start = timing[0]
                 compound.timing = timing[1:]
                 if compound:
