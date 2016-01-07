@@ -44,7 +44,7 @@ class ImageTexture(object):
         gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T, gl.GL_CLAMP)
 
         glu.gluBuild2DMipmaps(gl.GL_TEXTURE_2D, 4, self.tw, self.th, gl.GL_RGBA,
-                      gl.GL_UNSIGNED_BYTE, self.teximage.tostring())
+                      gl.GL_UNSIGNED_BYTE, self.teximage.tobytes())
 
     @property
     def width(self):
