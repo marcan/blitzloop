@@ -488,15 +488,16 @@ class Style(object):
         self.colors = ((255, 255, 255), (0, 128, 255), (0, 0, 0))
         self.colors_on = ((0, 128, 255), (255, 255, 255), (0, 0, 0))
 
-        for key, value in self.data.items():
-            if key in ("font", "ruby_font"):
-                setattr(self, key, value)
-            elif key in ("size", "ruby_size", "outline_width", "border_width"):
-                setattr(self, key, float(value))
-            elif key in ("colors", "colors_on"):
-                setattr(self, key, self._parse_colors(value))
-            else:
-                raise ParseError("Unknown style option %s=%s" % (key, value))
+        if self.data:
+            for key, value in self.data.items():
+                if key in ("font", "ruby_font"):
+                    setattr(self, key, value)
+                elif key in ("size", "ruby_size", "outline_width", "border_width"):
+                    setattr(self, key, float(value))
+                elif key in ("colors", "colors_on"):
+                    setattr(self, key, self._parse_colors(value))
+                else:
+                    raise ParseError("Unknown style option %s=%s" % (key, value))
 
         if self.ruby_font is None:
             self.ruby_font = self.font
@@ -532,6 +533,9 @@ class Variant(object):
         self.style = None
         self.default = False
         self.tag_data = {}
+
+        if data is None:
+            return
 
         for key, value in self.data.items():
             if key in ("name", "style"):
@@ -587,7 +591,7 @@ class Variant(object):
                     raise ParseError("Tag %s in variant %s must have a style" % (tag, self.name))
 
 class Song(object):
-    def __init__(self, filename, ignore_steps=False):
+    def __init__(self, filename=None, ignore_steps=False):
         parsers = {
             "Meta": self.parse_meta,
             "Song": self.parse_song,
@@ -598,7 +602,7 @@ class Song(object):
             "Lyrics": self.parse_lyrics,
         }
         self.ignore_steps = ignore_steps
-        self.pathbase = os.path.dirname(filename)
+        self.pathbase = os.path.dirname(filename) if filename else None
         section = None
         lines = []
         self.meta = None
@@ -612,6 +616,17 @@ class Song(object):
         self.fake_time = 0
         self.line = 0
         self.section_line = 0
+
+        if not filename:
+            self.meta = OrderedDict()
+            self.song = OrderedDict()
+            self.timing = BeatCounter()
+            self.formats = OrderedDict()
+            self.styles = OrderedDict()
+            self.variants = OrderedDict()
+            self.compounds = []
+            return
+
         for line in codecs.open(filename, encoding='utf-8', mode='r'):
             self.line += 1
             line = line.replace("\n","").replace("\r","")
