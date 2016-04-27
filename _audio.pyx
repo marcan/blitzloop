@@ -431,6 +431,7 @@ cdef class AudioEngine:
         self.rb_buf[1] = <float *>malloc(self._sample_rate * sizeof(float))
         self.delay_max = self._sample_rate
         self.delay_buf = <float *>malloc(self.delay_max * sizeof(float))
+        memset(self.delay_buf, 0, self.delay_max * sizeof(float))
 
         cdef int options = OptionProcessRealTime | OptionTransientsMixed | OptionChannelsTogether | OptionDetectorCompound
         self.rb = new RubberBandStretcher(self._sample_rate, 2, options)
