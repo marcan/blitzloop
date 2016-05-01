@@ -43,8 +43,13 @@ class ImageTexture(object):
         gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S, gl.GL_CLAMP)
         gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T, gl.GL_CLAMP)
 
+        try:
+            blob = self.teximage.tobytes()
+        except AttributeError:
+            blob = self.teximage.tostring()
+
         glu.gluBuild2DMipmaps(gl.GL_TEXTURE_2D, 4, self.tw, self.th, gl.GL_RGBA,
-                      gl.GL_UNSIGNED_BYTE, self.teximage.tobytes())
+                      gl.GL_UNSIGNED_BYTE, blob)
 
     @property
     def width(self):
