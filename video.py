@@ -105,6 +105,8 @@ class BackgroundVideo(object):
         self.sar = self.vsource.properties.SARNum / float(self.vsource.properties.SARDen)
         if self.sar == 0:
             self.sar = 1
+        if "video_sar" in song.song:
+            self.sar = float(song.song["video_sar"])
         self.aspect = self.sar * self.width / float(self.height)
         if async:
             self.vthread = VideoThread(self.vsource, len(self.timecodes)-1)
