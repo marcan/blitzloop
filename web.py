@@ -7,7 +7,7 @@ import StringIO
 
 import songlist
 
-LANGUAGES = ("en-gb", "es-es", "ja-jp", "de-de", "es-eu")
+LANGUAGES = ("en-gb", "es-es", "ja-jp", "de-de", "es-eu", "fr-fr")
 
 nonce = random.randint(0, 2**32)
 
