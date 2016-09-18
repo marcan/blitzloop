@@ -19,10 +19,8 @@
 from _audio import *
 
 import web
-import time, sys, os.path, os, threading
-import song, graphics, layout, video, songlist, idlescreen
-import OpenGL.GL as gl
-import OpenGL.GLUT as glut
+import sys, os
+import graphics, layout, video, songlist, idlescreen
 
 fullscreen = False
 if sys.argv[1] == "-fs":

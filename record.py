@@ -17,10 +17,9 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 from _audio import AudioFile
 
-import time, sys, os.path, os
+import sys, os
 import song, graphics, layout, video
 import OpenGL.GL as gl
-import OpenGL.GLUT as glut
 import subprocess
 
 s = song.Song(sys.argv[1])

@@ -18,7 +18,7 @@
 
 from _audio import *
 
-import time, sys
+import sys
 
 a = AudioEngine()
 a.set_mic_volume(0)

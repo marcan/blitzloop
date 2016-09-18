@@ -18,7 +18,7 @@
 
 from _audio import *
 
-import time, sys, os.path, os
+import time, sys, os
 import song, graphics, layout, video
 import OpenGL.GL as gl
 import OpenGL.GLUT as glut

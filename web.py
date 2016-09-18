@@ -1,7 +1,7 @@
 #!/usr/bin/python
-import sys, os, os.path, json, time, threading, random
+import sys, os, json, time, threading, random
 import bottle
-from bottle import route, view, static_file, request, response, hook, HTTPResponse, HTTPError, redirect
+from bottle import route, static_file, request, response, hook, HTTPError
 from PIL import Image
 import StringIO
 

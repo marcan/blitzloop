@@ -18,7 +18,7 @@
 
 from _audio import *
 
-import time, sys, os.path
+import time, sys
 import song
 
 s = song.Song(sys.argv[1], ignore_steps=True)

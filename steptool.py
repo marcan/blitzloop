@@ -18,8 +18,8 @@
 
 from _audio import *
 
-import time, sys, os.path
-import song, graphics, layout, texture_font
+import sys
+import song, graphics, layout
 import OpenGL.GL as gl
 
 s = song.Song(sys.argv[1], ignore_steps=True)

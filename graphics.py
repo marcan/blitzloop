@@ -20,7 +20,6 @@ import sys, os
 import OpenGL.GL as gl
 import OpenGL.GLUT as glut
 import OpenGL.GL.shaders as shaders
-import freetype as ft
 
 class Display(object):
     def __init__(self, width=640, height=480, fullscreen=False, aspect=None):
