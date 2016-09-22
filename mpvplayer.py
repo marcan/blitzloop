@@ -65,6 +65,8 @@ class Player(object):
         if song.videofile is not None and song.audiofile != song.videofile:
             self.mpv.set_property("audio-file", [song.audiofile])
             self.mpv.command('loadfile', song.videofile)
+        elif song.videofile is None:
+            self.mpv.set_property("vid", "no")
 
         self.duration = min(audio_duration, self._getprop("duration"))
 
@@ -77,27 +79,32 @@ class Player(object):
         self.volumes = [0] * self.channels
         self.set_channel(0, 1)
 
-        w = self._getprop("video-params/w")
-        h = self._getprop("video-params/h")
-        aspect = self._getprop("video-params/aspect")
+        if song.videofile is not None:
+            w = self._getprop("video-params/w")
+            h = self._getprop("video-params/h")
+            aspect = self._getprop("video-params/aspect")
 
-        if song.aspect:
-            if song.aspect > aspect:
-                nh = int(h * (aspect / song.aspect))
-                self.mpv.set_property("vf", "crop=%d:%d" % (w, nh))
-            elif aspect > song.aspect:
-                nw = int(w * (song.aspect / aspect))
-                self.mpv.set_property("vf", "crop=%d:%d" % (nw, h))
-            self.aspect = song.aspect
+            if song.aspect:
+                if song.aspect > aspect:
+                    nh = int(h * (aspect / song.aspect))
+                    self.mpv.set_property("vf", "crop=%d:%d" % (w, nh))
+                elif aspect > song.aspect:
+                    nw = int(w * (song.aspect / aspect))
+                    self.mpv.set_property("vf", "crop=%d:%d" % (nw, h))
+                self.aspect = song.aspect
+            else:
+                self.aspect = aspect
         else:
-            self.aspect = aspect
+            self.aspect = None
 
     def _getprop(self, p):
-        while True:
+        for i in range(10):
             try:
                 return self.mpv.get_property(p)
             except mpv.MPVError: # Wait until available
-                continue
+                time.sleep(0.1)
+        else:
+            raise Exception("Timed out getting property %s" % p)
 
     def play(self):
         self.set_pause(False)
