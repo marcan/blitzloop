@@ -16,73 +16,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-import threading, time
 import ffms
 import OpenGL.GL as gl
 
-class VideoThread(threading.Thread):
-    def __init__(self, source, maxframe):
-        self.source = source
-        self.lock = threading.Lock()
-        self.cond = threading.Condition(self.lock)
-        self.fn = 0
-        self.count = 10
-        self.frames = {}
-        self.die = False
-        self.maxframe = maxframe
-        threading.Thread.__init__(self)
-
-    def run(self):
-        with self.lock:
-            while not self.die:
-                while len(self.frames) >= self.count and not self.die:
-                    self.cond.wait()
-                if self.die:
-                    return
-                if self.fn not in self.frames:
-                    fn = self.fn
-                    self.fn += 1
-                    self.lock.release()
-                    t = time.time()
-                    frame = self.source.get_frame(fn).planes[0].copy()
-                    print "Frame %d decode time: %f" % (fn, time.time() - t)
-                    self.lock.acquire()
-                    self.frames[fn] = frame
-                else:
-                    self.fn += 1
-
-    def get_frame(self, num):
-        with self.lock:
-            if num in self.frames:
-                for i in self.frames.keys():
-                    if i < num or i >= (num + self.count):
-                        del self.frames[i]
-                self.cond.notifyAll()
-                return self.frames[num]
-            else:
-                best = None
-                for i in self.frames.keys():
-                    if best is None or abs(num - i) < abs(num - best):
-                        best = i
-                if best is None:
-                    print "Dropped video frame %d" % num
-                    return None
-                ret = self.frames[best]
-                print "Dropped video frame %d, got %d" % (num, best)
-                for i in self.frames.keys():
-                    if i < best or i >= (num + self.count/2):
-                        del self.frames[i]
-                self.fn = min(num + 2, self.maxframe)
-                self.cond.notifyAll()
-                return ret
-
-    def stop(self):
-        with self.lock:
-            self.die = True
-            self.cond.notify()
-
 class BackgroundVideo(object):
-    def __init__(self, song, async=True):
+    def __init__(self, song):
         self.offset = 0
         self.fade_in = 1
         self.fade_out = 1
@@ -96,7 +34,7 @@ class BackgroundVideo(object):
         self.vsource.set_output_format([ffms.get_pix_fmt("bgr32")])
         self.frameno = 0
         self.frame = None
-        self.timecodes = self.vsource.track.timecodes
+        self.timecodes = [i/1000.0 for i in self.vsource.track.timecodes]
         self.texid = gl.glGenTextures(1)
         frame = self.vsource.get_frame(0)
         self.width = frame.ScaledWidth
@@ -108,14 +46,8 @@ class BackgroundVideo(object):
         if "video_sar" in song.song:
             self.sar = float(song.song["video_sar"])
         self.aspect = self.sar * self.width / float(self.height)
-        if async:
-            self.vthread = VideoThread(self.vsource, len(self.timecodes)-1)
-            self.vthread.start()
-        else:
-            self.vthread = False
 
     def advance(self, time):
-        time = int(round(time * 1000))
         if self.frameno >= len(self.timecodes)-1:
             return
         cur_frame = self.frameno
@@ -123,14 +55,8 @@ class BackgroundVideo(object):
             self.frameno += 1
             if self.frameno >= len(self.timecodes)-1:
                 break
-        #print time, self.frameno, self.timecodes[self.frameno]
         if self.frameno != cur_frame:
-            if self.vthread is not None:
-                frame = self.vthread.get_frame(self.frameno)
-                if frame is not None:
-                    self.frame = frame
-            else:
-                self.frame = self.vsource.get_frame(self.frameno).planes[0].copy()
+            self.frame = self.vsource.get_frame(self.frameno)
 
     def draw(self, time, display, song_length):
         brightness = 1
@@ -145,7 +71,7 @@ class BackgroundVideo(object):
             time += self.offset
 
         self.advance(time)
-        data = self.frame
+        data = self.frame.planes[0]
         gl.glDisable(gl.GL_BLEND)
         gl.glBindTexture(gl.GL_TEXTURE_2D, self.texid)
         gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR);
@@ -177,4 +103,3 @@ class BackgroundVideo(object):
 
     def __del__(self):
         gl.glDeleteTextures(self.texid)
-        self.vthread.stop()
