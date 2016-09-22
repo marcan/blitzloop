@@ -111,15 +111,21 @@ def main_render():
         mpv.draw()
         mpv.poll()
         song_time = mpv.get_song_time() or song_time
+
         if qe.stop and not stopping:
             stopping = True
             mpv.fade_out = 2
             mpv.duration = min(mpv.duration, song_time + 2)
-        fade = mpv.draw_fade(song_time)
-        if stopping:
-            mpv.set_fadevol(max(fade * 1.3 - 0.3, 0))
+
+        if not stopping:
+            mpv.draw_fade(song_time)
+
         speed = 2**(qe.speed / 12.0)
         renderer.draw(song_time + audio_config.headstart / 100.0 * speed, song_layout)
+
+        if stopping:
+            fade = mpv.draw_fade(song_time)
+            mpv.set_fadevol(max(fade * 1.3 - 0.3, 0))
 
         mpv.set_speed(1.0 / speed)
         mpv.set_pitch(2**(qe.pitch/12.0))
