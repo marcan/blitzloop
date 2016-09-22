@@ -98,7 +98,14 @@ def main_render():
     song_layout = layout.SongLayout(qe.song, variant_key, renderer)
     print "Loaded."
 
-    mpv.set_pause(False)
+    def update_params():
+        mpv.set_speed(1.0 / (2**(qe.speed / 12.0)))
+        mpv.set_pitch(2**(qe.pitch / 12.0))
+        for i, j in enumerate(qe.channels):
+            mpv.set_channel(i, j / 10.0)
+        mpv.set_pause(qe.pause)
+
+    update_params()
     song_time = -10
     stopping = False
     while not (mpv.eof_reached() or (stopping and qe.pause)):
@@ -127,11 +134,7 @@ def main_render():
             fade = mpv.draw_fade(song_time)
             mpv.set_fadevol(max(fade * 1.3 - 0.3, 0))
 
-        mpv.set_speed(1.0 / speed)
-        mpv.set_pitch(2**(qe.pitch/12.0))
-        for i, j in enumerate(qe.channels):
-            mpv.set_channel(i, j/10.0)
-        mpv.set_pause(qe.pause)
+        update_params()
         audio_config.update(qe.song)
         yield None
         mpv.flip()
