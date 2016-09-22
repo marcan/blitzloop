@@ -72,7 +72,7 @@ def render():
         renderer.draw(song_time + headstart * 2**(speed_i/12.0), layout)
         yield None
         t2 = time.time()
-        print "T:%7.3f B:%7.3f FPS:%.2f draw:%.3f" % (song_time, s.timing.time2beat(song_time), (1.0/(t2-t)), dt)
+        print "T:%7.3f/%7.3f B:%7.3f FPS:%.2f draw:%.3f" % (song_time, mpv.duration, s.timing.time2beat(song_time), (1.0/(t2-t)), dt)
         t = t2
         mpv.flip()
     mpv.shutdown()

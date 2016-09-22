@@ -72,7 +72,7 @@ class Player(object):
         self.mpv.set_property("vid", "auto")
         self.mpv.command('loadfile', song.audiofile)
         self._wait_ev(mpv.Events.file_loaded)
-        audio_duration = self._getprop("duration")
+        self.duration = self._getprop("duration")
 
         if "video_offset" in song.song:
             self.offset = float(song.song["video_offset"])
@@ -86,8 +86,6 @@ class Player(object):
             self._wait_ev(mpv.Events.file_loaded)
         elif song.videofile is None:
             self.mpv.set_property("vid", "no")
-
-        self.duration = min(audio_duration, self._getprop("duration"))
 
         if "duration" in song.song:
             self.duration = float(song.song["duration"])
