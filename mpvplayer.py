@@ -21,6 +21,8 @@ import OpenGL.GL as gl
 
 class Player(object):
     def __init__(self, display):
+        self.volume = 0.5
+        self.song = None
         self.display = display
         self.mpv = mpv.Context()
         self.mpv.initialize()
@@ -49,6 +51,7 @@ class Player(object):
 
     def load_song(self, song):
         self.song = song
+        self.fadevol = 1
         self.fade_in = 1
         self.fade_out = 1
         self.speed = 1
@@ -75,7 +78,7 @@ class Player(object):
             self.mpv.set_property("audio-delay", self.offset)
         if song.videofile is not None and song.audiofile != song.videofile:
             self.mpv.set_property("audio-file", [song.audiofile])
-            self.stop()
+            self.mpv.command('stop')
             self._wait_ev(mpv.Events.idle)
             self.eof = False
             self.mpv.command('loadfile', song.videofile)
@@ -147,12 +150,30 @@ class Player(object):
         if self.volumes[channel] == value:
             return
         self.volumes[channel] = value
+        self._update_matrix()
+
+    def set_volume(self, volume):
+        if self.volume == volume:
+            return
+        self.volume = volume
+        if self.song is not None:
+            self._update_matrix()
+
+    def set_fadevol(self, volume):
+        if self.fadevol == volume:
+            return
+        self.fadevol = volume
+        if self.song is not None:
+            self._update_matrix()
+
+    def _update_matrix(self):
         if self.channels == 1:
-            mtx = [1-value, 0, 0, 1-value, value, 0, 0, value]
+            mtx = [1-self.volumes[0], 0, 0, 1-self.volumes[0], self.volumes[0], 0, 0, self.volumes[0]]
         else:
             mtx = [1, 0, 0, 1]
             for v in self.volumes:
                 mtx += [v, 0, 0, v]
+        mtx = [i * self.volume * self.fadevol for i in mtx]
         self.mpv.command("af-command", "pan", "set-matrix", ",".join(map(str, mtx)))
 
     def set_speed(self, speed):
@@ -211,6 +232,7 @@ class Player(object):
             gl.glVertex2f(1, 1)
             gl.glVertex2f(0, 1)
             gl.glEnd()
+        return brightness
 
     def get_song_time(self, async=True):
         if async:
@@ -223,6 +245,7 @@ class Player(object):
 
     def stop(self):
         self.mpv.command('stop')
+        self.song = None
 
     def shutdown(self):
         if self.gl:

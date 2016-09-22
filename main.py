@@ -54,9 +54,9 @@ class AudioConfig(object):
 
     def update(self, song=None):
         if song is None or "volume" not in song.song:
-            audio.set_volume(self.volume / 200.0)
+            mpv.set_volume(self.volume / 200.0)
         else:
-            audio.set_volume(self.volume / 200.0 * float(song.song["volume"]))
+            mpv.set_volume(self.volume / 200.0 * float(song.song["volume"]))
         audio.set_mic_volume(self.mic_volume / 100.0)
         audio.set_mic_feedback(self.mic_feedback / 100.0)
         audio.set_mic_delay(self.mic_delay / 100.0)
@@ -114,9 +114,11 @@ def main_render():
         song_time = mpv.get_song_time() or song_time
         if qe.stop and not stopping:
             stopping = True
-            mpv.fade_out = 1
-            mpv.duration = min(mpv.duration, song_time + 1)
-        mpv.draw_fade(song_time)
+            mpv.fade_out = 2
+            mpv.duration = min(mpv.duration, song_time + 2)
+        fade = mpv.draw_fade(song_time)
+        if stopping:
+            mpv.set_fadevol(max(fade * 1.3 - 0.3, 0))
         speed = 2**(qe.speed / 12.0)
         renderer.draw(song_time + audio_config.headstart / 100.0 * speed, song_layout)
 
