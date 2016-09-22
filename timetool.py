@@ -16,20 +16,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-from _audio import *
-
 import sys
 
-a = AudioEngine()
-a.set_mic_volume(0)
+import song, mpvplayer
 
-print "Sample Rate: %dHz" % a.sample_rate
+s = song.Song(sys.argv[1], ignore_steps=True)
 
-print "Loading audio file..."
-file = AudioFile(sys.argv[1], a.sample_rate)
-print "Loaded"
-
-a.play(file)
+mpv = mpvplayer.Player(None)
+mpv.load_song(s)
+mpv.set_pause(False)
 
 def build_bpms(beats):
     endpos = beats[-1]
@@ -65,14 +60,14 @@ beats = [(off_t, [])]
 try:
     while True:
         v = raw_input()
-        t = a.song_time()
+        t = mpv.get_song_time(False)
         if v == "n":
             off_t = beats[-1][1][-1] +beats[-1][0]
             beats.append((off_t, []))
         beats[-1][1].append(t - off_t)
 except KeyboardInterrupt:
     print "KeyboardInterrupt!"
-    a.shutdown()
+    mpv.shutdown()
     file.close()
 finally:
     beat = 0

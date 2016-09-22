@@ -212,8 +212,11 @@ class Player(object):
             gl.glVertex2f(0, 1)
             gl.glEnd()
 
-    def get_song_time(self):
-        return self.poll_props["audio-pts"]
+    def get_song_time(self, async=True):
+        if async:
+            return self.poll_props["audio-pts"]
+        else:
+            return self.mpv.get_property("audio-pts")
 
     def eof_reached(self):
         return self.eof or self.get_song_time() > self.duration
