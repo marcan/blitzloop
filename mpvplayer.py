@@ -56,7 +56,9 @@ class Player(object):
         self.set_pause(True)
         # Load just the audio first to find out the duration lower bound
         self.mpv.set_property("audio-file", [])
+        self.poll()
         self.mpv.command('loadfile', song.audiofile)
+        self._wait_ev(mpv.Events.file_loaded)
         audio_duration = self._getprop("duration")
 
         if "video_offset" in song.song:
@@ -64,7 +66,9 @@ class Player(object):
             self.mpv.set_property("audio-delay", self.offset)
         if song.videofile is not None and song.audiofile != song.videofile:
             self.mpv.set_property("audio-file", [song.audiofile])
+            self.poll()
             self.mpv.command('loadfile', song.videofile)
+            self._wait_ev(mpv.Events.file_loaded)
         elif song.videofile is None:
             self.mpv.set_property("vid", "no")
 
@@ -102,9 +106,16 @@ class Player(object):
             try:
                 return self.mpv.get_property(p)
             except mpv.MPVError: # Wait until available
+                self.poll()
                 time.sleep(0.1)
         else:
             raise Exception("Timed out getting property %s" % p)
+
+    def _wait_ev(self, ev_id):
+        while True:
+            for i in self.poll():
+                if i.id == ev_id:
+                    return
 
     def play(self):
         self.set_pause(False)
@@ -138,6 +149,7 @@ class Player(object):
 
     def poll(self):
         repoll = set()
+        evs = []
         while True:
             ev = self.mpv.wait_event(0)
             if ev.id == mpv.Events.none:
@@ -146,8 +158,12 @@ class Player(object):
                 and ev.data.name in self.poll_props):
                 self.poll_props[ev.data.name] = ev.data.data
                 repoll.add(ev.data.name)
+            else:
+                print "event: %s" % ev.name
+                evs.append(ev)
         for i in repoll:
             self.mpv.get_property_async(i)
+        return evs
 
     def flip(self):
         self.gl.report_flip(0)
