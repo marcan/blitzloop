@@ -24,19 +24,9 @@ a = AudioEngine()
 
 print "Sample Rate: %dHz" % a.sample_rate
 
-print "Loading audio file..."
-file = AudioFile(sys.argv[1], a.sample_rate)
-print "Loaded"
-
-a.play(file)
-
-te = []
-
 try:
     while True:
-        time.sleep(0.01)
-        print a.song_time()
+        time.sleep(1)
 except KeyboardInterrupt:
     print "KeyboardInterrupt!"
     a.shutdown()
-    file.close()
