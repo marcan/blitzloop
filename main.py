@@ -106,6 +106,8 @@ def main_render():
             cmd, arg = qe.commands.pop(0)
             if cmd == "seek":
                 mpv.seek(arg)
+            elif cmd == "seekto":
+                mpv.seek_to(arg)
         mpv.draw()
         mpv.poll()
         song_time = mpv.get_song_time() or song_time

@@ -205,7 +205,10 @@ def now_seek():
     except KeyError:
         return HTTPError(404)
 
-    qe.commands.append(("seek", float(request.json["offset"])))
+    if "offset" in request.json:
+        qe.commands.append(("seek", float(request.json["offset"])))
+    if "position" in request.json:
+        qe.commands.append(("seekto", float(request.json["position"])))
     return ""
 
 @route("/settings")

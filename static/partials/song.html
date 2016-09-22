@@ -37,10 +37,11 @@
 	</div>
 	<div class="actions" ng-show="tab=='now'">
 	<a class="button" href="#{{backUrl}}" translate>Back</a>
+	<a class="button icon" ng-click="seekto(0)">&#xf049;</a><!-- restart -->
 	<a class="button icon" ng-click="seek(-10)">&#xf04a;</a><!-- rew -->
+	<a class="button icon" ng-click="seek(10)">&#xf04e;</a><!-- fwd -->
 	<a class="button icon" ng-hide="song.config.pause" ng-click="song.config.pause=true">&#xf04c;</a><!-- pause -->
 	<a class="button icon" ng-show="song.config.pause" ng-click="song.config.pause=false">&#xf04b;</a><!-- play -->
-	<a class="button icon" ng-click="seek(10)">&#xf04e;</a><!-- fwd -->
 	<a class="button icon red" ng-click="removeFromQueue()">&#xf04d;</a><!-- stop -->
 	</div>
 </div>

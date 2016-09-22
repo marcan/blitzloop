@@ -314,6 +314,9 @@ app.controller('QueueEntryCtrl', function($scope, $rootScope, $routeParams, $htt
 	$scope.seek = function(offset) {
 		$http.post('/queue/now/seek', {"offset": offset});
 	};
+	$scope.seekto = function(pos) {
+		$http.post('/queue/now/seek', {"position": pos});
+	};
 	$scope.removeFromQueue = function() {
 		$http.post('/queue/remove/' + $scope.song.qid).success(function(data) {
 			if ($routeParams.qid == "now") {
