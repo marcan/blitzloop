@@ -20,7 +20,7 @@ from _audio import *
 
 import web
 import sys, os
-import graphics, layout, video, songlist, idlescreen
+import graphics, layout, mpvplayer, songlist, idlescreen
 
 fullscreen = False
 if sys.argv[1] == "-fs":
@@ -37,6 +37,7 @@ print "Done."
 
 display = graphics.Display(width, height, fullscreen)
 renderer = layout.Renderer(display)
+mpv = mpvplayer.Player(display)
 
 audio = AudioEngine()
 print "Engine sample rate: %dHz" % audio.sample_rate
@@ -90,20 +91,9 @@ def main_render():
     yield None
     yield None
 
-    print "Loading audio file..."
-    audiofile = AudioFile(qe.song.audiofile, audio.sample_rate)
-    length = audiofile.frames / float(audiofile.rate)
-
-    if qe.song.videofile is not None:
-        print "Loading video file..."
-        videofile = video.BackgroundVideo(qe.song)
-        display.set_aspect(videofile.aspect)
-    else:
-        videofile = None
-        display.set_aspect(None)
-
-    if qe.song.aspect:
-        display.set_aspect(float(qe.song.aspect))
+    print "Loading audio/video..."
+    mpv.load_song(qe.song)
+    display.set_aspect(mpv.aspect)
 
     print "Laying out song..."
     renderer.reset()
@@ -111,22 +101,30 @@ def main_render():
     song_layout = layout.SongLayout(qe.song, variant_key, renderer)
     print "Loaded."
 
-    audio.play(audiofile)
-    song_time = 0
-    while audio.is_playing() and not qe.stop:
-        song_time = audio.song_time() or song_time
-        if videofile:
-            videofile.draw(song_time, display, length)
+    mpv.set_pause(False)
+    song_time = -10
+    stopping = False
+    while not (mpv.eof_reached() or (stopping and qe.pause)):
+        mpv.draw()
+        mpv.poll()
+        song_time = mpv.get_song_time() or song_time
+        if qe.stop and not stopping:
+            stopping = True
+            mpv.fade_out = 1
+            mpv.duration = min(mpv.duration, song_time + 1)
+        mpv.draw_fade(song_time)
         speed = 2**(qe.speed / 12.0)
         renderer.draw(song_time + audio_config.headstart / 100.0 * speed, song_layout)
 
-        audio.set_speed(1.0 / speed)
-        audio.set_pitch(2**(qe.pitch/12.0))
+        mpv.set_speed(1.0 / speed)
+        mpv.set_pitch(2**(qe.pitch/12.0))
         for i, j in enumerate(qe.channels):
-            audio.set_channel(i, j/10.0)
-        audio.set_pause(qe.pause)
+            mpv.set_channel(i, j/10.0)
+        mpv.set_pause(qe.pause)
         audio_config.update(qe.song)
         yield None
+        mpv.flip()
+
     yield None
     yield None
     print "Song complete."
@@ -134,8 +132,7 @@ def main_render():
         queue.pop(qe.qid)
     except (IndexError, KeyError):
         pass
-    audio.stop()
-    audiofile.close()
+    mpv.stop()
     display.set_aspect(None)
 
 def main():
@@ -145,6 +142,7 @@ def main():
 
 def key(k):
     if k == '\033':
+        mpv.shutdown()
         audio.shutdown()
         os._exit(0)
 
