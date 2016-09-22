@@ -7,8 +7,8 @@ setup(
     ext_modules=[
         Extension("_audio",
             ["_audio.pyx"],
-            language="c++",
-            libraries=["jack", "samplerate", "sndfile", "rubberband"]
+            language="c",
+            libraries=["jack"]
             )
     ],
     cmdclass={"build_ext": build_ext}
