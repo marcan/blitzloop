@@ -47,7 +47,7 @@ display.set_aspect(mpv.aspect)
 renderer = layout.Renderer(display)
 layout = layout.SongLayout(s, s.variants.keys()[variant], renderer)
 
-song_time = 0
+song_time = -10
 
 speed_i = 0
 pitch_i = 0
