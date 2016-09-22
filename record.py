@@ -15,10 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-from _audio import AudioFile
-
 import sys, os
-import song, graphics, layout, ffmsvideo
+import song, graphics, layout, ffmsvideo, mpvplayer
 import OpenGL.GL as gl
 import subprocess
 
@@ -36,8 +34,10 @@ display = graphics.Display(width,height,False)
 renderer = layout.Renderer(display)
 layout = layout.SongLayout(s, s.variants.keys()[variant], renderer)
 
-file = AudioFile(s.audiofile, 48000)
-length = file.frames / float(file.rate)
+mpv = mpvplayer.Player(None)
+mpv.load_song(s)
+length = mpv.duration
+mpv.shutdown()
 
 if s.videofile is not None:
     v = ffmsvideo.BackgroundVideo(s)
@@ -81,7 +81,7 @@ def render():
             data = gl.glReadPixelsub(0, 0, width, height, gl.GL_RGB)
             print "\r%.02f%%" % (100 * song_time / length),
             sys.stdout.flush()
-            x264.stdin.write(data.tostring())
+            x264.stdin.write(data)
             song_time += 1/fps
             #yield
     except Exception as e:
