@@ -18,8 +18,8 @@
 
 from _audio import *
 
-import sys
-import song, graphics, layout
+import sys, os
+import song, graphics, layout, mpvplayer
 import OpenGL.GL as gl
 
 s = song.Song(sys.argv[1], ignore_steps=True)
@@ -29,14 +29,9 @@ pos = float(sys.argv[4]) if len(sys.argv) >= 5 else 0.0
 
 
 a = AudioEngine()
-a.set_speed(speed)
 a.set_mic_volume(0)
 
 print "Sample Rate: %dHz" % a.sample_rate
-
-print "Loading audio file..."
-file = AudioFile(s.audiofile, a.sample_rate, pos)
-print "Loaded"
 
 display = graphics.Display(1280,720)
 renderer = layout.Renderer(display)
@@ -49,12 +44,17 @@ cur_beat = 0
 compound = None
 compounds = iter(s.compounds)
 
+mpv = mpvplayer.Player(None)
+mpv.load_song(s)
+mpv.set_speed(speed)
+
 def render():
     while True:
         gl.glClearColor(0, 0.3, 0, 1)
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
         gl.glLoadIdentity()
         renderer.draw(step, layout)
+        mpv.poll()
         yield None
 
 def round_beat(b):
@@ -62,7 +62,7 @@ def round_beat(b):
 
 def key(k):
     global step, compound, cur_beat
-    song_time = a.song_time() or 0
+    song_time = mpv.get_song_time() or 0
     beat = s.timing.time2beat(song_time)
     if k == ' ':
         if compound is not None:
@@ -106,9 +106,12 @@ def key(k):
             step += 0.5
             compound = None
             print time
+    if k == '\033':
+        mpv.shutdown()
+        os._exit(0)
 
-a.play(file)
+mpv.set_pause(False)
 display.set_render_gen(render)
 display.set_keyboard_handler(key)
 display.main_loop()
-
+mpv.shutdown()
