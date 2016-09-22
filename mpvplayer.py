@@ -27,7 +27,6 @@ class Player(object):
         self.mpv.set_property("audio-file-auto", "no")
         self.mpv.set_property("terminal", True)
         self.mpv.set_property("quiet", True)
-        self.mpv.set_property("vo", "opengl-cb")
         self.mpv.set_property("ao", "jack")
         self.mpv.set_property("af", "@pan:pan=2:[1,0,0,1],@rb:rubberband")
         self.mpv.set_property("video-sync", "display-vdrop")
@@ -36,11 +35,17 @@ class Player(object):
         for i in self.poll_props:
             self.mpv.get_property_async(i)
 
-        def gpa(name):
-            return display.get_proc_address(name)
+        if display:
+            def gpa(name):
+                return display.get_proc_address(name)
 
-        self.gl = self.mpv.opengl_cb_api()
-        self.gl.init_gl(None, gpa)
+            self.gl = self.mpv.opengl_cb_api()
+            self.gl.init_gl(None, gpa)
+            self.mpv.set_property("vo", "opengl-cb")
+        else:
+            self.gl = None
+            self.mpv.set_property("vo", "null")
+            self.mpv.set_property("vid", "no")
 
     def load_song(self, song):
         self.song = song
@@ -89,7 +94,7 @@ class Player(object):
         self.volumes = [0] * self.channels
         self.set_channel(0, 1)
 
-        if song.videofile is not None:
+        if song.videofile is not None and self.display is not None:
             w = self._getprop("video-params/w")
             h = self._getprop("video-params/h")
             aspect = self._getprop("video-params/aspect")
@@ -217,6 +222,7 @@ class Player(object):
         self.mpv.command('stop')
 
     def shutdown(self):
-        self.gl.uninit_gl()
+        if self.gl:
+            self.gl.uninit_gl()
         self.mpv.shutdown()
 
