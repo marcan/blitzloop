@@ -6,18 +6,16 @@ Dependencies:
 
  Libs and headers (for _audio.pyx):
   JACK
-  libsndfile
-  libsamplerate
-  librubberband
 
  Python modules/bindings:
   numpy
-  ffms
+  ffms (only for record.py)
   freetype-py
   pyopengl
   bottle
   paste
   PIL
+  pympv
 
 On Debian:
 $ sudo apt-get install \
@@ -29,24 +27,34 @@ $ sudo apt-get install \
 	python-paste \
 	python-imaging \
 	libjack-jackd2-dev \
-	libsndfile-dev \
-	libsamplerate-dev \
 	librubberband-dev \
 	libffms2-dev \
 	libfreetype6-dev
 $ sudo easy_install freetype-py 3to2
-(ffms doesn't work with easy_install for some reason)
-$ wget https://bitbucket.org/spirit/ffms/downloads/ffms-0.3a2.tar.bz2
-$ tar xvf ffms-0.3a2.tar.bz2
-$ cd ffms-0.3a2
-$ sudo python2 setup.py install
 
 Then build the _audio module:
 $ python setup.py build
 $ export PYTHONPATH=$(echo `pwd`/build/lib.*)
 
-Note: libsndfile doesn't support mp3 (but does support most everything else).
-TODO: switch to ffmpegsource.
+You currently need version 0.21.0 of libmpv, which comes with mpv, plus
+updated bindings. 0.21.0 is not released as of this writing, so use git master:
+
+$ git clone https://github.com/mpv-player/mpv
+$ cd mpv
+$ ./bootstrap.py
+$ ./waf --enable-libmpv-shared configure
+$ ./waf build
+$ ./waf install
+$ cd ..
+$ git clone https://github.com/marcan/pympv
+$ cd pympv
+$ python setup.py install
+
+If you want to use record.py to render to video, you need ffms:
+$ wget https://bitbucket.org/spirit/ffms/downloads/ffms-0.3a2.tar.bz2
+$ tar xvf ffms-0.3a2.tar.bz2
+$ cd ffms-0.3a2
+$ sudo python2 setup.py install
 
 Audio may be 1-track (mono), 2-track (stereo), 4-track (dual stereo, without
 and with vocals)

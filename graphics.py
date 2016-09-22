@@ -107,6 +107,9 @@ class Display(object):
     def round_coord(self, c):
         return int(round(c * self.width)) / float(self.width)
 
+    def get_proc_address(self, s):
+        return glut.glutGetProcAddress(s)
+
     @property
     def top(self):
         return self.height / float(self.width)
