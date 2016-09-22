@@ -18,7 +18,7 @@
 from _audio import AudioFile
 
 import sys, os
-import song, graphics, layout, video
+import song, graphics, layout, ffmsvideo
 import OpenGL.GL as gl
 import subprocess
 
@@ -40,7 +40,7 @@ file = AudioFile(s.audiofile, 48000)
 length = file.frames / float(file.rate)
 
 if s.videofile is not None:
-    v = video.BackgroundVideo(s)
+    v = ffmsvideo.BackgroundVideo(s)
 else:
     v = None
 
