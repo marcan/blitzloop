@@ -46,6 +46,9 @@ class Player(object):
         self.song = song
         self.fade_in = 1
         self.fade_out = 1
+        self.speed = 1
+        self.pause = False
+        self.pitch = 1
         self.offset = 0
         self.song_time = None
         if "fade_in" in song.song:
@@ -121,13 +124,19 @@ class Player(object):
         self.set_pause(False)
 
     def set_pause(self, pause):
-        self.mpv.set_property("pause", pause, async=True)
+        if self.pause != pause:
+            self.mpv.set_property("pause", pause, async=True)
+            self.pause = pause
 
     def set_pitch(self, pitch):
-        self.mpv.command("af-command", "rb", "set-pitch", str(pitch))
+        if self.pitch != pitch:
+            self.mpv.command("af-command", "rb", "set-pitch", str(pitch))
+            self.pitch = pitch
 
     def set_channel(self, channel, value):
         if self.channels == 0:
+            return
+        if self.volumes[channel] == value:
             return
         self.volumes[channel] = value
         if self.channels == 1:
@@ -139,11 +148,13 @@ class Player(object):
         self.mpv.command("af-command", "pan", "set-matrix", ",".join(map(str, mtx)))
 
     def set_speed(self, speed):
-        self.mpv.set_property("speed", 1.0/speed)
+        if self.speed != speed:
+            self.mpv.set_property("speed", 1.0/speed)
+            self.speed = speed
 
     def seek(self, offset):
         self.mpv.command("seek", offset, async=True)
-    
+
     def seek_to(self, t):
         self.mpv.set_property("time-pos", t)
 
