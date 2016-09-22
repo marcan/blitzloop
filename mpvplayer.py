@@ -69,6 +69,7 @@ class Player(object):
         self.mpv.set_property("audio-file", [])
         self.poll()
         self.eof = False
+        self.mpv.set_property("vid", "auto")
         self.mpv.command('loadfile', song.audiofile)
         self._wait_ev(mpv.Events.file_loaded)
         audio_duration = self._getprop("duration")
