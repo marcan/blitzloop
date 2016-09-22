@@ -32,7 +32,7 @@ class Player(object):
         self.mpv.set_property("af", "@pan:pan=2:[1,0,0,1],@rb:rubberband")
         self.mpv.set_property("video-sync", "display-vdrop")
         self.mpv.set_property("display-fps", 60)
-        self.poll_props = {"audio-pts": None, "eof-reached": None}
+        self.poll_props = {"audio-pts": None}
         for i in self.poll_props:
             self.mpv.get_property_async(i)
 
@@ -60,6 +60,7 @@ class Player(object):
         # Load just the audio first to find out the duration lower bound
         self.mpv.set_property("audio-file", [])
         self.poll()
+        self.eof = False
         self.mpv.command('loadfile', song.audiofile)
         self._wait_ev(mpv.Events.file_loaded)
         audio_duration = self._getprop("duration")
@@ -69,7 +70,9 @@ class Player(object):
             self.mpv.set_property("audio-delay", self.offset)
         if song.videofile is not None and song.audiofile != song.videofile:
             self.mpv.set_property("audio-file", [song.audiofile])
-            self.poll()
+            self.stop()
+            self._wait_ev(mpv.Events.idle)
+            self.eof = False
             self.mpv.command('loadfile', song.videofile)
             self._wait_ev(mpv.Events.file_loaded)
         elif song.videofile is None:
@@ -169,6 +172,9 @@ class Player(object):
                 and ev.data.name in self.poll_props):
                 self.poll_props[ev.data.name] = ev.data.data
                 repoll.add(ev.data.name)
+            elif ev.id == mpv.Events.end_file:
+                print "event: %s" % ev.name
+                self.eof = True
             else:
                 print "event: %s" % ev.name
                 evs.append(ev)
@@ -205,7 +211,7 @@ class Player(object):
         return self.poll_props["audio-pts"]
 
     def eof_reached(self):
-        return self.poll_props["eof-reached"] or self.get_song_time() > self.duration
+        return self.eof or self.get_song_time() > self.duration
 
     def stop(self):
         self.mpv.command('stop')
