@@ -173,7 +173,8 @@ class Player(object):
             mtx = [1, 0, 0, 1]
             for v in self.volumes:
                 mtx += [v, 0, 0, v]
-        mtx = [i * self.volume * self.fadevol for i in mtx]
+        sv = float(self.song.song["volume"]) if "volume" in self.song.song else 1
+        mtx = [i * self.volume * self.fadevol * sv for i in mtx]
         self.mpv.command("af-command", "pan", "set-matrix", ",".join(map(str, mtx)))
 
     def set_speed(self, speed):

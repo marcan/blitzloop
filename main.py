@@ -53,10 +53,7 @@ class AudioConfig(object):
         self.headstart = 30
 
     def update(self, song=None):
-        if song is None or "volume" not in song.song:
-            mpv.set_volume(self.volume / 200.0)
-        else:
-            mpv.set_volume(self.volume / 200.0 * float(song.song["volume"]))
+        mpv.set_volume(self.volume / 200.0)
         audio.set_mic_volume(self.mic_volume / 100.0)
         audio.set_mic_feedback(self.mic_feedback / 100.0)
         audio.set_mic_delay(self.mic_delay / 100.0)
