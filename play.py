@@ -39,7 +39,8 @@ else:
     display = graphics.Display(1280, 720, fullscreen, None)
 print display.width, display.height
 
-mpv = mpvplayer.Player(s, display)
+mpv = mpvplayer.Player(display)
+mpv.load_song(s)
 
 display.set_aspect(mpv.aspect)
 

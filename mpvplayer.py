@@ -20,11 +20,30 @@ import time
 import OpenGL.GL as gl
 
 class Player(object):
-    def __init__(self, song, display):
-        self.song = song
-        self.mpv = mp = mpv.Context()
-        mp.initialize()
+    def __init__(self, display):
         self.display = display
+        self.mpv = mpv.Context()
+        self.mpv.initialize()
+        self.mpv.set_property("audio-file-auto", "no")
+        self.mpv.set_property("terminal", True)
+        self.mpv.set_property("quiet", True)
+        self.mpv.set_property("vo", "opengl-cb")
+        self.mpv.set_property("ao", "jack")
+        self.mpv.set_property("af", "@pan:pan=2:[1,0,0,1],@rb:rubberband")
+        self.mpv.set_property("video-sync", "display-vdrop")
+        self.mpv.set_property("display-fps", 60)
+        self.poll_props = {"audio-pts": None, "eof-reached": None}
+        for i in self.poll_props:
+            self.mpv.get_property_async(i)
+
+        def gpa(name):
+            return display.get_proc_address(name)
+
+        self.gl = self.mpv.opengl_cb_api()
+        self.gl.init_gl(None, gpa)
+
+    def load_song(self, song):
+        self.song = song
         self.fade_in = 1
         self.fade_out = 1
         self.offset = 0
@@ -35,35 +54,19 @@ class Player(object):
             self.fade_out = float(song.song["fade_out"])
 
         self.set_pause(True)
-        mp.set_property("audio-file-auto", "no")
-        mp.set_property("terminal", True)
-        mp.set_property("quiet", True)
-        mp.set_property("vo", "opengl-cb")
-        mp.set_property("ao", "jack")
-        mp.set_property("af", "@pan:pan=2:[1,0,0,1,0,0,0,0],@rb:rubberband")
-        mp.set_property("video-sync", "display-vdrop")
-        mp.set_property("display-fps", 60)
-        self.poll_props = {"audio-pts": None, "eof-reached": None}
-        for i in self.poll_props:
-            mp.get_property_async(i)
-
-        def gpa(name):
-            return display.get_proc_address(name)
-        self.gl = mp.opengl_cb_api()
-        self.gl.init_gl(None, gpa)
-
         # Load just the audio first to find out the duration lower bound
-        mp.command('loadfile', song.audiofile)
-        self.duration = self._getprop("duration")
+        self.mpv.set_property("audio-file", [])
+        self.mpv.command('loadfile', song.audiofile)
+        audio_duration = self._getprop("duration")
 
         if "video_offset" in song.song:
             self.offset = float(song.song["video_offset"])
-            mp.set_property("audio-delay", self.offset)
+            self.mpv.set_property("audio-delay", self.offset)
         if song.videofile is not None and song.audiofile != song.videofile:
-            mp.set_property("audio-file", song.audiofile)
-            mp.command('loadfile', song.videofile)
+            self.mpv.set_property("audio-file", [song.audiofile])
+            self.mpv.command('loadfile', song.videofile)
 
-        self.duration = min(self.duration, self._getprop("duration"))
+        self.duration = min(audio_duration, self._getprop("duration"))
 
         if "duration" in song.song:
             self.duration = float(song.song["duration"])
@@ -81,10 +84,10 @@ class Player(object):
         if song.aspect:
             if song.aspect > aspect:
                 nh = int(h * (aspect / song.aspect))
-                mp.set_property("vf", "crop=%d:%d" % (w, nh))
+                self.mpv.set_property("vf", "crop=%d:%d" % (w, nh))
             elif aspect > song.aspect:
                 nw = int(w * (song.aspect / aspect))
-                mp.set_property("vf", "crop=%d:%d" % (nw, h))
+                self.mpv.set_property("vf", "crop=%d:%d" % (nw, h))
             self.aspect = song.aspect
         else:
             self.aspect = aspect
@@ -169,6 +172,9 @@ class Player(object):
 
     def eof_reached(self):
         return self.poll_props["eof-reached"] or self.get_song_time() > self.duration
+
+    def stop(self):
+        self.mpv.command('stop')
 
     def shutdown(self):
         self.gl.uninit_gl()
