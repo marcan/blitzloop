@@ -16,8 +16,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-from _audio import *
-
 import sys, os
 import song, graphics, layout, mpvplayer
 import OpenGL.GL as gl
@@ -26,12 +24,6 @@ s = song.Song(sys.argv[1], ignore_steps=True)
 quant = int(sys.argv[2])
 speed = float(sys.argv[3]) if len(sys.argv) >= 4 else 1.0
 pos = float(sys.argv[4]) if len(sys.argv) >= 5 else 0.0
-
-
-a = AudioEngine()
-a.set_mic_volume(0)
-
-print "Sample Rate: %dHz" % a.sample_rate
 
 display = graphics.Display(1280,720)
 renderer = layout.Renderer(display)
@@ -97,8 +89,6 @@ def key(k):
                 step += 0.5
             else:
                 step += 1
-        song_time = a.song_time() or 0
-        beat = s.timing.time2beat(song_time)
     elif k == '\r':
         if compound and len(compound.timing) == (compound.steps - 1):
             time = song.MixedFraction(round_beat(beat - cur_beat), quant)
