@@ -105,6 +105,10 @@ def main_render():
     song_time = -10
     stopping = False
     while not (mpv.eof_reached() or (stopping and qe.pause)):
+        while qe.commands:
+            cmd, arg = qe.commands.pop(0)
+            if cmd == "seek":
+                mpv.seek(arg)
         mpv.draw()
         mpv.poll()
         song_time = mpv.get_song_time() or song_time

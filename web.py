@@ -198,6 +198,16 @@ def queue_change(qid):
     apply_qe(qe, request.json)
     return {"qid": qe.qid}
 
+@route("/queue/now/seek", method="POST")
+def now_seek():
+    try:
+        qe = queue[0]
+    except KeyError:
+        return HTTPError(404)
+
+    qe.commands.append(("seek", float(request.json["offset"])))
+    return ""
+
 @route("/settings")
 def settings_get():
     return {

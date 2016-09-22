@@ -46,6 +46,7 @@ class SongQueueEntry(object):
         self.pitch = 0
         self.pause = False
         self.stop = False
+        self.commands = []
 
 class SongQueue(object):
     def __init__(self):

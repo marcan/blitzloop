@@ -311,6 +311,9 @@ app.controller('QueueEntryCtrl', function($scope, $rootScope, $routeParams, $htt
 			$scope.variant = $scope.song.variants[$scope.song.config.variant];
 		}
 	}, true);
+	$scope.seek = function(offset) {
+		$http.post('/queue/now/seek', {"offset": offset});
+	};
 	$scope.removeFromQueue = function() {
 		$http.post('/queue/remove/' + $scope.song.qid).success(function(data) {
 			if ($routeParams.qid == "now") {
