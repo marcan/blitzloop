@@ -28,6 +28,9 @@ from util import map_from, map_to
 vs_karaoke = """
 #version 120
 
+attribute vec2 vertex;
+attribute vec2 texcoord;
+
 attribute vec3 border_color;
 attribute vec3 fill_color;
 attribute vec3 outline_color;
@@ -38,6 +41,7 @@ attribute vec3 outline_color_on;
 attribute float glyph_time;
 attribute vec2 atom_time;
 attribute vec2 line_time;
+
 uniform float time;
 
 varying vec2 v_texcoord;
@@ -57,7 +61,7 @@ float linstep(float min, float max, float v) {
 }
 
 void main() {
-    v_texcoord = gl_MultiTexCoord0.st;
+    v_texcoord = texcoord.st;
 
     v_time = glyph_time;
 
@@ -76,7 +80,7 @@ void main() {
 
     v_alpha = fade_in - fade_out;
 
-    vec4 pos = gl_Vertex;
+    vec4 pos = vec4(vertex.x, vertex.y, 0, 1);
 
     float x_shift = 0.03;
 
@@ -337,16 +341,12 @@ class DisplayLine(object):
             y = self.display.round_coord(self.y)
             gl.glTranslate(x, y, 0)
 
-            gl.glEnableClientState(gl.GL_VERTEX_ARRAY)
-            gl.glEnableClientState(gl.GL_TEXTURE_COORD_ARRAY)
             renderer.enable_attribs()
 
             stride = 27*4
             off = 0
-            gl.glVertexPointer(2, gl.GL_FLOAT, stride, self.vbo + off)
-            off += 2*4
-            gl.glTexCoordPointer(2, gl.GL_FLOAT, stride, self.vbo + off)
-            off += 2*4
+            off += renderer.attrib_pointer("vertex", stride, off, self.vbo)
+            off += renderer.attrib_pointer("texcoord", stride, off, self.vbo)
             off += renderer.attrib_pointer("glyph_time", stride, off, self.vbo)
             off += renderer.attrib_pointer("fill_color", stride, off, self.vbo)
             off += renderer.attrib_pointer("border_color", stride, off, self.vbo)
@@ -360,8 +360,6 @@ class DisplayLine(object):
 
             gl.glDrawElements(gl.GL_TRIANGLES, 6*self.count, gl.GL_UNSIGNED_SHORT, self.ibo)
 
-            gl.glDisableClientState(gl.GL_VERTEX_ARRAY)
-            gl.glDisableClientState(gl.GL_TEXTURE_COORD_ARRAY)
             renderer.disable_attribs()
             gl.glPopMatrix()
 
@@ -606,6 +604,8 @@ class Renderer(object):
         "tex", "time"
     ]
     ATTRIBUTES = {
+        "vertex": (2, gl.GL_FLOAT),
+        "texcoord": (2, gl.GL_FLOAT),
         "glyph_time": (1, gl.GL_FLOAT),
         "atom_time": (2, gl.GL_FLOAT),
         "line_time": (2, gl.GL_FLOAT),
