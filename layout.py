@@ -26,7 +26,7 @@ from OpenGL.arrays import vbo
 from util import map_from, map_to
 
 vs_karaoke = """
-#version 120
+#version 110
 
 attribute vec2 vertex;
 attribute vec2 texcoord;
@@ -80,19 +80,19 @@ void main() {
 
     v_alpha = fade_in - fade_out;
 
-    vec4 pos = vec4(vertex.x, vertex.y, 0, 1);
+    vec4 pos = vec4(vertex.x, vertex.y, 0.0, 1.0);
 
     float x_shift = 0.03;
 
-    pos.x -= x_shift * smoothstep(0, 2, 1-fade_in);
-    pos.x += x_shift * smoothstep(0, 2, fade_out);
+    pos.x -= x_shift * smoothstep(0.0, 2.0, 1.0 - fade_in);
+    pos.x += x_shift * smoothstep(0.0, 2.0, fade_out);
 
     gl_Position = gl_ModelViewProjectionMatrix * pos;
 }
 """
 
 fs_karaoke = """
-#version 120
+#version 110
 
 uniform float time;
 uniform sampler2D tex;
@@ -130,7 +130,7 @@ void main() {
     gl_FragColor.rgb = outline_color * outline;
     gl_FragColor.rgb += border_color * border;
     gl_FragColor.rgb += fill_color * fill;
-    gl_FragColor.rgb /= clamp(a, 0, 1);
+    gl_FragColor.rgb /= clamp(a, 0.0, 1.0);
     gl_FragColor.a = a * v_alpha;
 }
 """
