@@ -23,6 +23,7 @@ RESDIR = 'res'
 CFG = {
         'fontdir': os.path.join(RESDIR, 'fonts'),
         'gfxdir': os.path.join(RESDIR, 'gfx'),
+        'webdir': os.path.join(RESDIR, 'web'),
 }
 
 def get_res_path(t, fp):
@@ -33,6 +34,9 @@ def get_resfont_path(fp):
 
 def get_resgfx_path(fp):
     return get_res_path('gfxdir', fp)
+
+def get_webres_path(fp):
+    return get_res_path('webdir', fp)
 
 def map_from(x, min, max):
     return (x-min) / (max-min)

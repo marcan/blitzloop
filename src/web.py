@@ -6,6 +6,7 @@ from PIL import Image
 import StringIO
 
 import songlist
+import util
 
 LANGUAGES = ("en-gb", "es-es", "ja-jp", "de-de", "es-eu", "fr-fr")
 
@@ -44,13 +45,14 @@ def index():
         "latin": request.latin,
         "nonce": nonce,
     })
-    with open("static/i18n/%s.json" % request.lang) as fd:
+    fp = util.get_webres_path('i18n/%s.json') % request.lang
+    with open(fp) as fd:
         i18n = fd.read()
     return "g_cfg = %s;\ng_i18n = %s;" % (cfg, i18n)
 
 @route("/s/<filename:path>")
 def send_static(filename):
-    return static_file(filename, root="static")
+    return static_file(filename, root=util.get_webres_path(''))
 
 @route("/")
 def index():
@@ -62,7 +64,8 @@ def index_xs():
 
 @route("/xw=<width:int>")
 def index_xw(width, user_scalable=False):
-    with open("static/index.html") as fd:
+    fp = util.get_webres_path('index.html')
+    with open(fp) as fd:
         data = fd.read()
     data = data.replace("%SCALABLE%", "1" if user_scalable else "0")
     data = data.replace("%WIDTH%", str(width))
