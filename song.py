@@ -886,7 +886,7 @@ class Song(object):
         song_font = os.path.join(self.pathbase, font)
         if os.path.exists(song_font):
             return song_font
-        resfont = os.path.join(util.CFG['fontdir'], font)
+        resfont = util.get_resfont_path(font)
         if os.path.exists(resfont):
             return resfont
         raise IOError("Font %s not found" % font)

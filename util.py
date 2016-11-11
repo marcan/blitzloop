@@ -21,8 +21,18 @@ import os
 
 RESDIR = 'res'
 CFG = {
-        'fontdir': os.path.join(RESDIR, 'fonts')
+        'fontdir': os.path.join(RESDIR, 'fonts'),
+        'gfxdir': os.path.join(RESDIR, 'gfx'),
 }
+
+def get_res_path(t, fp):
+    return os.path.join(CFG[t], fp)
+
+def get_resfont_path(fp):
+    return get_res_path('fontdir', fp)
+
+def get_resgfx_path(fp):
+    return get_res_path('gfxdir', fp)
 
 def map_from(x, min, max):
     return (x-min) / (max-min)
