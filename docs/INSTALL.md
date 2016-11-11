@@ -125,7 +125,7 @@ ln -s /your/song/directory songs
 pyenv activate ${BL_PYENV}
 cd ${BL_HOME}/app
 export PYTHONPATH=$(echo `pwd`/build/lib.*)
-python ./main.py -fs songs 1024 768
+LD_LIBRARY_PATH=../mpv-dist/lib python ./main.py -fs ../songs 1024 768
 ```
 
 Visit port `10111` on your computer in a web browser, and sing!
