@@ -16,6 +16,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+import os
+
+
+RESDIR = 'res'
+CFG = {
+        'fontdir': os.path.join(RESDIR, 'fonts')
+}
+
 def map_from(x, min, max):
     return (x-min) / (max-min)
 
