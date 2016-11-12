@@ -130,7 +130,11 @@ void main() {
     gl_FragColor.rgb = outline_color * outline;
     gl_FragColor.rgb += border_color * border;
     gl_FragColor.rgb += fill_color * fill;
-    gl_FragColor.rgb /= clamp(a, 0.0, 1.0);
+    if (a > 0.0) {
+        gl_FragColor.rgb /= clamp(a, 0.0, 1.0);
+    } else {
+        gl_FragColor.rgb = vec3(0.0, 0.0, 0.0);
+    }
     gl_FragColor.a = a * v_alpha;
 }
 """
