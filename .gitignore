@@ -2,4 +2,5 @@
 *.pyo
 *~
 build
-_audio.cpp
+_audio.c*
+lib*.dylib
