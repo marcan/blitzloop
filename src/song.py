@@ -16,12 +16,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-import sys
-import os.path
 import codecs
-import re
-import fractions
 import decimal
+import fractions
+import os.path
+import re
+import sys
+import util
 from collections_substitute import OrderedDict
 
 class ParseError(Exception):
@@ -885,7 +886,7 @@ class Song(object):
         song_font = os.path.join(self.pathbase, font)
         if os.path.exists(song_font):
             return song_font
-        cwd_font = font
-        if os.path.exists(cwd_font):
-            return cwd_font
+        resfont = util.get_resfont_path(font)
+        if os.path.exists(resfont):
+            return resfont
         raise IOError("Font %s not found" % font)

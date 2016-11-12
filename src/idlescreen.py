@@ -17,6 +17,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 import time, math
+import util
 import OpenGL.GL as gl
 import OpenGL.GLU as glu
 import PIL
@@ -92,10 +93,12 @@ class ImageTexture(object):
 class IdleScreen(object):
     def __init__(self, display):
         self.display = display
-        self.logo = ImageTexture("logo.png", (0,0,0))
-        self.tablet = ImageTexture("tablet.png", (0,0,0))
-        self.hand = ImageTexture("hand.png", (255,255,255))
-        self.silhouette = ImageTexture("silhouette.png", (0,0,0))
+        self.logo = ImageTexture(util.get_resgfx_path("logo.png"), (0,0,0))
+        self.tablet = ImageTexture(util.get_resgfx_path("tablet.png"), (0,0,0))
+        self.hand = ImageTexture(
+                util.get_resgfx_path("hand.png"), (255,255,255))
+        self.silhouette = ImageTexture(
+                util.get_resgfx_path("silhouette.png"), (0,0,0))
         self.reset()
 
     def reset(self):
