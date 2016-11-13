@@ -1,6 +1,8 @@
 *.pyc
 *.pyo
 *~
-build
+*.egg-info/
 _audio.c*
+build
+dist/
 lib*.dylib
