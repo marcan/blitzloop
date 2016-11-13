@@ -32,9 +32,9 @@ On Debian, this should set you up:
 sudo apt-get install libjack-jackd2-dev librubberband-dev libffms2-dev libfreetype6-dev libass-dev libgl1-mesa-dev libavfilter-dev
 ```
 
-Under OSX, try this:
+Under OSX, you need homebrew's python in addition to the libraries:
 ```shell
-brew install jack jpeg ffms2 rubberband libass freetype
+brew install python jack jpeg ffms2 rubberband libass freetype
 ```
 
 ### Set up python environment
@@ -42,6 +42,12 @@ brew install jack jpeg ffms2 rubberband libass freetype
 BL_VENV=blitzloop-prod
 mkvirtualenv ${BL_VENV}
 pip install cython
+```
+
+Under OSX, you need some extra options to make sure python libs are able to find
+homebrew shared libs:
+```shell
+PIP_FLAGS=(--global-option=build_ext --global-option=-I$(brew --prefix)/include --global-option=-L$(brew --prefix)/lib)
 ```
 
 ### Get libmpv
@@ -66,26 +72,13 @@ cd mpv
 ```
 
 ### Get pympv.
-Linux:
 ```shell
-pip install 'git+git://github.com/yacoob/pympv.git@HEAD'
+pip install 'git+git://github.com/yacoob/pympv.git@HEAD' ${PIP_FLAGS}
 ```
-
-OSX:
-```shell
-pip install 'git+git://github.com/yacoob/pympv.git@HEAD' --global-option=build_ext --global-option="-I$(brew --prefix)/include" --global-option="-L$(brew --prefix)/lib"
-```
-
 
 ### Install Blitzloop itself
-Linux:
 ```shell
-pip install 'git+git://github.com/marcan/blitzloop.git@libmpv'
-```
-
-OSX:
-```shell
-pip install 'git+git://github.com/marcan/blitzloop.git@libmpv' --global-option=build_ext --global-option="-I$(brew --prefix)/include" --global-option="-L$(brew --prefix)/lib"
+pip install 'git+git://github.com/marcan/blitzloop.git@libmpv' ${PIP_FLAGS}
 ```
 
 ### Add songs.
@@ -94,7 +87,7 @@ cd ${BL_HOME}
 ln -s /your/song/directory songs
 ```
 
-# Running Blitzloop
+# Sing!
 TODO: fix this, as it's currently broken
 ```shell
 pyenv activate ${BL_VENV}
