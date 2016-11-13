@@ -17,6 +17,12 @@ extensions=[
 if USE_CYTHON:
     extensions=cythonize(extensions)
 
+# res_files = []
+# for dirpath, dirname, files in os.walk('blitzloop/res'):
+#     for fn in files:
+#         res_files.append(os.path.join(dirpath, fn))
+# print res_files
+
 setup(
         name='blitzloop',
         version='0.1',
@@ -41,4 +47,8 @@ setup(
             'pympv',
             'pyopengl',
         ],
+        include_package_data=True,
+        # package_data={
+        #     'blitzloop': res_files,
+        # },
 )
