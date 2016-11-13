@@ -48,7 +48,5 @@ setup(
             'pyopengl',
         ],
         include_package_data=True,
-        # package_data={
-        #     'blitzloop': res_files,
-        # },
+        zip_safe=False,
 )

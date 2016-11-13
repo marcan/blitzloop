@@ -16,10 +16,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-import os
+import os, sys
 
 
-RESDIR = 'res'
+# TODO: consider using pkgutil.get_data here?
+RESDIR = os.path.join(os.path.dirname(sys.modules[__name__].__file__), 'res')
 CFG = {
         'fontdir': os.path.join(RESDIR, 'fonts'),
         'gfxdir': os.path.join(RESDIR, 'gfx'),
