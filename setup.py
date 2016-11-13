@@ -1,38 +1,37 @@
 #!/usr/bin/env python
 import os
 
-# TODO: Handle Cython missing at setup time.
-#
 from setuptools import setup, find_packages
 from setuptools.extension import Extension
-from Cython.Build import cythonize
 
+try:
+    from Cython.Build import cythonize
+    USE_CYTHON = True
+except ImportError:
+    USE_CYTHON = False
+
+ext = 'pyx' if USE_CYTHON else 'c'
 extensions=[
-    Extension(
-        '_audio',
-        ['blitzloop/_audio.pyx'],
-        language='c',
-        libraries=['jack']
-    ),
+    Extension('_audio', ['blitzloop/_audio.%s' % ext], libraries=['jack']),
 ]
+if USE_CYTHON:
+    extensions=cythonize(extensions)
 
 setup(
         name='blitzloop',
         version='0.1',
         packages=find_packages(),
-        ext_modules=cythonize(extensions),
+        ext_modules=extensions,
         entry_points={
             'console_scripts': [
                 'blitzloop = blitzloop.main',
             ]
         },
         setup_requires=[
-            'Cython',
             '3to2',
         ],
         install_requires=[
             '3to2',
-            'Cython',
             'Pillow',
             'bottle',
             'ffms',
@@ -42,5 +41,4 @@ setup(
             'pympv',
             'pyopengl',
         ],
-
 )
