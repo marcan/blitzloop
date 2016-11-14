@@ -53,7 +53,7 @@ class Display(object):
         gl.glMatrixMode(gl.GL_PROJECTION)
         gl.glLoadIdentity()
         gl.glOrtho(0, width, 0, height, -1, 1)
-        display_aspect = width / float(height)
+        display_aspect = width / height
         if self.aspect:
             if display_aspect > self.aspect:
                 self.width = int(round(self.aspect * height))
@@ -81,7 +81,7 @@ class Display(object):
             gl.glClearColor(0, 0, 0, 1)
             gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
             gl.glLoadIdentity()
-            self.frames.next()
+            next(self.frames)
         except StopIteration:
             pass
         except BaseException as e:
@@ -91,7 +91,7 @@ class Display(object):
 
     def set_aspect(self, aspect):
         if aspect is None:
-            aspect = self.win_width / float(self.win_height)
+            aspect = self.win_width / self.win_height
         self.aspect = aspect
         self._on_reshape(self.win_width, self.win_height)
 
@@ -105,14 +105,14 @@ class Display(object):
         glut.glutMainLoop()
 
     def round_coord(self, c):
-        return int(round(c * self.width)) / float(self.width)
+        return int(round(c * self.width)) / self.width
 
     def get_proc_address(self, s):
         return glut.glutGetProcAddress(s)
 
     @property
     def top(self):
-        return self.height / float(self.width)
+        return self.height / self.width
 
 if __name__ == "__main__":
     fs_red = """

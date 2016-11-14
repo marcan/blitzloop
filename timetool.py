@@ -32,12 +32,12 @@ def build_bpms(beats):
     beats = [(beats[i], beats[i+1] - beats[i]) for i in range(len(beats)-1)]
     fbeats = beats
     oldlen = 0
-    print >>sys.stderr, "Got %d beats" % len(beats)
+    print("Got %d beats" % len(beats), file=sys.stderr)
     while oldlen != len(fbeats):
         oldlen = len(fbeats)
         avg = sum(l for s,l in fbeats) / len(fbeats)
         fbeats = [b for b in fbeats if abs(avg-b[1]) < avg*tolerance]
-    print >>sys.stderr, "After filtering, %d valid beats avg %fBPM" % (len(fbeats), 60.0/avg)
+    print("After filtering, %d valid beats avg %fBPM" % (len(fbeats), 60.0/avg), file=sys.stderr)
     off = fbeats[0][0]
     error = 0
     for start, length in fbeats:
@@ -47,7 +47,7 @@ def build_bpms(beats):
     off += error / len(fbeats)
     last = int(round((endpos - off) / avg))
     last_time = off + avg * last
-    print >>sys.stderr, "Offset %f, %d beats" % (off, last + 1)
+    print("Offset %f, %d beats" % (off, last + 1), file=sys.stderr)
     while off > avg:
         off -= avg
         last += 1
@@ -59,14 +59,14 @@ off_t = 0
 beats = [(off_t, [])]
 try:
     while True:
-        v = raw_input()
+        v = input()
         t = mpv.get_song_time(False)
         if v == "n":
             off_t = beats[-1][1][-1] +beats[-1][0]
             beats.append((off_t, []))
         beats[-1][1].append(t - off_t)
 except KeyboardInterrupt:
-    print "KeyboardInterrupt!"
+    print("KeyboardInterrupt!")
     mpv.shutdown()
     file.close()
 finally:
@@ -91,6 +91,6 @@ finally:
         if i != 0 and when < last * 0.1 and delta == 1:
             continue
         beat += delta
-        print "@%f=%d" % (t, beat)
+        print("@%f=%d" % (t, beat))
         last = when
     #print "@%f=%d" % (last_time, last)

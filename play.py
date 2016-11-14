@@ -37,7 +37,7 @@ if fullscreen:
     display = graphics.Display(1920, 1200, fullscreen, None)
 else:
     display = graphics.Display(1280, 720, fullscreen, None)
-print display.width, display.height
+print(display.width, display.height)
 
 mpv = mpvplayer.Player(display)
 mpv.load_song(s)
@@ -45,7 +45,7 @@ mpv.load_song(s)
 display.set_aspect(mpv.aspect)
 
 renderer = layout.Renderer(display)
-layout = layout.SongLayout(s, s.variants.keys()[variant], renderer)
+layout = layout.SongLayout(s, list(s.variants.keys())[variant], renderer)
 
 song_time = -10
 
@@ -72,7 +72,7 @@ def render():
         renderer.draw(song_time + headstart * 2**(speed_i/12.0), layout)
         yield None
         t2 = time.time()
-        print "T:%7.3f/%7.3f B:%7.3f FPS:%.2f draw:%.3f" % (song_time, mpv.duration, s.timing.time2beat(song_time), (1.0/(t2-t)), dt)
+        print("T:%7.3f/%7.3f B:%7.3f FPS:%.2f draw:%.3f" % (song_time, mpv.duration, s.timing.time2beat(song_time), (1.0/(t2-t)), dt))
         t = t2
         mpv.flip()
     mpv.shutdown()
@@ -87,27 +87,27 @@ def key(k):
         os._exit(0)
     if k == '[' and speed_i > -12:
         speed_i -= 1
-        print "Speed: %d" % speed_i
+        print("Speed: %d" % speed_i)
         mpv.set_speed(2**(-speed_i/12.0))
     elif k == ']' and speed_i < 12:
         speed_i += 1
-        print "Speed: %d" % speed_i
+        print("Speed: %d" % speed_i)
         mpv.set_speed(2**(-speed_i/12.0))
     elif k == glut.GLUT_KEY_UP and pitch_i < 12:
         pitch_i += 1
-        print "Pitch: %d" % pitch_i
+        print("Pitch: %d" % pitch_i)
         mpv.set_pitch(2**(pitch_i/12.0))
     elif k == glut.GLUT_KEY_DOWN and pitch_i > -12:
         pitch_i -= 1
-        print "Pitch: %d" % pitch_i
+        print("Pitch: %d" % pitch_i)
         mpv.set_pitch(2**(pitch_i/12.0))
     elif k == '+' and vocals_i < 30:
         vocals_i += 1
-        print "Vocals: %d" % vocals_i
+        print("Vocals: %d" % vocals_i)
         mpv.set_channel(0, vocals_i/10.0)
     elif k == '-' and vocals_i > 0:
         vocals_i -= 1
-        print "Vocals: %d" % vocals_i
+        print("Vocals: %d" % vocals_i)
         mpv.set_channel(0, vocals_i/10.0)
     elif k == glut.GLUT_KEY_LEFT:
         mpv.seek(-10)
@@ -117,7 +117,7 @@ def key(k):
         pause = not pause
         t = time.time()
         mpv.set_pause(pause)
-        print "P %.03f" % (time.time()-t)
+        print("P %.03f" % (time.time()-t))
 
 mpv.play()
 display.set_render_gen(render)

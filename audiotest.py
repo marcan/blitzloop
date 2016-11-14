@@ -22,11 +22,11 @@ import time, sys
 
 a = AudioEngine()
 
-print "Sample Rate: %dHz" % a.sample_rate
+print("Sample Rate: %dHz" % a.sample_rate)
 
 try:
     while True:
         time.sleep(1)
 except KeyboardInterrupt:
-    print "KeyboardInterrupt!"
+    print("KeyboardInterrupt!")
     a.shutdown()

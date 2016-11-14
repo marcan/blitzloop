@@ -40,12 +40,12 @@ class BackgroundVideo(object):
         self.width = frame.ScaledWidth
         self.height = frame.ScaledHeight
         self.frame = frame.planes[0].copy()
-        self.sar = self.vsource.properties.SARNum / float(self.vsource.properties.SARDen)
+        self.sar = self.vsource.properties.SARNum / self.vsource.properties.SARDen
         if self.sar == 0:
             self.sar = 1
         if "video_sar" in song.song:
             self.sar = float(song.song["video_sar"])
-        self.aspect = self.sar * self.width / float(self.height)
+        self.aspect = self.sar * self.width / self.height
 
     def advance(self, time):
         if self.frameno >= len(self.timecodes)-1:
@@ -86,8 +86,8 @@ class BackgroundVideo(object):
         gl.glBindTexture(gl.GL_TEXTURE_2D, self.texid)
         gl.glEnable(gl.GL_TEXTURE_2D)
         gl.glBegin(gl.GL_TRIANGLE_STRIP)
-        h = self.height / float(self.width) / self.sar
-        dh = display.height / float(display.width)
+        h = self.height / self.width / self.sar
+        dh = display.height / display.width
         offset = (dh-h) / 2
         gl.glColor4f(brightness,brightness,brightness,1)
         gl.glTexCoord2f(0,1)

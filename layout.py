@@ -21,7 +21,6 @@ import texture_font
 import numpy as np
 import OpenGL.GL as gl
 import OpenGL.GL.shaders as shaders
-from contextlib import nested
 from OpenGL.arrays import vbo
 from util import map_from, map_to
 
@@ -162,7 +161,7 @@ class DisplayLine(object):
     def __init__(self, display):
         self.display = display
         self.glyphs = []
-        self.text = u""
+        self.text = ""
         self.px = 0
         self.py = 0
         self.x = 0.0
@@ -339,7 +338,7 @@ class DisplayLine(object):
         self.count = len(self.glyphs)
 
     def draw(self, renderer):
-        with nested(self.vbo, self.ibo):
+        with self.vbo, self.ibo:
             gl.glPushMatrix()
             x = self.display.round_coord(self.x)
             y = self.display.round_coord(self.y)
@@ -368,7 +367,7 @@ class DisplayLine(object):
             gl.glPopMatrix()
 
     def __unicode__(self):
-        return u"DisplayLine<[%s]>" % self.text
+        return "DisplayLine<[%s]>" % self.text
 
 class SongLayout(object):
     def __init__(self, song_obj, variant, renderer):
@@ -669,7 +668,7 @@ if __name__ == "__main__":
     s = song.Song(sys.argv[1])
     display = graphics.Display(1280,720)
     renderer = Renderer(display)
-    layout = SongLayout(s, s.variants.keys()[-1], renderer)
+    layout = SongLayout(s, list(s.variants.keys())[-1], renderer)
     def render():
         song_time = 1
         while True:

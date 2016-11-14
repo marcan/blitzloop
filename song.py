@@ -22,7 +22,7 @@ import codecs
 import re
 import fractions
 import decimal
-from collections_substitute import OrderedDict
+from collections import OrderedDict
 
 class ParseError(Exception):
     def __str__(self):
@@ -37,7 +37,7 @@ class Particle(object):
         return 1
 
     def __unicode__(self):
-            return u"'%s'" % self.text
+            return "'%s'" % self.text
 
 class Atom(Particle):
     def __init__(self, text):
@@ -54,9 +54,9 @@ class Atom(Particle):
 
     def __unicode__(self):
         if self.particles is None:
-            return u"'%s'" % self.text
+            return "'%s'" % self.text
         else:
-            return u"'%s'" % self.text + u"(" + u" ".join(map(unicode,self.particles)) + ")"
+            return "'%s'" % self.text + "(" + " ".join(map(str,self.particles)) + ")"
 
 class Molecule(object):
     def __init__(self, source):
@@ -79,11 +79,11 @@ class Molecule(object):
         return any(atom.particles for atom in self.atoms)
 
     def __unicode__(self):
-        return u"Molecule<[%r]" % self.steps + u" ".join(map(unicode, self.atoms)) + u">"
+        return "Molecule<[%r]" % self.steps + " ".join(map(str, self.atoms)) + ">"
 
 class JapaneseMolecule(Molecule):
-    COMBINE_CHARS = u"ぁぃぅぇぉゃゅょァィゥェォャュョ 　？！?!…。、.,-「」―-"
-    SPACE = u"　"
+    COMBINE_CHARS = "ぁぃぅぇぉゃゅょァィゥェォャュョ 　？！?!…。、.,-「」―-"
+    SPACE = "　"
 
     def parse(self, source):
         self.atoms = []
@@ -93,29 +93,29 @@ class JapaneseMolecule(Molecule):
 
         self.break_before = self.break_after = False
         self.row = None
-        if source and source[0] in u"＄$":
+        if source and source[0] in "＄$":
             self.break_before = True
             source = source[1:]
-            if source and source[0] in u"＾^":
+            if source and source[0] in "＾^":
                 self.row = int(source[1])
                 source = source[2:]
-        if source and source[-1] in u"＄$":
-            if source[-2:] not in (u"＼＄", u"\\$"):
+        if source and source[-1] in "＄$":
+            if source[-2:] not in ("＼＄", "\\$"):
                 self.break_after = True
                 source = source[:-1]
 
         for c in source:
             if not in_escape:
-                if c in u"\\＼":
+                if c in "\\＼":
                     in_escape = True
                     continue
-                elif c in u"{｛":
+                elif c in "{｛":
                     if in_particle:
                         raise ParseError("Nested atoms")
                     in_particle = True
                     particle_text = ""
                     continue
-                elif c in u"}｝" and in_particle:
+                elif c in "}｝" and in_particle:
                     if not particle_text:
                         raise ParseError("Empty group")
                     in_particle = False
@@ -124,17 +124,17 @@ class JapaneseMolecule(Molecule):
                     else:
                         self.atoms.append(Atom(particle_text))
                     continue
-                elif c in u"(（":
+                elif c in "(（":
                     if in_furi:
-                        raise ParseError(u"Nested furigana (%s)" % source)
+                        raise ParseError("Nested furigana (%s)" % source)
                     if in_particle:
-                        raise ParseError(u"Furigana within atom (%s)" % source)
+                        raise ParseError("Furigana within atom (%s)" % source)
                     if not self.atoms:
-                        raise ParseError(u"Furigana with no atom (%s)" % source)
+                        raise ParseError("Furigana with no atom (%s)" % source)
                     in_furi = True
                     self.atoms[-1].particles = []
                     continue
-                elif c in u")）" and in_furi:
+                elif c in ")）" and in_furi:
                     self.atoms[-1].particle_edge = len(self.atoms[-1].text)
                     in_furi = False
                     continue
@@ -219,7 +219,7 @@ class RomajiMolecule(Molecule):
                     last_consonant = c
             elif last_consonant is not None:
                 pair = last_consonant + c
-                if pair.lower() in (u"sh", u"ts", u"ch", u"dz") or c.lower() == "y":
+                if pair.lower() in ("sh", "ts", "ch", "dz") or c.lower() == "y":
                     self.atoms[-1].text += c
                 else:
                     self.atoms.append(Atom(c))
@@ -235,8 +235,8 @@ class RomajiMolecule(Molecule):
 
 class LatinMolecule(Molecule):
     SPACE = " "
-    VOWELS = u"aeiouáéíóúäëïöü"
-    CONSONANTS = u"bcdfghjklmnñpqrstvwxyz0123456789'"
+    VOWELS = "aeiouáéíóúäëïöü"
+    CONSONANTS = "bcdfghjklmnñpqrstvwxyz0123456789'"
     VOWELS_END = VOWELS
     CONSONANTS_END = CONSONANTS
 
@@ -313,7 +313,7 @@ class LatinMolecule(Molecule):
                 if preceding_vowel and consonants == "":
                     self.atoms[-1].text += c
                 elif preceding_vowel and consonants:
-                    split = len(consonants)/2
+                    split = len(consonants) // 2
                     self.atoms[-1].text += consonants[:split]
                     self.atoms.append(Atom(consonants[split:] + c))
                 else:
@@ -354,13 +354,13 @@ class LatinMolecule(Molecule):
 class EnglishMolecule(LatinMolecule):
     SPACE = " "
     VOWELS_END = "aiouy"
-    CONSONANTS_END = u"bcdfghjklmnñpqrstvwxz0123456789'"
+    CONSONANTS_END = "bcdfghjklmnñpqrstvwxz0123456789'"
 
 class MultiString(OrderedDict):
     def __getitem__(self, key=None):
         if key is None:
             return self.get(None, "")
-        elif isinstance(key, basestring):
+        elif isinstance(key, str):
             return self[[key]]
         elif isinstance(key, list) or isinstance(key, tuple):
             for k in key:
@@ -395,7 +395,7 @@ class Compound(OrderedDict):
 
     @property
     def steps(self):
-        return self[self.keys()[0]].steps
+        return self[list(self.keys())[0]].steps
 
     @property
     def end(self):
@@ -403,8 +403,8 @@ class Compound(OrderedDict):
 
     def get_atom_time(self, steps, length):
         if self.timing is not None and self.song_timing is not None:
-            start = self.start + sum(self.timing[i] for i in xrange(steps))
-            end = start + sum(self.timing[i] for i in xrange(steps, steps + length))
+            start = self.start + sum(self.timing[i] for i in range(steps))
+            end = start + sum(self.timing[i] for i in range(steps, steps + length))
             start = self.song_timing.beat2time(start)
             end = self.song_timing.beat2time(end)
         else:
@@ -452,7 +452,7 @@ class MixedFraction(fractions.Fraction):
     def __new__(cls, a, b=None):
         if b is not None:
             return super(MixedFraction, cls).__new__(cls, a, b)
-        if isinstance(a, basestring):
+        if isinstance(a, str):
             match = re.match(r"(-?\d+)\+(\d+)/(\d+)", a)
             if match:
                 whole, num, den = (int(match.group(i)) for i in (1, 2, 3))
@@ -736,10 +736,10 @@ class Song(object):
         for s in (lines + [""]):
             lineno += 1
             if not s and compound:
-                first = compound[compound.keys()[0]]
+                first = compound[list(compound.keys())[0]]
                 for key,val in compound.items():
                     if first.steps != val.steps:
-                        raise ParseError("%d: Duration mismatch: %d!=%d (%s) (%s)" % (lineno, first.steps, val.steps, unicode(first), unicode(val)))
+                        raise ParseError("%d: Duration mismatch: %d!=%d (%s) (%s)" % (lineno, first.steps, val.steps, str(first), str(val)))
                 if compound.timing is not None:
                     if compound.steps != len(compound.timing):
                         raise ParseError("%d: Timing line length mismatch: %d!=%d" % (lineno, len(compound.timing), compound.steps))
@@ -764,11 +764,11 @@ class Song(object):
             if tag == "@":
                 if self.ignore_steps:
                     continue
-                timing = map(parse_time, text.split())
+                timing = list(map(parse_time, text.split()))
                 compound.start = timing[0]
                 compound.timing = timing[1:]
                 if compound:
-                    first = compound[compound.keys()[0]]
+                    first = compound[list(compound.keys())[0]]
                     if first.steps != len(compound.timing):
                         raise ParseError("%d: Timing line length mismatch: %d!=%d" % (lineno, len(compound.timing), compound.steps))
                 continue
@@ -785,9 +785,9 @@ class Song(object):
             for tag, value in self.meta.items():
                 for lang, text in value.items():
                     if lang is None:
-                        s += u"%s=%s\n" % (tag, text)
+                        s += "%s=%s\n" % (tag, text)
                     else:
-                        s += u"%s[%s]=%s\n" % (tag, lang, text)
+                        s += "%s[%s]=%s\n" % (tag, lang, text)
             s += "\n"
         if self.song is not None:
             s += "[Song]\n"
@@ -816,15 +816,15 @@ class Song(object):
             for name, variant in self.variants.items():
                 s += "{%s}\n" % name
                 for key, value in variant.data.items():
-                    s += u"%s=%s\n" % (key, value)
+                    s += "%s=%s\n" % (key, value)
                 s += "\n"
         if self.compounds is not None:
             s += "[Lyrics]\n\n"
             for compound in self.compounds:
                 for tag, molecule in compound.items():
-                    s += u"%s: %s\n" % (tag, molecule.source)
+                    s += "%s: %s\n" % (tag, molecule.source)
                 if compound.timing is not None:
-                    s += u"@: %s  %s\n" % (str(compound.start), ' '.join(map(str,compound.timing)))
+                    s += "@: %s  %s\n" % (str(compound.start), ' '.join(map(str,compound.timing)))
                 s += "\n"
                 if any(i.break_before or i.break_after for i in compound.values()):
                     s += "\n"
@@ -872,11 +872,11 @@ class Song(object):
                 if tag not in tags:
                     continue
                 if molecule.break_before and not broke:
-                    lyrics += u"/" + molecule.SPACE
+                    lyrics += "/" + molecule.SPACE
                 broke = False
                 lyrics += molecule.text + molecule.SPACE
                 if molecule.break_after:
-                    lyrics += u"/" + molecule.SPACE
+                    lyrics += "/" + molecule.SPACE
                     broke = True
 
         return lyrics

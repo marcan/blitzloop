@@ -31,16 +31,16 @@ songs_dir = sys.argv[1]
 width = int(sys.argv[2])
 height = int(sys.argv[3])
 
-print "Loading song DB..."
+print("Loading song DB...")
 song_database = songlist.SongDatabase(sys.argv[1])
-print "Done."
+print("Done.")
 
 display = graphics.Display(width, height, fullscreen)
 renderer = layout.Renderer(display)
 mpv = mpvplayer.Player(display)
 
 audio = AudioEngine()
-print "Engine sample rate: %dHz" % audio.sample_rate
+print("Engine sample rate: %dHz" % audio.sample_rate)
 
 queue = songlist.SongQueue()
 
@@ -70,7 +70,7 @@ idle_screen = idlescreen.IdleScreen(display)
 
 def main_render():
     # Wait for element in queue
-    print "Waiting for song to appear in queue..."
+    print("Waiting for song to appear in queue...")
     qe = None
     with queue.lock:
         if len(queue) != 0:
@@ -88,15 +88,15 @@ def main_render():
     yield None
     yield None
 
-    print "Loading audio/video..."
+    print("Loading audio/video...")
     mpv.load_song(qe.song)
     display.set_aspect(mpv.aspect)
 
-    print "Laying out song..."
+    print("Laying out song...")
     renderer.reset()
-    variant_key = qe.song.variants.keys()[qe.variant]
+    variant_key = list(qe.song.variants.keys())[qe.variant]
     song_layout = layout.SongLayout(qe.song, variant_key, renderer)
-    print "Loaded."
+    print("Loaded.")
 
     def update_params():
         mpv.set_speed(1.0 / (2**(qe.speed / 12.0)))
@@ -141,7 +141,7 @@ def main_render():
 
     yield None
     yield None
-    print "Song complete."
+    print("Song complete.")
     try:
         queue.pop(qe.qid)
     except (IndexError, KeyError):

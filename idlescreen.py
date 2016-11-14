@@ -61,7 +61,7 @@ class ImageTexture(object):
 
     @property
     def aspect(self):
-        return self.width / float(self.height)
+        return self.width / self.height
 
     def __del__(self):
         gl.glDeleteTextures(self.texid)
@@ -77,13 +77,13 @@ class ImageTexture(object):
         gl.glEnable(gl.GL_TEXTURE_2D)
         gl.glBegin(gl.GL_TRIANGLE_STRIP)
         gl.glColor4f(brightness, brightness, brightness,1)
-        gl.glTexCoord2f(0, self.height / float(self.th))
+        gl.glTexCoord2f(0, self.height / self.th)
         gl.glVertex2f(x, y)
-        gl.glTexCoord2f(self.width / float(self.tw), self.height / float(self.th))
+        gl.glTexCoord2f(self.width / self.tw, self.height / self.th)
         gl.glVertex2f(x+width, y)
         gl.glTexCoord2f(0, 0)
         gl.glVertex2f(x, y+height)
-        gl.glTexCoord2f(self.width / float(self.tw), 0)
+        gl.glTexCoord2f(self.width / self.tw, 0)
         gl.glVertex2f(x+width, y+height)
         gl.glEnd()
         gl.glDisable(gl.GL_TEXTURE_2D)
@@ -109,7 +109,7 @@ class IdleScreen(object):
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         t = time.time() - self.st
         self.display.set_aspect(4.0/3.0)
         if self.closing:

@@ -31,7 +31,7 @@ class SongDatabase(object):
                 if not name.endswith(".txt"):
                     continue
                 path = os.path.join(dirpath, name)
-                print path
+                print(path)
                 song = Song(path)
                 song.id = len(self.songs)
                 self.songs.append(song)

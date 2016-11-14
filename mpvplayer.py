@@ -199,10 +199,10 @@ class Player(object):
                 self.poll_props[ev.data.name] = ev.data.data
                 repoll.add(ev.data.name)
             elif ev.id == mpv.Events.end_file:
-                print "event: %s" % ev.name
+                print("event: %s" % ev.name)
                 self.eof = True
             else:
-                print "event: %s" % ev.name
+                print("event: %s" % ev.name)
                 evs.append(ev)
         for i in repoll:
             self.mpv.get_property_async(i)
@@ -241,7 +241,8 @@ class Player(object):
             return self.mpv.get_property("audio-pts")
 
     def eof_reached(self):
-        return self.eof or self.get_song_time() > self.duration
+        t = self.get_song_time() or 0
+        return self.eof or t > self.duration
 
     def stop(self):
         self.mpv.command('stop')

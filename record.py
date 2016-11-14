@@ -32,7 +32,7 @@ headstart = 0.3
 display = graphics.Display(width,height,False)
 
 renderer = layout.Renderer(display)
-layout = layout.SongLayout(s, s.variants.keys()[variant], renderer)
+layout = layout.SongLayout(s, list(s.variants.keys())[variant], renderer)
 
 mpv = mpvplayer.Player(None)
 mpv.load_song(s)
@@ -70,7 +70,7 @@ def render():
             gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
             gl.glMatrixMode(gl.GL_PROJECTION)
             gl.glLoadIdentity()
-            gl.glOrtho(0, 1, height / float(width), 0, -1, 1)
+            gl.glOrtho(0, 1, height / width, 0, -1, 1)
             gl.glMatrixMode(gl.GL_MODELVIEW)
             gl.glLoadIdentity()
             if v:
@@ -79,7 +79,7 @@ def render():
             gl.glFinish()
             gl.glReadBuffer(gl.GL_BACK)
             data = gl.glReadPixelsub(0, 0, width, height, gl.GL_RGB)
-            print "\r%.02f%%" % (100 * song_time / length),
+            print("\r%.02f%%" % (100 * song_time / length), end=' ')
             sys.stdout.flush()
             x264.stdin.write(data)
             song_time += 1/fps

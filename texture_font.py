@@ -137,9 +137,9 @@ class TextureAtlas(object):
             A newly allocated region as (x,y,width,height) or None
         '''
 
-        best_height = sys.maxint
+        best_height = sys.maxsize
         best_index = None
-        best_width = sys.maxint
+        best_width = sys.maxsize
         region = 0, 0, width, height
 
         for i in range(len(self.nodes)):
@@ -262,12 +262,12 @@ class OutlinedGlyph(object):
 
         stack = np.dstack((fill, border, outline))
         self.data = np.clip(stack * 255.0, 0, 255).astype(np.uint8)
-        self.top = top / float(self.font.hres)
-        self.left = left / float(self.font.hres)
+        self.top = top / self.font.hres
+        self.left = left / self.font.hres
         self.pwidth = width
         self.pheight = height
-        self.width = width / float(self.font.hres)
-        self.height = height / float(self.font.hres)
+        self.width = width / self.font.hres
+        self.height = height / self.font.hres
         self.bot = self.top - self.height
         self.right = self.left + self.width
         self.dy = self.font.ft2screen(self.face.glyph.advance.y)
@@ -303,7 +303,7 @@ class OutlinedGlyph(object):
             corners.append((glyph.top, glyph.left,
                 glyph.top - glyph.bitmap.rows,
                 glyph.left + glyph.bitmap.width))
-        corners = zip(*corners)
+        corners = list(zip(*corners))
         top, left, bot, right = max(corners[0]), min(corners[1]), min(corners[2]), max(corners[3])
 
         width = right - left
@@ -331,7 +331,7 @@ class TextureFont(object):
         self.glyphs = {}
         self.glyphclass = glyphclass
         self.face = ft.Face(self.filename)
-        self.face.set_char_size(int(self.size*64), hres=self.hres/4, vres=self.hres/4)
+        self.face.set_char_size(int(self.size * 64), hres=int(self.hres / 4), vres=int(self.hres / 4))
         self._dirty = True
         metrics = self.face.size
         self.ascender = self.ft2screen(metrics.ascender)

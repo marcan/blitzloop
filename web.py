@@ -3,7 +3,7 @@ import sys, os, json, time, threading, random
 import bottle
 from bottle import route, static_file, request, response, hook, HTTPError
 from PIL import Image
-import StringIO
+import io
 
 import songlist
 
@@ -123,12 +123,12 @@ def get_songcover(id, size):
         response.content_type = "image/png"
         if request.method != 'HEAD':
             im = Image.open(song.coverfile).resize((size, size), Image.ANTIALIAS)
-            fd = StringIO.StringIO()
+            fd = io.BytesIO()
             im.save(fd, "PNG")
             fd.seek(0)
             return fd
         else:
-            fd = StringIO.StringIO("TEST")
+            fd = io.BytesIO("TEST")
             return fd  # FIXME: this sets content-length: 0 and I don't know how to avoid that
 
 @route("/queue")
@@ -209,7 +209,7 @@ def now_seek():
         qe.commands.append(("seek", float(request.json["offset"])))
     if "position" in request.json:
         qe.commands.append(("seekto", float(request.json["position"])))
-    return ""
+    return "OK" # bug in paste for python3 with empty replies, give it something
 
 @route("/settings")
 def settings_get():

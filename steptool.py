@@ -27,7 +27,7 @@ pos = float(sys.argv[4]) if len(sys.argv) >= 5 else 0.0
 
 display = graphics.Display(1280,720)
 renderer = layout.Renderer(display)
-layout = layout.SongLayout(s, s.variants.keys()[-1], renderer)
+layout = layout.SongLayout(s, list(s.variants.keys())[-1], renderer)
 
 step = 0
 
@@ -61,7 +61,7 @@ def key(k):
             time = song.MixedFraction(round_beat(beat - cur_beat), quant)
             cur_beat += time
             compound.timing.append(time)
-            print time,
+            print(time, end=' ')
             sys.stdout.flush()
             if len(compound.timing) < (compound.steps-1):
                 step += 1
@@ -71,19 +71,19 @@ def key(k):
             else:
                 step += 0.5
                 compound = None
-                print
+                print()
         if compound is None:
             start = song.MixedFraction(round_beat(beat), quant)
             cur_beat = start
             try:
-                compound = compounds.next()
+                compound = next(compounds)
             except StopIteration:
                 d = s.dump()
                 s.save(sys.argv[1] + ".new")
                 return
             compound.start = start
             compound.timing = []
-            print start, " ",
+            print(start, " ", end=' ')
             sys.stdout.flush()
             if compound.steps == 1:
                 step += 0.5
@@ -95,7 +95,7 @@ def key(k):
             compound.timing.append(time)
             step += 0.5
             compound = None
-            print time
+            print(time)
     if k == '\033':
         mpv.shutdown()
         os._exit(0)
