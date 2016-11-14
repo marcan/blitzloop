@@ -4,7 +4,7 @@ use and your operating system's packet manager for libraries. If you want to do
 things your own way, here's a nonexhaustive list of dependencies:
 
 * Core:
-   * Python 2.6 or 2.7
+   * Python 3
    * Cython
 * Libs and headers (for _audio.pyx):
    * JACK
@@ -29,18 +29,18 @@ things your own way, here's a nonexhaustive list of dependencies:
 ### Install the dependencies
 On Debian, this should set you up:
 ```shell
-sudo apt-get install libjack-jackd2-dev librubberband-dev libffms2-dev libfreetype6-dev libass-dev libgl1-mesa-dev libavfilter-dev
+sudo apt-get install libjack-jackd2-dev librubberband-dev libffms2-dev libfreetype6-dev libass-dev libgl1-mesa-dev libavfilter-dev python3-dev
 ```
 
 Under OSX, you need homebrew's python in addition to the libraries:
 ```shell
-brew install python jack jpeg ffms2 rubberband libass freetype
+brew install python3 jack jpeg ffms2 rubberband libass freetype
 ```
 
 ### Set up python environment
 ```shell
 BL_VENV=blitzloop-prod
-mkvirtualenv ${BL_VENV}
+mkvirtualenv --python=$(which python3) ${BL_VENV}
 pip install cython
 ```
 
@@ -58,42 +58,40 @@ Under OSX, run:
 brew install mpv --with-rubberband --with-jack
 ```
 
-If your package manager doesn't have a version which is recent enough, install
-mpv from source:
+On Linux, If your package manager doesn't have a version which is recent enough,
+install mpv from source to `/usr/local`:
 ```shell
-cd ${BL_HOME}
-mkdir mpv-dist
 git clone https://github.com/mpv-player/mpv
 cd mpv
 ./bootstrap.py
-./waf --enable-libmpv-shared --prefix=${BL_HOME}/mpv-dist configure
+./waf --enable-libmpv-shared configure
 ./waf build
 ./waf install
 ```
 
 ### Get pympv.
 ```shell
-pip install 'git+git://github.com/yacoob/pympv.git@HEAD' ${PIP_FLAGS}
+pip install 'git+git://github.com/marcan/pympv.git@HEAD' ${PIP_FLAGS}
 ```
 
 ### Install Blitzloop itself
 ```shell
-pip install 'git+git://github.com/marcan/blitzloop.git@libmpv' ${PIP_FLAGS}
+pip install 'git+git://github.com/marcan/blitzloop.git@py3k' ${PIP_FLAGS}
 ```
+
+Note: Non-empty `PIP_FLAGS` disables usage of wheels in pip, and makes the whole
+process slower. You might save time running this command twice, once without
+`PIP_FLAGS` to install all dependencies from wheels, and once with `PIP_FLAGS`
+to finish the installation - it's only blitzloop itself that needs these flags.
 
 ### Add songs.
-```shell
-cd ${BL_HOME}
-ln -s /your/song/directory songs
-```
+Stories tell about ancient caches of existing blitzloop songs. Find one, or make
+your own songs.
 
-# Sing!
-TODO: fix this, as it's currently broken
+### Sing!
 ```shell
-pyenv activate ${BL_VENV}
-cd ${BL_HOME}/app
-export PYTHONPATH=$(echo `pwd`/build/lib.*)
-LD_LIBRARY_PATH=../mpv-dist/lib python ./main.py -fs ../songs 1024 768
+workon ${BL_VENV}
+blitzloop -fs ${path_to_your_songs} 1024 768
 ```
 
 Visit port `10111` on your computer in a web browser, and sing!
