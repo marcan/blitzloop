@@ -16,11 +16,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-import time, math
-import util
 import OpenGL.GL as gl
 import OpenGL.GLU as glu
 import PIL
+import math
+import time
+
+from blitzloop import util
+
 
 class ImageTexture(object):
     def __init__(self, img_file, background=(0,0,0)):

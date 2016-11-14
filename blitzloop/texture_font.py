@@ -16,11 +16,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-import sys
-import math
-import numpy as np
 import OpenGL.GL as gl
 import freetype as ft
+import math
+import numpy as np
+import sys
 
 
 #  TextureAtlas is based on examples/texture_font.py from freetype-py

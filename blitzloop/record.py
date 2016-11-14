@@ -15,10 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-import sys, os
-import song, graphics, layout, ffmsvideo, mpvplayer
+
 import OpenGL.GL as gl
+import os
 import subprocess
+import sys
+
+from blitzloop import ffmsvideo, graphics, layout, mpvplayer, song
+
 
 s = song.Song(sys.argv[1])
 output = sys.argv[2]

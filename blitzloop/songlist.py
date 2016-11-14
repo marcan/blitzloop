@@ -16,9 +16,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+import os
 import threading
-import os, os.path
-from song import Song
+
+from blitzloop.song import Song
+
 
 class SongDatabase(object):
     def __init__(self, root):

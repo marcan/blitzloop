@@ -18,7 +18,8 @@
 
 import sys
 
-import song, mpvplayer
+from blitzloop import mpvplayer, song
+
 
 s = song.Song(sys.argv[1], ignore_steps=True)
 

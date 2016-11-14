@@ -16,9 +16,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-import sys, os
-import song, graphics, layout, mpvplayer
 import OpenGL.GL as gl
+import os
+import sys
+
+from blitzloop import graphics, layout, mpvplayer, song
+
 
 s = song.Song(sys.argv[1], ignore_steps=True)
 quant = int(sys.argv[2])

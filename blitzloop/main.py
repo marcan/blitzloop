@@ -16,11 +16,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-from _audio import *
+import os
+import sys
 
-import web
-import sys, os
-import graphics, layout, mpvplayer, songlist, idlescreen
+from _audio import *
+from blitzloop import graphics, idlescreen, layout, mpvplayer, songlist, web
+
 
 fullscreen = False
 if sys.argv[1] == "-fs":

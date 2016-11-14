@@ -16,10 +16,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-import time, sys, os
-import song, graphics, layout, mpvplayer
 import OpenGL.GL as gl
 import OpenGL.GLUT as glut
+import os
+import sys
+import time
+
+from blitzloop import graphics, layout, mpvplayer, song
+
 
 fullscreen = False
 if sys.argv[1] == "-fs":

@@ -1,12 +1,18 @@
 #!/usr/bin/python
-import sys, os, json, time, threading, random
-import bottle
-from bottle import route, static_file, request, response, hook, HTTPError
-from PIL import Image
-import io
 
-import songlist
-import util
+from PIL import Image
+from bottle import route, static_file, request, response, hook, HTTPError
+import bottle
+import io
+import json
+import os
+import random
+import sys
+import threading
+import time
+
+from blitzloop import songlist, util
+
 
 LANGUAGES = ("en-gb", "es-es", "ja-jp", "de-de", "es-eu", "fr-fr")
 

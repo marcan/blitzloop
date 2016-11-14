@@ -16,13 +16,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-import song
-import texture_font
-import numpy as np
+from OpenGL.arrays import vbo
 import OpenGL.GL as gl
 import OpenGL.GL.shaders as shaders
-from OpenGL.arrays import vbo
-from util import map_from, map_to
+import numpy as np
+
+from blitzloop import song, texture_font
+from blitzloop.util import map_from, map_to
+
 
 vs_karaoke = """
 #version 110

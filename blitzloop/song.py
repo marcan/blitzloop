@@ -16,14 +16,16 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-import sys
-import os.path
-import codecs
-import re
-import fractions
-import decimal
-import util
 from collections import OrderedDict
+import codecs
+import decimal
+import fractions
+import os.path
+import re
+import sys
+
+from blitzloop import util
+
 
 class ParseError(Exception):
     def __str__(self):
