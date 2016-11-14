@@ -1,15 +1,52 @@
 #!/usr/bin/env python
-from distutils.core import setup
-from distutils.extension import Extension
-from Cython.Distutils import build_ext
+import os
+
+from setuptools import setup, find_packages
+from setuptools.extension import Extension
+
+try:
+    from Cython.Build import cythonize
+    USE_CYTHON = True
+except ImportError:
+    USE_CYTHON = False
+
+ext = 'pyx' if USE_CYTHON else 'c'
+extensions=[
+    Extension('_audio', ['blitzloop/_audio.%s' % ext], libraries=['jack']),
+]
+if USE_CYTHON:
+    extensions=cythonize(extensions)
+
+# res_files = []
+# for dirpath, dirname, files in os.walk('blitzloop/res'):
+#     for fn in files:
+#         res_files.append(os.path.join(dirpath, fn))
+# print res_files
 
 setup(
-    ext_modules=[
-        Extension("_audio",
-            ["_audio.pyx"],
-            language="c",
-            libraries=["jack"]
-            )
-    ],
-    cmdclass={"build_ext": build_ext}
+        name='blitzloop',
+        version='0.1',
+        packages=find_packages(),
+        ext_modules=extensions,
+        entry_points={
+            'console_scripts': [
+                'blitzloop = blitzloop.main',
+            ]
+        },
+        setup_requires=[
+            '3to2',
+        ],
+        install_requires=[
+            '3to2',
+            'Pillow',
+            'bottle',
+            'ffms',
+            'freetype-py',
+            'numpy',
+            'paste',
+            'pympv',
+            'pyopengl',
+        ],
+        include_package_data=True,
+        zip_safe=False,
 )

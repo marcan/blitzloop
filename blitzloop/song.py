@@ -22,6 +22,7 @@ import codecs
 import re
 import fractions
 import decimal
+import util
 from collections import OrderedDict
 
 class ParseError(Exception):
@@ -885,7 +886,7 @@ class Song(object):
         song_font = os.path.join(self.pathbase, font)
         if os.path.exists(song_font):
             return song_font
-        cwd_font = font
-        if os.path.exists(cwd_font):
-            return cwd_font
+        resfont = util.get_resfont_path(font)
+        if os.path.exists(resfont):
+            return resfont
         raise IOError("Font %s not found" % font)
