@@ -32,6 +32,7 @@ setup(
         entry_points={
             'console_scripts': [
                 'blitzloop = blitzloop.main',
+                'blitzloop-single = blitzloop.play',
             ]
         },
         setup_requires=[
