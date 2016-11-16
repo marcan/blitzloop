@@ -26,7 +26,7 @@ from blitzloop._audio import *
 parser = argparse.ArgumentParser()
 parser.add_argument('-fs', dest='fs', action='store_true',
         help='run blitzloop fullscreen')
-parser.add_argument('songdir', nargs='?')
+parser.add_argument('songdir', nargs='?', help='directory with songs')
 args = parser.parse_args()
 
 fullscreen = args.fs or util.get_cfg().getboolean('fullscreen')
