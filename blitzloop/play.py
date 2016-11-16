@@ -18,23 +18,26 @@
 
 import OpenGL.GL as gl
 import OpenGL.GLUT as glut
+import argparse
 import os
-import sys
 import time
 
 from blitzloop import graphics, layout, mpvplayer, song
+from blitzloop._audio import *
 
 
-fullscreen = False
-if sys.argv[1] == "-fs":
-    sys.argv = sys.argv[1:]
-    fullscreen = True
+parser = argparse.ArgumentParser()
+parser.add_argument('-fs', dest='fs', action='store_true',
+        help='run blitzloop-play fullscreen')
+parser.add_argument('songpath', help='path to the song file')
+parser.add_argument('offset', nargs='?', default=0, help='song offset')
+parser.add_argument('variant', nargs='?', default=0, help='song variant')
+args = parser.parse_args()
 
-s = song.Song(sys.argv[1])
-
-offset = float(sys.argv[2]) if len(sys.argv) >= 3 else 0
-variant = int(sys.argv[3]) if len(sys.argv) >= 4 else 0
-
+fullscreen = args.fs
+s = song.Song(args.songpath)
+offset = float(args.offset)
+variant = int(args.variant)
 headstart = 0.3
 
 if fullscreen:
@@ -42,6 +45,9 @@ if fullscreen:
 else:
     display = graphics.Display(1280, 720, fullscreen, None)
 print(display.width, display.height)
+
+audio = AudioEngine()
+print("Engine sample rate: %dHz" % audio.sample_rate)
 
 mpv = mpvplayer.Player(display)
 mpv.load_song(s)
