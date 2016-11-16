@@ -16,20 +16,39 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+import configparser
 import os
 import sys
 
 
-# TODO: consider using pkgutil.get_data here?
 RESDIR = os.path.join(os.path.dirname(sys.modules[__name__].__file__), 'res')
-CFG = {
+RESDIRS = {
         'fontdir': os.path.join(RESDIR, 'fonts'),
         'gfxdir': os.path.join(RESDIR, 'gfx'),
         'webdir': os.path.join(RESDIR, 'web'),
 }
+CONFIG = configparser.ConfigParser(
+        interpolation=None,
+        defaults={
+            'songdir': os.path.expanduser('~/.blitzloop/songs'),
+            'port': '10111',
+            'fullscreen': 'False',
+            'width': '1024',
+            'height': '768',
+})
+try:
+    CONFIG.read_file(open(os.path.expanduser('~/.blitzloop/cfg')))
+except FileNotFoundError:
+    CONFIG['blitzloop'] = {}
+
+def get_cfg():
+    return CONFIG['blitzloop']
+
+def get_cfg_bool(k):
+    return C
 
 def get_res_path(t, fp):
-    return os.path.join(CFG[t], fp)
+    return os.path.join(RESDIRS[t], fp)
 
 def get_resfont_path(fp):
     return get_res_path('fontdir', fp)

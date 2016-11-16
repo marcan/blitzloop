@@ -258,4 +258,6 @@ class ServerThread(threading.Thread):
 
 if __name__ == "__main__":
     database = songlist.SongDatabase(sys.argv[1])
-    bottle.run(reloader=True, host="0.0.0.0", port=10111, server="paste")
+    bottle.run(
+            reloader=True, host="0.0.0.0", port=util.get_cfg().getint('port'),
+            server="paste")
