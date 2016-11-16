@@ -3,4 +3,5 @@
 *.pyo
 *~
 .eggs
+blitzloop/_audio*so
 build
