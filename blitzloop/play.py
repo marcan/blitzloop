@@ -20,6 +20,7 @@ import OpenGL.GL as gl
 import OpenGL.GLUT as glut
 import argparse
 import os
+import sys
 import time
 
 from blitzloop import graphics, layout, mpvplayer, song
@@ -29,6 +30,8 @@ from blitzloop._audio import *
 parser = argparse.ArgumentParser()
 parser.add_argument('-fs', dest='fs', action='store_true',
         help='run blitzloop-play fullscreen')
+parser.add_argument('-st', dest='show_timings', action='store_true',
+        help='show mpv timings')
 parser.add_argument('songpath', help='path to the song file')
 parser.add_argument('offset', nargs='?', default=0, help='song offset')
 parser.add_argument('variant', nargs='?', default=0, help='song variant')
@@ -82,7 +85,9 @@ def render():
         renderer.draw(song_time + headstart * 2**(speed_i/12.0), layout)
         yield None
         t2 = time.time()
-        print("T:%7.3f/%7.3f B:%7.3f FPS:%.2f draw:%.3f" % (song_time, mpv.duration, s.timing.time2beat(song_time), (1.0/(t2-t)), dt))
+        if args.show_timings:
+            print("T:%7.3f/%7.3f B:%7.3f FPS:%.2f draw:%.3f" % (song_time,
+                mpv.duration, s.timing.time2beat(song_time), (1.0/(t2-t)), dt))
         t = t2
         mpv.flip()
     mpv.shutdown()
@@ -91,15 +96,17 @@ def render():
 pause = False
 
 def key(k):
+    if type(k) is bytes:
+        k = int.from_bytes(k, sys.byteorder)
     global speed_i, pitch_i, vocals_i, pause
-    if k == '\033':
+    if k == 27:
         mpv.shutdown()
         os._exit(0)
-    if k == '[' and speed_i > -12:
+    if k == ord('[') and speed_i > -12:
         speed_i -= 1
         print("Speed: %d" % speed_i)
         mpv.set_speed(2**(-speed_i/12.0))
-    elif k == ']' and speed_i < 12:
+    elif k == ord(']') and speed_i < 12:
         speed_i += 1
         print("Speed: %d" % speed_i)
         mpv.set_speed(2**(-speed_i/12.0))
@@ -111,11 +118,11 @@ def key(k):
         pitch_i -= 1
         print("Pitch: %d" % pitch_i)
         mpv.set_pitch(2**(pitch_i/12.0))
-    elif k == '+' and vocals_i < 30:
+    elif k == ord('+') and vocals_i < 30:
         vocals_i += 1
         print("Vocals: %d" % vocals_i)
         mpv.set_channel(0, vocals_i/10.0)
-    elif k == '-' and vocals_i > 0:
+    elif k == ord('-') and vocals_i > 0:
         vocals_i -= 1
         print("Vocals: %d" % vocals_i)
         mpv.set_channel(0, vocals_i/10.0)
@@ -123,7 +130,7 @@ def key(k):
         mpv.seek(-10)
     elif k == glut.GLUT_KEY_RIGHT:
         mpv.seek(10)
-    elif k == ' ':
+    elif k == ord(' '):
         pause = not pause
         t = time.time()
         mpv.set_pause(pause)
