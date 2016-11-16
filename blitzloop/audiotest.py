@@ -19,7 +19,7 @@
 import sys
 import time
 
-from _audio import *
+from blitzloop._audio import *
 
 
 a = AudioEngine()

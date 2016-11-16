@@ -19,8 +19,8 @@
 import os
 import sys
 
-from _audio import *
 from blitzloop import graphics, idlescreen, layout, mpvplayer, songlist, web
+from blitzloop._audio import *
 
 
 fullscreen = False

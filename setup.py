@@ -12,7 +12,8 @@ except ImportError:
 
 ext = 'pyx' if USE_CYTHON else 'c'
 extensions=[
-    Extension('_audio', ['blitzloop/_audio.%s' % ext], libraries=['jack']),
+    Extension('blitzloop._audio',
+        ['blitzloop/_audio.%s' % ext], libraries=['jack']),
 ]
 if USE_CYTHON:
     extensions=cythonize(extensions)
