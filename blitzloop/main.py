@@ -16,24 +16,26 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+import argparse
 import os
-import sys
 
-from blitzloop import graphics, idlescreen, layout, mpvplayer, songlist, web
+from blitzloop import graphics, idlescreen, layout, mpvplayer, songlist, util, web
 from blitzloop._audio import *
 
 
-fullscreen = False
-if sys.argv[1] == "-fs":
-    sys.argv = sys.argv[1:]
-    fullscreen = True
+parser = argparse.ArgumentParser()
+parser.add_argument('-fs', dest='fs', action='store_true',
+        help='run blitzloop fullscreen')
+parser.add_argument('songdir', nargs='?', help='directory with songs')
+args = parser.parse_args()
 
-songs_dir = sys.argv[1]
-width = int(sys.argv[2])
-height = int(sys.argv[3])
+fullscreen = args.fs or util.get_cfg().getboolean('fullscreen')
+songs_dir = os.path.expanduser(args.songdir or util.get_cfg().get('songdir'))
+width = util.get_cfg().getint('width')
+height = util.get_cfg().getint('height')
 
 print("Loading song DB...")
-song_database = songlist.SongDatabase(sys.argv[1])
+song_database = songlist.SongDatabase(songs_dir)
 print("Done.")
 
 display = graphics.Display(width, height, fullscreen)
@@ -64,7 +66,8 @@ audio_config = AudioConfig()
 web.database = song_database
 web.queue = queue
 web.audio_config = audio_config
-server = web.ServerThread(host="0.0.0.0", port=10111, server="paste")
+server = web.ServerThread(host="0.0.0.0", port=util.get_cfg().getint('port'),
+        server="paste")
 server.start()
 
 idle_screen = idlescreen.IdleScreen(display)
@@ -156,7 +159,7 @@ def main():
             yield i
 
 def key(k):
-    if k == '\033':
+    if k == b'\x1b':
         mpv.shutdown()
         audio.shutdown()
         os._exit(0)

@@ -26,12 +26,13 @@ if USE_CYTHON:
 
 setup(
         name='blitzloop',
-        version='0.1',
+        version='0.1.1',
         packages=find_packages(),
         ext_modules=extensions,
         entry_points={
             'console_scripts': [
                 'blitzloop = blitzloop.main',
+                'blitzloop-single = blitzloop.play',
             ]
         },
         setup_requires=[
