@@ -91,14 +91,14 @@ pause = False
 
 def key(k):
     global speed_i, pitch_i, vocals_i, pause
-    if k == '\033':
+    if k == b'\x1b':
         mpv.shutdown()
         os._exit(0)
-    if k == '[' and speed_i > -12:
+    if k == b'[' and speed_i > -12:
         speed_i -= 1
         print("Speed: %d" % speed_i)
         mpv.set_speed(2**(-speed_i/12.0))
-    elif k == ']' and speed_i < 12:
+    elif k == b']' and speed_i < 12:
         speed_i += 1
         print("Speed: %d" % speed_i)
         mpv.set_speed(2**(-speed_i/12.0))
@@ -110,11 +110,11 @@ def key(k):
         pitch_i -= 1
         print("Pitch: %d" % pitch_i)
         mpv.set_pitch(2**(pitch_i/12.0))
-    elif k == '+' and vocals_i < 30:
+    elif k == b'+' and vocals_i < 30:
         vocals_i += 1
         print("Vocals: %d" % vocals_i)
         mpv.set_channel(0, vocals_i/10.0)
-    elif k == '-' and vocals_i > 0:
+    elif k == b'-' and vocals_i > 0:
         vocals_i -= 1
         print("Vocals: %d" % vocals_i)
         mpv.set_channel(0, vocals_i/10.0)
@@ -122,7 +122,7 @@ def key(k):
         mpv.seek(-10)
     elif k == glut.GLUT_KEY_RIGHT:
         mpv.seek(10)
-    elif k == ' ':
+    elif k == b' ':
         pause = not pause
         t = time.time()
         mpv.set_pause(pause)
