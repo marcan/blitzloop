@@ -18,15 +18,30 @@
 
 import os
 import sys
+import configargparse
 
 
-# TODO: consider using pkgutil.get_data here?
 RESDIR = os.path.join(os.path.dirname(sys.modules[__name__].__file__), 'res')
 CFG = {
         'fontdir': os.path.join(RESDIR, 'fonts'),
         'gfxdir': os.path.join(RESDIR, 'gfx'),
         'webdir': os.path.join(RESDIR, 'web'),
 }
+
+def init_argparser():
+    configargparse.init_argument_parser(
+            default_config_files=['/etc/blitzloop/cfg', '~/.blitzloop/cfg'])
+    parser = configargparse.get_argument_parser()
+    parser.add_argument(
+        '--fullscreen', default=False, action='store_true',
+        help='run blitzloop fullscreen')
+
+def get_argparser():
+    return configargparse.get_argument_parser()
+
+def get_opts():
+    opts, unknown = get_argparser().parse_known_args()
+    return opts
 
 def get_res_path(t, fp):
     return os.path.join(CFG[t], fp)
@@ -45,3 +60,6 @@ def map_from(x, min, max):
 
 def map_to(x, min, max):
     return min + x * (max - min)
+
+
+init_argparser()
