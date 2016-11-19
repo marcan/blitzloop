@@ -25,6 +25,9 @@ from blitzloop import graphics, layout, mpvplayer, song, util
 
 
 parser = util.get_argparser()
+parser.add_argument(
+    '--show-timings', dest='st', action='store_true',
+    help='show mpv timings')
 parser.add_argument('songpath', help='path to the song file')
 parser.add_argument('offset', nargs='?', default=0, help='song offset')
 parser.add_argument('variant', nargs='?', default=0, help='song variant')
@@ -77,7 +80,8 @@ def render():
         renderer.draw(song_time + headstart * 2**(speed_i/12.0), layout)
         yield None
         t2 = time.time()
-        print("T:%7.3f/%7.3f B:%7.3f FPS:%.2f draw:%.3f" % (song_time, mpv.duration, s.timing.time2beat(song_time), (1.0/(t2-t)), dt))
+        if opts.st:
+            print("T:%7.3f/%7.3f B:%7.3f FPS:%.2f draw:%.3f" % (song_time, mpv.duration, s.timing.time2beat(song_time), (1.0/(t2-t)), dt))
         t = t2
         mpv.flip()
     mpv.shutdown()
