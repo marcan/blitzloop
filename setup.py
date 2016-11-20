@@ -39,6 +39,7 @@ setup(
         ],
         install_requires=[
             '3to2',
+            'ConfigArgParse',
             'Pillow',
             'bottle',
             'ffms',

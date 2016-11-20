@@ -19,21 +19,22 @@
 import OpenGL.GL as gl
 import OpenGL.GLUT as glut
 import os
-import sys
 import time
 
-from blitzloop import graphics, layout, mpvplayer, song
+from blitzloop import graphics, layout, mpvplayer, song, util
 
 
-fullscreen = False
-if sys.argv[1] == "-fs":
-    sys.argv = sys.argv[1:]
-    fullscreen = True
+parser = util.get_argparser()
+parser.add_argument('songpath', help='path to the song file')
+parser.add_argument('offset', nargs='?', default=0, help='song offset')
+parser.add_argument('variant', nargs='?', default=0, help='song variant')
+opts = util.get_opts()
 
-s = song.Song(sys.argv[1])
+fullscreen = opts.fullscreen
+s = song.Song(opts.songpath)
 
-offset = float(sys.argv[2]) if len(sys.argv) >= 3 else 0
-variant = int(sys.argv[3]) if len(sys.argv) >= 4 else 0
+offset = float(opts.offset)
+variant = int(opts.variant)
 
 headstart = 0.3
 

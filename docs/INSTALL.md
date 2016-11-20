@@ -86,7 +86,7 @@ to finish the installation - it's only blitzloop itself that needs these flags.
 
 ### Add songs.
 Stories tell about ancient caches of existing blitzloop songs. Find one, or make
-your own songs.
+your own songs. By default, blitzloop expects songs in `~/.blitzloop/songs`.
 
 ### Sing!
 ```shell
