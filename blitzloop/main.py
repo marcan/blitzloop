@@ -162,7 +162,7 @@ def main():
             yield i
 
 def key(k):
-    if k == '\033':
+    if k == b'\x1b':
         mpv.shutdown()
         audio.shutdown()
         os._exit(0)

@@ -32,6 +32,7 @@ class Player(object):
         self.mpv.set_property("terminal", True)
         self.mpv.set_property("quiet", True)
         self.mpv.set_property("ao", "jack")
+        self.mpv.set_property("jack-autostart", "yes")
         self.mpv.set_property("af", "@pan:pan=2:[1,0,0,1],@rb:rubberband")
         self.mpv.set_property("video-sync", "display-vdrop")
         self.mpv.set_property("display-fps", 60)
