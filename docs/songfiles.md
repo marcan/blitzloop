@@ -191,7 +191,7 @@ And its romaji (tag `R`) version:
 ```
 (1) base: <sis>
 (1) base: <ter>
-(1) base: <s's>
+(1) base: <'s>
 (1) base: <noise>
 (1) base: <sa>
 (1) base: <ga>
