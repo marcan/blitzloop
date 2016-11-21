@@ -76,7 +76,7 @@ pip install 'git+git://github.com/marcan/pympv.git@HEAD' ${PIP_FLAGS}
 
 ### Install Blitzloop itself
 ```shell
-pip install 'git+git://github.com/marcan/blitzloop.git@py3k' ${PIP_FLAGS}
+pip install 'git+git://github.com/marcan/blitzloop.git@HEAD' ${PIP_FLAGS}
 ```
 
 Note: Non-empty `PIP_FLAGS` disables usage of wheels in pip, and makes the whole
