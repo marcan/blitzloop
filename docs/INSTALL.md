@@ -124,7 +124,8 @@ to finish the installation - it's only blitzloop itself that needs these flags.
 
 ## Add songs
 Stories tell about ancient caches of existing blitzloop songs. Find one, or make
-your own songs. By default, blitzloop expects songs in `~/.blitzloop/songs`.
+your own songs. By default, blitzloop expects songs in
+`$XDG_DATA_HOME/blitzloop/songs` (generally `~/.local/share/blitzloop/songs`).
 
 ### Sing!
 ```shell

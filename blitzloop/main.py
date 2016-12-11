@@ -22,9 +22,12 @@ from blitzloop import graphics, idlescreen, layout, mpvplayer, songlist, util, w
 from blitzloop._audio import *
 
 
+data_home = os.getenv('XDG_DATA_HOME', '~/.local/share')
+songs_dir = os.path.join(data_home, 'blitzloop', 'songs')
+
 parser = util.get_argparser()
 parser.add_argument(
-    '--songdir', default=os.path.expanduser('~/.blitzloop/songs'),
+    '--songdir', default=os.path.expanduser(songs_dir),
     help='directory with songs')
 parser.add_argument('--port', default=10111, help='port for the UI')
 parser.add_argument(
