@@ -23,18 +23,18 @@ from blitzloop import graphics, layout, mpvplayer, song, util
 
 parser = util.get_argparser()
 parser.add_argument(
+    'songpath', metavar='SONGPATH', help='path to the song file')
+parser.add_argument(
     '--show-timings', dest='st', action='store_true',
     help='show mpv timings')
-parser.add_argument('songpath', help='path to the song file')
-parser.add_argument('offset', nargs='?', default=0, help='song offset')
-parser.add_argument('variant', nargs='?', default=0, help='song variant')
+parser.add_argument(
+    '--offset', type=float, default=0.0, help='song offset')
+parser.add_argument(
+    '--variant', type=int, default=0, help='song variant')
 opts = util.get_opts()
 
 fullscreen = opts.fullscreen
 s = song.Song(opts.songpath)
-
-offset = float(opts.offset)
-variant = int(opts.variant)
 
 headstart = 0.3
 
@@ -50,7 +50,7 @@ mpv.load_song(s)
 display.set_aspect(mpv.aspect)
 
 renderer = graphics.get_renderer().KaraokeRenderer(display)
-layout = layout.SongLayout(s, list(s.variants.keys())[variant], renderer)
+layout = layout.SongLayout(s, list(s.variants.keys())[opts.variant], renderer)
 
 song_time = -10
 
@@ -58,8 +58,8 @@ speed_i = 0
 pitch_i = 0
 vocals_i = 10
 
-if offset:
-    mpv.seek_to(offset)
+if opts.offset:
+    mpv.seek_to(opts.offset)
 
 def render():
     t = time.time()

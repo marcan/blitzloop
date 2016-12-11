@@ -28,24 +28,23 @@ parser.add_argument(
     help='directory with songs')
 parser.add_argument('--port', default=10111, help='port for the UI')
 parser.add_argument(
-    '--width', default=1024, help='width of blitzloop window (ignored in fs)')
+    '--width', type=int, default=1024,
+    help='width of blitzloop window (ignored in fs)')
 parser.add_argument(
-    '--height', default=768, help='height of blitzloop window (ignored in fs)')
+    '--height', type=int, default=768,
+    help='height of blitzloop window (ignored in fs)')
 parser.add_argument(
-    '--no-audioengine', default=False, action="store_true",
+    '--no-audioengine', action="store_true",
     help='Disable JACK-based audio engine (mic echo effect)')
 opts = util.get_opts()
 
-fullscreen = opts.fullscreen
 songs_dir = os.path.expanduser(opts.songdir)
-width = int(opts.width)
-height = int(opts.height)
 
 print("Loading song DB...")
 song_database = songlist.SongDatabase(songs_dir)
 print("Done.")
 
-display = graphics.Display(width, height, fullscreen)
+display = graphics.Display(opts.width, opts.height, opts.fullscreen)
 renderer = graphics.get_renderer().KaraokeRenderer(display)
 mpv = mpvplayer.Player(display)
 

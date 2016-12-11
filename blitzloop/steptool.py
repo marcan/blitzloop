@@ -20,14 +20,22 @@ import OpenGL.GL as gl
 import os
 import sys
 
-from blitzloop import graphics, layout, mpvplayer, song
+from blitzloop import graphics, layout, mpvplayer, song, util
 
 
-s = song.Song(sys.argv[1], ignore_steps=True)
-quant = int(sys.argv[2])
-speed = float(sys.argv[3]) if len(sys.argv) >= 4 else 1.0
-pos = float(sys.argv[4]) if len(sys.argv) >= 5 else 0.0
+parser = util.get_argparser()
+parser.add_argument(
+    'songpath', metavar='SONGPATH', help='path to the song file')
+parser.add_argument(
+    'quant', metavar='QUANT', type=int, help='quantization of the song')
+parser.add_argument(
+    '--speed', default=1.0, type=float, help='divisor of the audio speed')
+parser.add_argument(
+    '--position', default=0.0, type=float,
+    help='starting position in the song, in seconds')
+opts = util.get_opts()
 
+s = song.Song(opts.songpath, ignore_steps=True)
 display = graphics.Display(1280,720)
 renderer = layout.Renderer(display)
 layout = layout.SongLayout(s, list(s.variants.keys())[-1], renderer)
@@ -41,7 +49,10 @@ compounds = iter(s.compounds)
 
 mpv = mpvplayer.Player(None)
 mpv.load_song(s)
-mpv.set_speed(speed)
+mpv.set_speed(opts.speed)
+
+if opts.position > 0.0:
+    mpv.seek_to(opts.position)
 
 def render():
     while True:
@@ -53,7 +64,7 @@ def render():
         yield None
 
 def round_beat(b):
-    return song.MixedFraction(int(round(quant * float(b))))
+    return song.MixedFraction(int(round(opts.quant * float(b))))
 
 def key(k):
     global step, compound, cur_beat
@@ -61,7 +72,7 @@ def key(k):
     beat = s.timing.time2beat(song_time)
     if k == ' ':
         if compound is not None:
-            time = song.MixedFraction(round_beat(beat - cur_beat), quant)
+            time = song.MixedFraction(round_beat(beat - cur_beat), opts.quant)
             cur_beat += time
             compound.timing.append(time)
             print(time, end=' ')
@@ -76,13 +87,13 @@ def key(k):
                 compound = None
                 print()
         if compound is None:
-            start = song.MixedFraction(round_beat(beat), quant)
+            start = song.MixedFraction(round_beat(beat), opts.quant)
             cur_beat = start
             try:
                 compound = next(compounds)
             except StopIteration:
                 d = s.dump()
-                s.save(sys.argv[1] + ".new")
+                s.save(opts.songpath + ".new")
                 return
             compound.start = start
             compound.timing = []
@@ -94,7 +105,7 @@ def key(k):
                 step += 1
     elif k == '\r':
         if compound and len(compound.timing) == (compound.steps - 1):
-            time = song.MixedFraction(round_beat(beat - cur_beat), quant)
+            time = song.MixedFraction(round_beat(beat - cur_beat), opts.quant)
             compound.timing.append(time)
             step += 0.5
             compound = None
