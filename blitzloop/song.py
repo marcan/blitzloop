@@ -835,7 +835,7 @@ class Song(object):
 
     def save(self, filename):
         fd = open(filename, "w")
-        fd.write(self.dump().encode("utf-8"))
+        fd.write(self.dump())
         fd.close()
 
     @property
