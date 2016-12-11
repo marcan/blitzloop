@@ -69,7 +69,6 @@ try:
 except KeyboardInterrupt:
     print("KeyboardInterrupt!")
     mpv.shutdown()
-    file.close()
 finally:
     beat = 0
     bmap = []

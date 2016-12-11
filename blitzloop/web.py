@@ -20,6 +20,11 @@ nonce = random.randint(0, 2**32)
 
 DEFAULT_WIDTH = 1024
 
+# Will be set by script/main.py
+database = None
+queue = None
+audio_config = None
+
 @hook("before_request")
 def pre_req():
     request.lang = request.get_cookie('lang')

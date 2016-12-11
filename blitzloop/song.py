@@ -374,7 +374,7 @@ class MultiString(OrderedDict):
             return self.get(None, "")
         else:
             raise TypeError()
-    def __eq__(other):
+    def __eq__(self, other):
         for k in self:
             if other.get(k) != self.get(k):
                 return False
