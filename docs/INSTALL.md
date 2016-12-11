@@ -5,7 +5,7 @@ things your own way, here's a nonexhaustive list of dependencies:
 
 * Core:
    * Python 3
-* Libs and headers (for _audio.pyx):
+* Libs and headers (for \_audio.pyx):
    * JACK
 * Python modules/bindings:
    * Pillow
