@@ -43,7 +43,6 @@ setup(
             'ConfigArgParse',
             'Pillow',
             'bottle',
-            'ffms',
             'freetype-py',
             'numpy',
             'paste',
