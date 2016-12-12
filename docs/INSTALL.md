@@ -9,7 +9,7 @@ things your own way, here's a nonexhaustive list of dependencies:
 * Libs and headers (for _audio.pyx):
    * JACK
 * Python modules/bindings:
-   * PIL
+   * Pillow
    * bottle
    * ffms (optional, for record.py)
    * freetype-py
@@ -35,6 +35,11 @@ sudo apt-get install libjack-jackd2-dev librubberband-dev libffms2-dev libfreety
 Under OSX, you need homebrew's python in addition to the libraries:
 ```shell
 brew install python3 jack jpeg ffms2 rubberband libass freetype
+```
+
+Under Gentoo, this should work:
+```shell
+emerge -av --noreplace virtual/jack media-libs/ffmpegsource media-libs/freetype media-libs/libass media-libs/rubberband
 ```
 
 ### Set up python environment
@@ -68,6 +73,15 @@ cd mpv
 ./waf build
 ./waf install
 ```
+
+On Gentoo Linux, make sure you have the `libmpv` USE flag set, and build mpv:
+```shell
+sudo euse -p media-video/mpv libmpv
+sudo emerge -av media-video/mpv
+```
+If you're running stable (`arch`, not `~arch`) then you need to add
+`media-video/mpv` to `/etc/portage/package.keywords`; as of this writing,
+version 0.21.0 or newer is not keyworded stable.
 
 ### Install Blitzloop itself
 ```shell
