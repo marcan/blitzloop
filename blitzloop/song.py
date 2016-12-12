@@ -28,8 +28,7 @@ from blitzloop import util
 
 
 class ParseError(Exception):
-    def __str__(self):
-        return self.message.encode(sys.stderr.encoding)
+    pass
 
 class Particle(object):
     def __init__(self, text):
