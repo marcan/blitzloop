@@ -39,9 +39,12 @@ def init_argparser():
 def get_argparser():
     return configargparse.get_argument_parser()
 
+_opts = None
 def get_opts():
-    opts, unknown = get_argparser().parse_known_args()
-    return opts
+    global _opts
+    if _opts is None:
+        _opts, unknown = get_argparser().parse_known_args()
+    return _opts
 
 def get_res_path(t, fp):
     return os.path.join(CFG[t], fp)
