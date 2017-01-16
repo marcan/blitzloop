@@ -31,6 +31,9 @@ parser.add_argument(
     '--width', default=1024, help='width of blitzloop window (ignored in fs)')
 parser.add_argument(
     '--height', default=768, help='height of blitzloop window (ignored in fs)')
+parser.add_argument(
+    '--no-audioengine', default=False, action="store_true",
+    help='Disable JACK-based audio engine (mic echo effect)')
 opts = util.get_opts()
 
 fullscreen = opts.fullscreen
@@ -46,8 +49,9 @@ display = graphics.Display(width, height, fullscreen)
 renderer = layout.Renderer(display)
 mpv = mpvplayer.Player(display)
 
-audio = AudioEngine()
-print("Engine sample rate: %dHz" % audio.sample_rate)
+if not opts.no_audioengine:
+    audio = AudioEngine()
+    print("Engine sample rate: %dHz" % audio.sample_rate)
 
 queue = songlist.SongQueue()
 
@@ -61,9 +65,10 @@ class AudioConfig(object):
 
     def update(self, song=None):
         mpv.set_volume(self.volume / 200.0)
-        audio.set_mic_volume(self.mic_volume / 100.0)
-        audio.set_mic_feedback(self.mic_feedback / 100.0)
-        audio.set_mic_delay(self.mic_delay / 100.0)
+        if not opts.no_audioengine:
+            audio.set_mic_volume(self.mic_volume / 100.0)
+            audio.set_mic_feedback(self.mic_feedback / 100.0)
+            audio.set_mic_delay(self.mic_delay / 100.0)
 
 audio_config = AudioConfig()
 
@@ -164,7 +169,8 @@ def main():
 def key(k):
     if k == b'\x1b':
         mpv.shutdown()
-        audio.shutdown()
+        if not opts.no_audioengine:
+            audio.shutdown()
         os._exit(0)
 
 display.set_render_gen(main)

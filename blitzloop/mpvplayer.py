@@ -19,6 +19,7 @@
 import OpenGL.GL as gl
 import mpv
 import time
+from blitzloop import util
 
 
 class Player(object):
@@ -26,16 +27,21 @@ class Player(object):
         self.volume = 0.5
         self.song = None
         self.display = display
+        opts = util.get_opts()
         self.mpv = mpv.Context()
         self.mpv.initialize()
         self.mpv.set_property("audio-file-auto", "no")
         self.mpv.set_property("terminal", True)
         self.mpv.set_property("quiet", True)
-        self.mpv.set_property("ao", "jack")
-        self.mpv.set_property("jack-autostart", "yes")
+        self.mpv.set_property("ao", opts.mpv_ao)
+        if opts.mpv_ao == "jack":
+            self.mpv.set_property("jack-autostart", "yes")
         self.mpv.set_property("af", "@pan:pan=2:[1,0,0,1],@rb:rubberband")
         self.mpv.set_property("video-sync", "display-vdrop")
-        self.mpv.set_property("display-fps", 60)
+        self.mpv.set_property("display-fps", opts.fps)
+        for optval in opts.mpv_options.split():
+            opt, val = optval.split("=", 1)
+            self.mpv.set_property(opt, val)
         self.poll_props = {"audio-pts": None}
         for i in self.poll_props:
             self.mpv.get_property_async(i)

@@ -35,6 +35,15 @@ def init_argparser():
     parser.add_argument(
         '--fullscreen', default=False, action='store_true',
         help='run blitzloop fullscreen')
+    parser.add_argument(
+        '--mpv-ao', default="jack",
+        help='Audio output driver for libmpv')
+    parser.add_argument(
+        '--fps', default="60", type=int,
+        help='Display FPS (required for correct video sync)')
+    parser.add_argument(
+        '--mpv-options', default="",
+        help='Additional options for libmpv (space separated opt=val)')
 
 def get_argparser():
     return configargparse.get_argument_parser()
