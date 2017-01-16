@@ -89,7 +89,7 @@ def render():
             song_time += 1/fps
             #yield
     except Exception as e:
-        print e
+        print(e)
     finally:
         x264.stdin.close()
         x264.wait()
