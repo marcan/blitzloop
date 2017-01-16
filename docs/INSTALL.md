@@ -5,7 +5,6 @@ things your own way, here's a nonexhaustive list of dependencies:
 
 * Core:
    * Python 3
-   * Cython
 * Libs and headers (for _audio.pyx):
    * JACK
 * Python modules/bindings:
@@ -24,68 +23,96 @@ things your own way, here's a nonexhaustive list of dependencies:
    * libmpv
    * librubberband
 
-# Set up process
+# Installation
 
-### Install the dependencies
-On Debian, this should set you up:
-```shell
-sudo apt-get install libjack-jackd2-dev librubberband-dev libffms2-dev libfreetype6-dev libass-dev libgl1-mesa-dev libavfilter-dev python3-dev
-```
+## General instructions
 
-Under OSX, you need homebrew's python in addition to the libraries:
-```shell
-brew install python3 jack jpeg ffms2 rubberband libass freetype
-```
+First, install the required OS dependencies:
 
-Under Gentoo, this should work:
-```shell
-emerge -av --noreplace virtual/jack media-libs/ffmpegsource media-libs/freetype media-libs/libass media-libs/rubberband
-```
+* Python 3
+* JACK
+* ffms
+* freetype
+* OpenGL
 
-### Set up python environment
-```shell
-BL_VENV=blitzloop-prod
-mkvirtualenv --python=$(which python3) ${BL_VENV}
-pip install cython
-```
+Next, install libmpv. You need mpv built with librubberband support. This will
+pull in additional dependencies. If your platform has version 0.21.0 or later
+with rubberband compiled in, you may use that. Otherwise, compile it from
+source:
 
-Under OSX, you need some extra options to make sure python libs are able to find
-homebrew shared libs:
-```shell
-PIP_FLAGS=(--global-option=build_ext --global-option=-I$(brew --prefix)/include --global-option=-L$(brew --prefix)/lib)
-```
-
-### Get libmpv
-You need version 0.21.0 of `mpv` or higher.
-
-Under OSX, run:
-```shell
-brew install mpv --with-rubberband --with-jack
-```
-
-On Linux, If your package manager doesn't have a version which is recent enough,
-install mpv from source to `/usr/local`:
 ```shell
 git clone https://github.com/mpv-player/mpv
 cd mpv
 ./bootstrap.py
 ./waf --enable-libmpv-shared configure
 ./waf build
-./waf install
+sudo ./waf install
 ```
 
-On Gentoo Linux, make sure you have the `libmpv` USE flag set, and build mpv:
-```shell
-sudo euse -p media-video/mpv libmpv
-sudo emerge -av media-video/mpv
-```
-If you're running stable (`arch`, not `~arch`) then you need to add
-`media-video/mpv` to `/etc/portage/package.keywords`; as of this writing,
-version 0.21.0 or newer is not keyworded stable.
+Finally, make a virtualenv and install BlitzLoop:
 
-### Install Blitzloop itself
 ```shell
-pip install 'git+git://github.com/marcan/blitzloop.git@HEAD' ${PIP_FLAGS}
+python3 -m venv blitz
+source blitz/bin/activate
+pip install 'git+git://github.com/marcan/blitzloop.git'
+```
+
+## Platform specific guides
+
+Please report back any missing dependencies you may encounter while following
+these guides.
+
+### Arch Linux
+
+These instructions have been tested on Arch Linux ARM (e.g. Raspberry Pi).
+
+```shell
+sudo pacman -S --needed gcc jack ffms2 freetype2 mpv
+# Optionally use distro Python packages to save time with pip
+sudo pacman -S --needed numpy python-pillow python-freetype python-numpy python-opengl
+python -m venv blitz
+source blitz/bin/activate
+pip install 'git+git://github.com/marcan/blitzloop.git'
+```
+
+### Debian
+
+NOTE: not tested recently, please report back feedback and any problems/missing
+deps.
+
+```shell
+sudo apt-get install libjack-jackd2-dev librubberband-dev libffms2-dev libfreetype6-dev libgl1-mesa-dev libavfilter-dev python3-dev
+git clone https://github.com/mpv-player/mpv
+cd mpv
+./bootstrap.py
+./waf --enable-libmpv-shared configure
+./waf build
+sudo ./waf install
+python3 -m venv blitz
+source blitz/bin/activate
+pip install 'git+git://github.com/marcan/blitzloop.git'
+```
+
+### Gentoo Linux
+Under Gentoo, this should work (note: `euse` is in gentoolkit):
+
+```shell
+sudo euse -p media-video/mpv libmpv rubberband
+sudo emerge -avN --noreplace virtual/jack media-libs/ffmpegsource media-libs/freetype media-video/mpv
+python3 -m venv blitz
+source blitz/bin/activate
+pip install 'git+git://github.com/marcan/blitzloop.git'
+```
+
+### macOS
+
+```shell
+brew install python3 jack jpeg ffms2 rubberband libass freetype
+brew install mpv --with-rubberband --with-jack
+PIP_FLAGS=(--global-option=build_ext --global-option=-I$(brew --prefix)/include --global-option=-L$(brew --prefix)/lib)
+python3 -m venv blitz
+source blitz/bin/activate
+pip install 'git+git://github.com/marcan/blitzloop.git' ${PIP_FLAGS}
 ```
 
 Note: Non-empty `PIP_FLAGS` disables usage of wheels in pip, and makes the whole
@@ -93,14 +120,16 @@ process slower. You might save time running this command twice, once without
 `PIP_FLAGS` to install all dependencies from wheels, and once with `PIP_FLAGS`
 to finish the installation - it's only blitzloop itself that needs these flags.
 
-### Add songs.
+# Usage
+
+## Add songs
 Stories tell about ancient caches of existing blitzloop songs. Find one, or make
 your own songs. By default, blitzloop expects songs in `~/.blitzloop/songs`.
 
 ### Sing!
 ```shell
-workon ${BL_VENV}
-blitzloop -fs ${path_to_your_songs} 1024 768
+source blitz/bin/activate
+blitzloop -fs
 ```
 
 Visit port `10111` on your computer in a web browser, and sing!
