@@ -123,6 +123,7 @@ class Player(object):
                     self.mpv.set_property("vf", "crop=%d:%d" % (nw, h))
                 self.aspect = song.aspect
             else:
+                self.mpv.set_property("vf", "")
                 self.aspect = aspect
         else:
             self.aspect = None
