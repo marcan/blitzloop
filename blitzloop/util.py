@@ -36,8 +36,14 @@ def init_argparser():
         '--fullscreen', default=False, action='store_true',
         help='run blitzloop fullscreen')
     parser.add_argument(
+        '--display', default="glut",
+        help='Choose a display backend')
+    parser.add_argument(
         '--mpv-ao', default="jack",
         help='Audio output driver for libmpv')
+    parser.add_argument(
+        '--mpv-vo', default="opengl-cb",
+        help='Video output driver for libmpv')
     parser.add_argument(
         '--fps', default="60", type=int,
         help='Display FPS (required for correct video sync)')

@@ -16,13 +16,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-import OpenGL.GL as gl
-import OpenGL.GLUT as glut
 import os
 import time
 
 from blitzloop import graphics, layout, mpvplayer, song, util
-
 
 parser = util.get_argparser()
 parser.add_argument(
@@ -52,7 +49,7 @@ mpv.load_song(s)
 
 display.set_aspect(mpv.aspect)
 
-renderer = layout.Renderer(display)
+renderer = graphics.get_renderer().Renderer(display)
 layout = layout.SongLayout(s, list(s.variants.keys())[variant], renderer)
 
 song_time = -10
@@ -68,9 +65,7 @@ def render():
     t = time.time()
     global song_time
     while not mpv.eof_reached():
-        gl.glClearColor(0, 0, 0, 1)
-        gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
-        gl.glLoadIdentity()
+        graphics.get_renderer().clear(0, 0, 0, 1)
         t1 = time.time()
         mpv.draw()
         dt = time.time() - t1
@@ -90,6 +85,7 @@ def render():
 pause = False
 
 def key(k):
+    import OpenGL.GLUT as glut
     global speed_i, pitch_i, vocals_i, pause
     if k == b'\x1b':
         mpv.shutdown()

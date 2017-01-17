@@ -16,34 +16,44 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-from blitzloop import util
 
-def Display(*args, **kwargs):
-    display = util.get_opts().display
+print("matrix!")
+Matrix=True
 
-    if display == "glut":
-        from blitzloop.backend import glut
-        return glut.Display(*args, **kwargs)
-    elif display == "rpi":
-        from blitzloop.backend import rpi
-        return rpi.Display(*args, **kwargs)
+import numpy as np
 
-_renderer = None
+print("matrix2!")
 
-def get_renderer():
-    global _renderer
-    if _renderer is None:
-        display = util.get_opts().display
+class Matrix(object):
+    def __init__(self):
+        self.stack = []
+        self.reset()
 
-        if display == "glut":
-            from blitzloop.renderer import gl as _renderer
-        elif display == "rpi":
-            from blitzloop.renderer import gles as _renderer
+    def reset(self):
+        self.m = np.matrix([
+            [1,0,0,0],
+            [0,1,0,0],
+            [0,0,1,0],
+            [0,0,0,1]], float)
 
-    return _renderer
+    def push(self):
+        self.stack.append(self.m.copy())
 
-def GL():
-    return get_renderer().gl
+    def pop(self):
+        self.m = self.stack.pop()
 
-def arrays():
-    return get_renderer().arrays
+    def scale(self, sx, sy, sz=1.0):
+        self.m *= [
+            [sx, 0, 0, 0],
+            [0, sy, 0, 0],
+            [0, 0, sz, 0],
+            [0, 0, 0, 1],
+        ]
+
+    def translate(self, tx, ty, tz=0.0):
+        self.m *= [
+            [1, 0, 0, tx],
+            [0, 1, 0, ty],
+            [0, 0, 1, tz],
+            [0, 0, 0, 1],
+        ]

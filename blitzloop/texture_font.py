@@ -16,12 +16,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-import OpenGL.GL as gl
 import freetype as ft
 import math
 import numpy as np
 import sys
 
+from blitzloop import graphics
 
 #  TextureAtlas is based on examples/texture_font.py from freetype-py
 #  FreeType high-level python API - Copyright 2011 Nicolas P. Rougier
@@ -75,6 +75,8 @@ class TextureAtlas(object):
         Upload atlas data into video memory.
         '''
 
+        gl = graphics.GL()
+
         if not self._dirty:
             return
 
@@ -89,13 +91,13 @@ class TextureAtlas(object):
         }
         ifmt, fmt = FORMATS[self.depth]
         gl.glBindTexture(gl.GL_TEXTURE_2D, self.texid)
-        gl.glTexParameteri( gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S, gl.GL_CLAMP )
-        gl.glTexParameteri( gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T, gl.GL_CLAMP )
+        gl.glTexParameteri( gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S, gl.GL_CLAMP_TO_EDGE )
+        gl.glTexParameteri( gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T, gl.GL_CLAMP_TO_EDGE )
         gl.glTexParameteri( gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR )
         gl.glTexParameteri( gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR )
         #gl.glTexParameteri( gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST )
         #gl.glTexParameteri( gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_NEAREST )
-        gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, ifmt,
+        gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, fmt,
                         self.width, self.height, 0,
                         fmt, gl.GL_UNSIGNED_BYTE, self.data)
 
@@ -232,7 +234,10 @@ class TextureAtlas(object):
 
     def __del__(self):
         if self.texid is not None:
-            gl.glDeleteTextures(self.texid)
+            gl = graphics.GL()
+            arrays = graphics.arrays()
+            tex = arrays.GLintArray.asArray([self.texid])
+            gl.glDeleteTextures(1, tex)
 
 def bitmap_to_numpy(bitmap, dtype=np.uint8):
     pitch = bitmap.pitch

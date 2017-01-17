@@ -16,10 +16,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-import OpenGL.GL as gl
 import mpv
 import time
-from blitzloop import util
+from blitzloop import util, graphics
 
 
 class Player(object):
@@ -34,6 +33,7 @@ class Player(object):
         self.mpv.set_property("terminal", True)
         self.mpv.set_property("quiet", True)
         self.mpv.set_property("ao", opts.mpv_ao)
+        self.mpv.set_property("fs", True)
         if opts.mpv_ao == "jack":
             self.mpv.set_property("jack-autostart", "yes")
         self.mpv.set_property("af", "@pan:pan=2:[1,0,0,1],@rb:rubberband")
@@ -47,12 +47,16 @@ class Player(object):
             self.mpv.get_property_async(i)
 
         if display:
-            def gpa(name):
-                return display.get_proc_address(name)
+            if opts.mpv_vo == "opengl-cb":
+                def gpa(name):
+                    return display.get_proc_address(name)
 
-            self.gl = self.mpv.opengl_cb_api()
-            self.gl.init_gl(None, gpa)
-            self.mpv.set_property("vo", "opengl-cb")
+                self.gl = self.mpv.opengl_cb_api()
+                self.gl.init_gl(None, gpa)
+            else:
+                self.gl = None
+            self.mpv.set_property("vo", opts.mpv_vo)
+            self.renderer = graphics.get_renderer()
         else:
             self.gl = None
             self.mpv.set_property("vo", "null")
@@ -218,10 +222,12 @@ class Player(object):
         return evs
 
     def flip(self):
-        self.gl.report_flip(0)
+        if self.gl:
+            self.gl.report_flip(0)
 
     def draw(self):
-        self.gl.draw(0, self.display.win_width, -self.display.win_height)
+        if self.gl:
+            self.gl.draw(0, self.display.win_width, -self.display.win_height)
 
     def draw_fade(self, songtime):
         brightness = 1
@@ -232,15 +238,7 @@ class Player(object):
         if songtime < self.fade_in and self.fade_in:
             brightness *= max(0, min(1, songtime / self.fade_in))
         if brightness != 1:
-            gl.glEnable(gl.GL_BLEND)
-            gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA);
-            gl.glColor4f(0, 0, 0, 1 - brightness)
-            gl.glBegin(gl.GL_TRIANGLE_FAN)
-            gl.glVertex2f(0, 0)
-            gl.glVertex2f(1, 0)
-            gl.glVertex2f(1, 1)
-            gl.glVertex2f(0, 1)
-            gl.glEnd()
+            self.renderer.clear(0, 0, 0, 1 - brightness)
         return brightness
 
     def get_song_time(self, async=True):
