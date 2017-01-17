@@ -440,7 +440,8 @@ class ImageTexture(object):
         return self.width / self.height
 
     def __del__(self):
-        gl.glDeleteTextures(self.texid)
+        tex = arrays.GLintArray.asArray([self.texid])
+        gl.glDeleteTextures(1, tex)
 
     def draw(self, x=0, y=0, width=1, height=None, alpha=1.0):
         if height is None:
