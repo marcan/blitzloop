@@ -17,12 +17,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 
-print("matrix!")
-Matrix=True
-
 import numpy as np
-
-print("matrix2!")
 
 class Matrix(object):
     def __init__(self):
