@@ -35,11 +35,7 @@ def get_renderer():
     if _renderer is None:
         display = util.get_opts().display
 
-        if display == "glut":
-            from blitzloop.renderer import gl as _renderer
-        elif display == "rpi":
-            from blitzloop.renderer import gles as _renderer
-
+        from blitzloop.renderer import gles as _renderer
     return _renderer
 
 def GL():

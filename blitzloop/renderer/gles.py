@@ -20,11 +20,17 @@ import numpy as np
 
 from OpenGL import arrays
 from OpenGL.arrays import vbo
-import OpenGL.GLES2 as gl
-import OpenGL.GLES2.shaders as shaders
 
 from blitzloop import texture_font
-from blitzloop.util import map_from, map_to
+from blitzloop.util import map_from, map_to, get_opts
+
+if get_opts().display in ("glut",):
+    import OpenGL.GL as gl
+    import OpenGL.GL.shaders as shaders
+else:
+    import OpenGL.GLES2 as gl
+    import OpenGL.GLES2.shaders as shaders
+
 
 vs_karaoke = """
 attribute vec4 coords;

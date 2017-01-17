@@ -19,6 +19,7 @@
 import os, sys, time
 
 from blitzloop.matrix import Matrix
+from blitzloop.backend.common import *
 
 import ctypes, ctypes.util
 from ctypes import cdll, POINTER, c_char_p, c_int, c_uint, c_void_p, Structure, byref
@@ -83,8 +84,9 @@ class VC_DISPMANX_ALPHA_T(Structure):
 
 libbcm_host = cdll.LoadLibrary("libbcm_host.so")
 
-class Display(object):
+class Display(BaseDisplay):
     def __init__(self, width=640, height=480, fullscreen=False, aspect=None):
+        self.gl = gl
         libbcm_host.bcm_host_init()
         display = libbcm_host.vc_dispmanx_display_open(0)
 
@@ -161,58 +163,13 @@ class Display(object):
 
         gl.glViewport(0, 0, self.win_width, self.win_height)
 
-        self.matrix = Matrix()
-        self.set_aspect(None)
+        BaseDisplay.__init__(self, mode.width, mode.height, True, aspect)
 
-    def set_aspect(self, aspect):
-        if aspect is None:
-            aspect = self.win_width / self.win_height
-        self.aspect = aspect
-        display_aspect = self.win_width / self.win_height
-        if self.aspect:
-            if display_aspect > self.aspect:
-                self.width = int(round(self.aspect * self.win_height))
-                self.height = self.win_height
-            else:
-                self.width = self.win_width
-                self.height = int(round(self.win_width / self.aspect))
-        else:
-            self.width = self.win_width
-            self.height = self.win_height
-        self.off_x = int((self.win_width - self.width) / 2)
-        self.off_y = int((self.win_height - self.height) / 2)
+        # Transparent layer
+        self.clear_color = (0.0, 0.0, 0.0, 0.0)
 
-    def commit_matrix(self, uniform):
-        gl.glUniformMatrix4fv(uniform, 1, False, self.matrix.m.transpose())
-
-    def set_render_gen(self, gen):
-        self.frames = gen()
-
-    def set_keyboard_handler(self, f):
-        self.kbd_handler = f
-
-    def main_loop(self):
-        while True:
-            try:
-                self.matrix.reset()
-                self.matrix.translate(-1.0, -1.0)
-                self.matrix.scale(2.0/self.win_width, 2.0/self.win_height)
-                self.matrix.translate(self.off_x, self.off_y, 0)
-                self.matrix.scale(self.width, self.width, 1)
-
-                gl.glClearColor(0.0, 0.0, 0.0, 0.0)
-                gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
-                next(self.frames)
-            except StopIteration:
-                break
-            egl.eglSwapBuffers(self.disp, self.surface)
-
-    def round_coord(self, c):
-        return int(round(c * self.width)) / self.width
-
-    @property
-    def top(self):
-        return self.height / self.width
+    def swap_buffers(self):
+        egl.eglSwapBuffers(self.disp, self.surface)
 
 if __name__ == "__main__":
     import OpenGL.GLES2 as gl

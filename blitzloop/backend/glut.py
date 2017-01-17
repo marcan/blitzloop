@@ -22,12 +22,11 @@ import OpenGL.GLUT as glut
 import os
 import sys
 
+from blitzloop.backend.common import *
 
-class Display(object):
+class Display(BaseDisplay):
     def __init__(self, width=640, height=480, fullscreen=False, aspect=None):
-        self.kbd_handler = None
-        self.win_width = width
-        self.win_height = height
+        self.gl = gl
         glut.glutInit(sys.argv)
         glut.glutInitDisplayMode(glut.GLUT_DOUBLE | glut.GLUT_RGB | glut.GLUT_DEPTH)
         glut.glutInitWindowPosition(0, 0)
@@ -36,10 +35,7 @@ class Display(object):
             glut.glutReshapeWindow(width, height)
         else:
             glut.glutSetCursor(glut.GLUT_CURSOR_NONE)
-        self.win_width = width
-        self.win_height = height
-        self.set_aspect(aspect)
-        self._on_reshape(width, height)
+        BaseDisplay.__init__(self, width, height, fullscreen, aspect)
         if fullscreen:
             glut.glutFullScreen()
         glut.glutDisplayFunc(self._render)
@@ -51,26 +47,7 @@ class Display(object):
     def _on_reshape(self, width, height):
         self.win_width = width
         self.win_height = height
-        gl.glViewport(0, 0, width, height)
-        gl.glMatrixMode(gl.GL_PROJECTION)
-        gl.glLoadIdentity()
-        gl.glOrtho(0, width, 0, height, -1, 1)
-        display_aspect = width / height
-        if self.aspect:
-            if display_aspect > self.aspect:
-                self.width = int(round(self.aspect * height))
-                self.height = height
-            else:
-                self.width = width
-                self.height = int(round(width / self.aspect))
-        else:
-            self.width = width
-            self.height = height
-        off_x = int((width - self.width) / 2)
-        off_y = int((height - self.height) / 2)
-        gl.glTranslate(off_x, off_y, 0)
-        gl.glScale(self.width, self.width, 1)
-        gl.glMatrixMode(gl.GL_MODELVIEW)
+        self.set_aspect(self.aspect)
 
     def _on_keyboard(self, key, x, y):
         if self.kbd_handler:
@@ -80,41 +57,22 @@ class Display(object):
 
     def _render(self):
         try:
-            gl.glClearColor(0, 0, 0, 1)
-            gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
-            gl.glLoadIdentity()
-            next(self.frames)
+            BaseDisplay._render(self)
         except StopIteration:
             pass
         except BaseException as e:
             sys.excepthook(*sys.exc_info())
             os._exit(0)
+        self.swap_buffers()
+
+    def swap_buffers(self):
         glut.glutSwapBuffers()
-
-    def set_aspect(self, aspect):
-        if aspect is None:
-            aspect = self.win_width / self.win_height
-        self.aspect = aspect
-        self._on_reshape(self.win_width, self.win_height)
-
-    def set_render_gen(self, gen):
-        self.frames = gen()
-
-    def set_keyboard_handler(self, f):
-        self.kbd_handler = f
 
     def main_loop(self):
         glut.glutMainLoop()
 
-    def round_coord(self, c):
-        return int(round(c * self.width)) / self.width
-
     def get_proc_address(self, s):
         return glut.glutGetProcAddress(s)
-
-    @property
-    def top(self):
-        return self.height / self.width
 
 if __name__ == "__main__":
     fs_red = """
