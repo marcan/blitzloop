@@ -127,7 +127,7 @@ class Display(object):
         rectSrc.height = mode.height << 16
 
         alpha = VC_DISPMANX_ALPHA_T()
-        alpha.flags = 0
+        alpha.flags = 1 << 16  # premultiplied alpha
         alpha.opacity = 255
         alpha.mask = 0
 

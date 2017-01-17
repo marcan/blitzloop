@@ -125,11 +125,7 @@ void main() {
     gl_FragColor.rgb = outline_color * outline;
     gl_FragColor.rgb += border_color * border;
     gl_FragColor.rgb += fill_color * fill;
-    if (a > 0.0) {
-        gl_FragColor.rgb /= clamp(a, 0.0, 1.0);
-    } else {
-        gl_FragColor.rgb = vec3(0.0, 0.0, 0.0);
-    }
+    gl_FragColor.rgb *= v_alpha;
     gl_FragColor.a = a * v_alpha;
 }
 """
@@ -243,7 +239,7 @@ class Renderer(object):
     def draw(self, time, layout):
         gl.glActiveTexture(gl.GL_TEXTURE0)
         gl.glBindTexture(gl.GL_TEXTURE_2D, self.atlas.texid)
-        gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)
+        gl.glBlendFunc(gl.GL_ONE, gl.GL_ONE_MINUS_SRC_ALPHA)
         gl.glEnable(gl.GL_BLEND)
         with self.shader:
             gl.glUniform1i(self.l_tex, 0)
