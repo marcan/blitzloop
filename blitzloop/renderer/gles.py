@@ -449,13 +449,11 @@ class ImageTexture(object):
 
         color = (1., 1., 1., alpha)
 
-        gl.glEnable(gl.GL_TEXTURE_2D)
+        gl.glActiveTexture(gl.GL_TEXTURE0)
         gl.glBindTexture(gl.GL_TEXTURE_2D, self.texid)
 
         self.renderer.draw((x, y), (width, height), (0, self.height / self.th),
                            (self.width / self.tw, -self.height / self.th), color)
-
-        gl.glDisable(gl.GL_TEXTURE_2D)
 
 def clear(r, g, b, a):
     return
