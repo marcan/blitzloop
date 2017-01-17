@@ -49,7 +49,7 @@ mpv.load_song(s)
 
 display.set_aspect(mpv.aspect)
 
-renderer = graphics.get_renderer().Renderer(display)
+renderer = graphics.get_renderer().KaraokeRenderer(display)
 layout = layout.SongLayout(s, list(s.variants.keys())[variant], renderer)
 
 song_time = -10

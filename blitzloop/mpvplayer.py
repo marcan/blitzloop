@@ -56,7 +56,7 @@ class Player(object):
             else:
                 self.gl = None
             self.mpv.set_property("vo", opts.mpv_vo)
-            self.renderer = graphics.get_renderer()
+            self.solid_renderer = graphics.get_solid_renderer()
         else:
             self.gl = None
             self.mpv.set_property("vo", "null")
@@ -238,7 +238,7 @@ class Player(object):
         if songtime < self.fade_in and self.fade_in:
             brightness *= max(0, min(1, songtime / self.fade_in))
         if brightness != 1:
-            self.renderer.clear(0, 0, 0, 1 - brightness)
+            self.solid_renderer.draw((0, 0), (1, 1), (0., 0., 0., 1 - brightness))
         return brightness
 
     def get_song_time(self, async=True):

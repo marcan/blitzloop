@@ -136,6 +136,31 @@ void main() {
 }
 """
 
+vs_solid = """
+attribute vec3 coord;
+
+uniform vec4 color;
+uniform mat4 transform;
+
+varying vec4 v_color;
+
+void main() {
+    v_color = color;
+    v_color.rgb *= color.a; // assume unpremultiplied color, premultiply
+
+    vec4 pos = vec4(coord.x, coord.y, coord.z, 1.0);
+    gl_Position = transform * pos;
+}
+"""
+
+fs_solid = """
+varying vec4 v_color;
+
+void main() {
+    gl_FragColor = v_color;
+}
+"""
+
 class RenderedLine(object):
     def __init__(self, line):
         self.line = line
@@ -197,33 +222,19 @@ class RenderedLine(object):
             renderer.disable_attribs()
             self.display.matrix.pop()
 
-class Renderer(object):
-    UNIFORMS = [
-        "tex", "time", "transform",
-    ]
-    ATTRIBUTES = {
-        "coords": (4, gl.GL_FLOAT),
-        "times": (3, gl.GL_FLOAT),
-        "border_color": (3, gl.GL_FLOAT),
-        "fill_color": (3, gl.GL_FLOAT),
-        "outline_color": (3, gl.GL_FLOAT),
-        "border_color_on": (3, gl.GL_FLOAT),
-        "fill_color_on": (3, gl.GL_FLOAT),
-        "outline_color_on": (3, gl.GL_FLOAT),
-    }
+class BaseRenderer(object):
     TYPE_LEN = {
         gl.GL_FLOAT: 4
     }
     def __init__(self, display):
         self.display = display
         self.shader = shaders.compileProgram(
-            shaders.compileShader(vs_karaoke, gl.GL_VERTEX_SHADER),
-            shaders.compileShader(fs_karaoke, gl.GL_FRAGMENT_SHADER),
+            shaders.compileShader(self.VS, gl.GL_VERTEX_SHADER),
+            shaders.compileShader(self.FS, gl.GL_FRAGMENT_SHADER),
         )
         for i in self.UNIFORMS:
             setattr(self, "l_" + i, gl.glGetUniformLocation(self.shader, i))
         self.attrib_loc = {i: gl.glGetAttribLocation(self.shader, i) for i in self.ATTRIBUTES}
-        self.atlas = texture_font.TextureAtlas(depth=3)
 
     def attrib_pointer(self, attrib, stride, offset, vbo):
         size, data_type = self.ATTRIBUTES[attrib]
@@ -242,6 +253,26 @@ class Renderer(object):
             if i >= 0:
                 gl.glDisableVertexAttribArray(i)
 
+class KaraokeRenderer(BaseRenderer):
+    UNIFORMS = [
+        "tex", "time", "transform",
+    ]
+    ATTRIBUTES = {
+        "coords": (4, gl.GL_FLOAT),
+        "times": (3, gl.GL_FLOAT),
+        "border_color": (3, gl.GL_FLOAT),
+        "fill_color": (3, gl.GL_FLOAT),
+        "outline_color": (3, gl.GL_FLOAT),
+        "border_color_on": (3, gl.GL_FLOAT),
+        "fill_color_on": (3, gl.GL_FLOAT),
+        "outline_color_on": (3, gl.GL_FLOAT),
+    }
+    FS = fs_karaoke
+    VS = vs_karaoke
+    def __init__(self, display):
+        BaseRenderer.__init__(self, display)
+        self.atlas = texture_font.TextureAtlas(depth=3)
+
     def draw(self, time, layout):
         gl.glActiveTexture(gl.GL_TEXTURE0)
         gl.glBindTexture(gl.GL_TEXTURE_2D, self.atlas.texid)
@@ -254,6 +285,51 @@ class Renderer(object):
 
     def reset(self):
         self.atlas = texture_font.TextureAtlas(depth=3)
+
+class SolidRenderer(BaseRenderer):
+    UNIFORMS = [
+        "color", "transform",
+    ]
+    ATTRIBUTES = {
+        "coord": (3, gl.GL_FLOAT),
+    }
+    VS = vs_solid
+    FS = fs_solid
+
+    def __init__(self, display):
+        BaseRenderer.__init__(self, display)
+
+        vbodata = [[0., 0., 0.],
+                   [1., 0., 0.],
+                   [1., 1., 0.],
+                   [0., 1., 0.]]
+        idxdata = [0, 1, 2, 2, 3, 0]
+
+        self.vbo = vbo.VBO(np.asarray(vbodata, np.float32), gl.GL_STATIC_DRAW, gl.GL_ARRAY_BUFFER)
+        self.ibo = vbo.VBO(np.asarray(idxdata, np.uint16), gl.GL_STATIC_DRAW, gl.GL_ELEMENT_ARRAY_BUFFER)
+
+    def draw(self, pos, size, color):
+        with self.shader, self.vbo, self.ibo:
+            self.display.matrix.push()
+            self.display.matrix.translate(*pos)
+            self.display.matrix.scale(*size)
+            self.display.commit_matrix(self.l_transform)
+
+            self.enable_attribs()
+
+            stride = 3*4
+            off = 0
+            off += self.attrib_pointer("coord", stride, off, self.vbo)
+            assert off == stride
+
+            gl.glBlendFunc(gl.GL_ONE, gl.GL_ONE_MINUS_SRC_ALPHA)
+            gl.glEnable(gl.GL_BLEND)
+            gl.glUniform4f(self.l_color, *color)
+
+            gl.glDrawElements(gl.GL_TRIANGLES, 6, gl.GL_UNSIGNED_SHORT, self.ibo)
+
+            self.disable_attribs()
+            self.display.matrix.pop()
 
 def clear(r, g, b, a):
     return

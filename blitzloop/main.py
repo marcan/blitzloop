@@ -46,7 +46,7 @@ song_database = songlist.SongDatabase(songs_dir)
 print("Done.")
 
 display = graphics.Display(width, height, fullscreen)
-renderer = graphics.get_renderer().Renderer(display)
+renderer = graphics.get_renderer().KaraokeRenderer(display)
 mpv = mpvplayer.Player(display)
 
 if not opts.no_audioengine:

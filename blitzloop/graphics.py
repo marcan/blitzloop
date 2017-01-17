@@ -19,24 +19,30 @@
 from blitzloop import util
 
 def Display(*args, **kwargs):
+    global _display
     display = util.get_opts().display
 
     if display == "glut":
         from blitzloop.backend import glut
-        return glut.Display(*args, **kwargs)
+        _display = glut.Display(*args, **kwargs)
     elif display == "rpi":
         from blitzloop.backend import rpi
-        return rpi.Display(*args, **kwargs)
+        _display = rpi.Display(*args, **kwargs)
+    return _display
 
 _renderer = None
-
 def get_renderer():
     global _renderer
     if _renderer is None:
-        display = util.get_opts().display
-
         from blitzloop.renderer import gles as _renderer
     return _renderer
+
+_solid_renderer = None
+def get_solid_renderer():
+    global _solid_renderer
+    if _solid_renderer is None:
+        _solid_renderer = get_renderer().SolidRenderer(_display)
+    return _solid_renderer
 
 def GL():
     return get_renderer().gl
