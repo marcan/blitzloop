@@ -166,7 +166,7 @@ class Display(BaseDisplay):
         BaseDisplay.__init__(self, mode.width, mode.height, True, aspect)
 
         # Transparent layer
-        self.clear_color = (0.0, 0.0, 0.0, 0.0)
+        self.clear_color = self.TRANSPARENT
 
     def swap_buffers(self):
         egl.eglSwapBuffers(self.disp, self.surface)

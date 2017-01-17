@@ -89,16 +89,20 @@ def main_render():
             qe = queue[0]
     if not qe:
         idle_screen.reset()
+        graphics.get_renderer().clear(0, 0, 0, 1)
         for f in idle_screen:
             audio_config.update()
             yield None
+            graphics.get_renderer().clear(0, 0, 0, 1)
             if not qe:
                 with queue.lock:
                     if len(queue) != 0:
                         qe = queue[0]
                         idle_screen.close()
-    yield None
-    yield None
+
+    for i in range(2):
+        yield None
+        graphics.get_renderer().clear(0, 0, 0, 1)
 
     print("Loading audio/video...")
     mpv.load_song(qe.song)
@@ -151,8 +155,11 @@ def main_render():
         yield None
         mpv.flip()
 
-    yield None
-    yield None
+    graphics.get_renderer().clear(0, 0, 0, 1)
+    for i in range(2):
+        yield None
+        graphics.get_renderer().clear(0, 0, 0, 1)
+
     print("Song complete.")
     try:
         queue.pop(qe.qid)

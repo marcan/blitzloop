@@ -19,6 +19,8 @@
 from blitzloop.matrix import Matrix
 
 class BaseDisplay(object):
+    BLACK = (0.0, 0.0, 0.0, 1.0)
+    TRANSPARENT = (0.0, 0.0, 0.0, 0.0)
     def __init__(self, width=640, height=480, fullscreen=False, aspect=None):
         self.kbd_handler = None
         self.win_width = self.width = width
@@ -26,7 +28,7 @@ class BaseDisplay(object):
         self.matrix = Matrix()
         self.viewmatrix = Matrix()
         self.set_aspect(aspect)
-        self.clear_color = (0.0, 0.0, 0.0, 1.0)
+        self.clear_color = self.BLACK
 
     def set_aspect(self, aspect):
         if aspect is None:

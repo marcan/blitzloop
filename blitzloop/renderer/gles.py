@@ -456,13 +456,5 @@ class ImageTexture(object):
                            (self.width / self.tw, -self.height / self.th), color)
 
 def clear(r, g, b, a):
-    return
-    gl.glEnable(gl.GL_BLEND)
-    gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA);
-    gl.glColor4f(r, g, b, a)
-    gl.glBegin(gl.GL_TRIANGLE_FAN)
-    gl.glVertex2f(0, 0)
-    gl.glVertex2f(1, 0)
-    gl.glVertex2f(1, 1)
-    gl.glVertex2f(0, 1)
-    gl.glEnd()
+    gl.glClearColor(r, g, b, a)
+    gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
