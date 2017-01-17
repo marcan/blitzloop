@@ -24,6 +24,7 @@ class BaseDisplay(object):
         self.win_width = self.width = width
         self.win_height = self.height = height
         self.matrix = Matrix()
+        self.viewmatrix = Matrix()
         self.set_aspect(aspect)
         self.clear_color = (0.0, 0.0, 0.0, 1.0)
 
@@ -42,11 +43,18 @@ class BaseDisplay(object):
         else:
             self.width = self.win_width
             self.height = self.win_height
-        self.off_x = int((self.win_width - self.width) / 2)
-        self.off_y = int((self.win_height - self.height) / 2)
+        off_x = int((self.win_width - self.width) / 2)
+        off_y = int((self.win_height - self.height) / 2)
+
+        self.viewmatrix.reset()
+        self.viewmatrix.translate(-1.0, -1.0)
+        self.viewmatrix.scale(2.0/self.win_width, 2.0/self.win_height)
+        self.viewmatrix.translate(off_x, off_y, 0)
+        self.viewmatrix.scale(self.width, self.width, 1)
 
     def commit_matrix(self, uniform):
-        self.gl.glUniformMatrix4fv(uniform, 1, False, self.matrix.m.transpose())
+        m = self.viewmatrix.m * self.matrix.m
+        self.gl.glUniformMatrix4fv(uniform, 1, False, m.transpose())
 
     def set_render_gen(self, gen):
         self.frames = gen()
@@ -56,10 +64,6 @@ class BaseDisplay(object):
 
     def _render(self):
         self.matrix.reset()
-        self.matrix.translate(-1.0, -1.0)
-        self.matrix.scale(2.0/self.win_width, 2.0/self.win_height)
-        self.matrix.translate(self.off_x, self.off_y, 0)
-        self.matrix.scale(self.width, self.width, 1)
 
         self.gl.glClearColor(*self.clear_color)
         self.gl.glClear(self.gl.GL_COLOR_BUFFER_BIT | self.gl.GL_DEPTH_BUFFER_BIT)
