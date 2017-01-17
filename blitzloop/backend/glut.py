@@ -36,6 +36,7 @@ class Display(BaseDisplay):
         else:
             glut.glutSetCursor(glut.GLUT_CURSOR_NONE)
         BaseDisplay.__init__(self, width, height, fullscreen, aspect)
+        self._on_reshape(width, height)
         if fullscreen:
             glut.glutFullScreen()
         glut.glutDisplayFunc(self._render)
@@ -47,6 +48,7 @@ class Display(BaseDisplay):
     def _on_reshape(self, width, height):
         self.win_width = width
         self.win_height = height
+        self.gl.glViewport(0, 0, width, height)
         self.set_aspect(self.aspect)
 
     def _on_keyboard(self, key, x, y):
