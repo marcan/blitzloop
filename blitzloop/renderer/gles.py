@@ -17,19 +17,23 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 import numpy as np
+import PIL
 
 from OpenGL import arrays
 from OpenGL.arrays import vbo
 
 from blitzloop import texture_font
 from blitzloop.util import map_from, map_to, get_opts
+from blitzloop.matrix import Matrix
 
 if get_opts().display in ("glut",):
     import OpenGL.GL as gl
     import OpenGL.GL.shaders as shaders
+    import OpenGL.GLU as glu
 else:
     import OpenGL.GLES2 as gl
     import OpenGL.GLES2.shaders as shaders
+    glu = None
 
 
 vs_karaoke = """
@@ -158,6 +162,40 @@ varying vec4 v_color;
 
 void main() {
     gl_FragColor = v_color;
+}
+"""
+
+vs_texture = """
+attribute vec3 coord;
+
+uniform vec4 color;
+uniform mat4 textransform;
+uniform mat4 transform;
+
+varying vec2 v_texcoord;
+varying vec4 v_color;
+
+void main() {
+    v_color = color;
+    v_color.rgb *= color.a; // assume unpremultiplied color, premultiply
+
+    vec4 pos = vec4(coord.x, coord.y, coord.z, 1.0);
+    gl_Position = transform * pos;
+
+    vec4 texcoord = textransform * pos;
+    v_texcoord = texcoord.xy;
+}
+"""
+
+fs_texture = """
+uniform sampler2D tex;
+
+varying vec2 v_texcoord;
+varying vec4 v_color;
+
+void main() {
+    vec4 texel = texture2D(tex, v_texcoord.st);
+    gl_FragColor = texel * v_color;
 }
 """
 
@@ -310,6 +348,9 @@ class SolidRenderer(BaseRenderer):
 
     def draw(self, pos, size, color):
         with self.shader, self.vbo, self.ibo:
+            self._draw(pos, size, color)
+
+    def _draw(self, pos, size, color):
             self.display.matrix.push()
             self.display.matrix.translate(*pos)
             self.display.matrix.scale(*size)
@@ -330,6 +371,90 @@ class SolidRenderer(BaseRenderer):
 
             self.disable_attribs()
             self.display.matrix.pop()
+
+class TextureRenderer(SolidRenderer):
+    UNIFORMS = [
+        "color", "transform", "textransform"
+    ]
+    VS = vs_texture
+    FS = fs_texture
+
+    def __init__(self, display):
+        SolidRenderer.__init__(self, display)
+
+    def draw(self, pos, size, tpos, tsize, color):
+        with self.shader, self.vbo, self.ibo:
+            tmatrix = Matrix()
+            tmatrix.translate(*tpos)
+            tmatrix.scale(*tsize)
+            gl.glUniformMatrix4fv(self.l_textransform, 1, False, tmatrix.m.transpose())
+
+            self._draw(pos, size, color)
+
+class ImageTexture(object):
+    def __init__(self, img_file, texture_renderer):
+        self.renderer = texture_renderer
+        self.image = PIL.Image.open(img_file)
+
+        self.tw = 1
+        while self.tw < self.width:
+            self.tw *= 2
+        self.th = 1
+        while self.th < self.height:
+            self.th *= 2
+
+        self.teximage = PIL.Image.new("RGBA", (self.tw, self.th), (0, 0, 0, 0))
+        self.teximage.paste(self.image, (0,0), self.image)
+        self.teximage = self.teximage.convert("RGBa") # premultiply alpha
+
+        self.texid = gl.glGenTextures(1)
+        gl.glBindTexture(gl.GL_TEXTURE_2D, self.texid)
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR_MIPMAP_LINEAR)
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR)
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S, gl.GL_CLAMP)
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T, gl.GL_CLAMP)
+
+        try:
+            blob = self.teximage.tobytes()
+        except AttributeError:
+            blob = self.teximage.tostring()
+
+        if glu is not None:
+            glu.gluBuild2DMipmaps(gl.GL_TEXTURE_2D, 4, self.tw, self.th,
+                gl.GL_RGBA, gl.GL_UNSIGNED_BYTE, blob)
+        else:
+            gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGBA, self.tw, self.th,
+                            0, gl.GL_RGBA, gl.GL_UNSIGNED_BYTE, blob)
+            gl.glGenerateMipmap(gl.GL_TEXTURE_2D)
+
+    @property
+    def width(self):
+        return self.image.size[0]
+
+    @property
+    def height(self):
+        return self.image.size[1]
+
+    @property
+    def aspect(self):
+        return self.width / self.height
+
+    def __del__(self):
+        gl.glDeleteTextures(self.texid)
+
+    def draw(self, x=0, y=0, width=1, height=None, alpha=1.0):
+        if height is None:
+            height = width / self.aspect
+
+        color = (1., 1., 1., alpha)
+
+        gl.glEnable(gl.GL_TEXTURE_2D)
+        gl.glBindTexture(gl.GL_TEXTURE_2D, self.texid)
+
+        self.renderer.draw((x, y), (width, height), (0, self.height / self.th),
+                           (self.width / self.tw, -self.height / self.th), color)
+
+        gl.glDisable(gl.GL_TEXTURE_2D)
 
 def clear(r, g, b, a):
     return

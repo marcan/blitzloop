@@ -17,91 +17,21 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 import OpenGL.GL as gl
-import OpenGL.GLU as glu
-import PIL
 import math
 import time
 
-from blitzloop import util
-
-
-class ImageTexture(object):
-    def __init__(self, img_file, background=(0,0,0)):
-        self.image = PIL.Image.open(img_file)
-
-        self.tw = 1
-        while self.tw < self.width:
-            self.tw *= 2
-        self.th = 1
-        while self.th < self.height:
-            self.th *= 2
-
-        r, g, b = background
-        self.teximage = PIL.Image.new("RGBA", (self.tw, self.th), (r, g, b, 0))
-        self.teximage.paste(self.image, (0,0), self.image)
-
-        self.texid = gl.glGenTextures(1)
-        gl.glBindTexture(gl.GL_TEXTURE_2D, self.texid)
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR_MIPMAP_LINEAR)
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR)
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S, gl.GL_CLAMP)
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T, gl.GL_CLAMP)
-
-        try:
-            blob = self.teximage.tobytes()
-        except AttributeError:
-            blob = self.teximage.tostring()
-
-        glu.gluBuild2DMipmaps(gl.GL_TEXTURE_2D, 4, self.tw, self.th, gl.GL_RGBA,
-                      gl.GL_UNSIGNED_BYTE, blob)
-
-    @property
-    def width(self):
-        return self.image.size[0]
-
-    @property
-    def height(self):
-        return self.image.size[1]
-
-    @property
-    def aspect(self):
-        return self.width / self.height
-
-    def __del__(self):
-        gl.glDeleteTextures(self.texid)
-
-    def draw(self, x=0, y=0, width=1, height=None, brightness=1.0):
-        if height is None:
-            height = width / self.aspect
-
-        gl.glEnable(gl.GL_BLEND)
-        gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA);
-        gl.glActiveTexture(gl.GL_TEXTURE0)
-        gl.glBindTexture(gl.GL_TEXTURE_2D, self.texid)
-        gl.glEnable(gl.GL_TEXTURE_2D)
-        gl.glBegin(gl.GL_TRIANGLE_STRIP)
-        gl.glColor4f(brightness, brightness, brightness,1)
-        gl.glTexCoord2f(0, self.height / self.th)
-        gl.glVertex2f(x, y)
-        gl.glTexCoord2f(self.width / self.tw, self.height / self.th)
-        gl.glVertex2f(x+width, y)
-        gl.glTexCoord2f(0, 0)
-        gl.glVertex2f(x, y+height)
-        gl.glTexCoord2f(self.width / self.tw, 0)
-        gl.glVertex2f(x+width, y+height)
-        gl.glEnd()
-        gl.glDisable(gl.GL_TEXTURE_2D)
-
+from blitzloop import util, graphics
 
 class IdleScreen(object):
     def __init__(self, display):
         self.display = display
-        self.logo = ImageTexture(util.get_resgfx_path("logo.png"), (0,0,0))
-        self.tablet = ImageTexture(util.get_resgfx_path("tablet.png"), (0,0,0))
-        self.hand = ImageTexture(
-                util.get_resgfx_path("hand.png"), (255,255,255))
-        self.silhouette = ImageTexture(
-                util.get_resgfx_path("silhouette.png"), (0,0,0))
+
+        tr = graphics.get_texture_renderer()
+        ImageTexture = graphics.get_renderer().ImageTexture
+        self.logo = ImageTexture(util.get_resgfx_path("logo.png"), tr)
+        self.tablet = ImageTexture(util.get_resgfx_path("tablet.png"), tr)
+        self.hand = ImageTexture(util.get_resgfx_path("hand.png"), tr)
+        self.silhouette = ImageTexture(util.get_resgfx_path("silhouette.png"), tr)
         self.reset()
 
     def reset(self):
@@ -125,8 +55,9 @@ class IdleScreen(object):
         elif self.fade < 1:
             self.fade = min(1, self.fade + 0.015)
 
-        gl.glClearColor(0, 0, 0, 1)
-        gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
+        self.display.gl.glClearColor(0, 0, 0, 1)
+        self.display.gl.glClear(gl.GL_COLOR_BUFFER_BIT | self.display.gl.GL_DEPTH_BUFFER_BIT)
+
         sfac = self.silhouette.aspect / self.display.aspect
         self.silhouette.draw(x=0, width=sfac)
         lx = sfac * 0.7
@@ -139,11 +70,7 @@ class IdleScreen(object):
         self.hand.draw(x=tx + 0.1 - 0.6 * d, y=ty - 0.09 + d, width=0.1)
 
         self.display.set_aspect(None)
-        gl.glBegin(gl.GL_TRIANGLE_STRIP)
-        gl.glColor4f(0, 0, 0, 1-self.fade)
-        gl.glVertex2f(0, 0)
-        gl.glVertex2f(0, 1)
-        gl.glVertex2f(1, 0)
-        gl.glVertex2f(1, 1)
-        gl.glEnd()
+
+        graphics.get_solid_renderer().draw((0, 0), (1, 1),
+                                           (0., 0., 0., 1 - self.fade))
 

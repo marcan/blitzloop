@@ -44,6 +44,13 @@ def get_solid_renderer():
         _solid_renderer = get_renderer().SolidRenderer(_display)
     return _solid_renderer
 
+_texture_renderer = None
+def get_texture_renderer():
+    global _texture_renderer
+    if _texture_renderer is None:
+        _texture_renderer = get_renderer().TextureRenderer(_display)
+    return _texture_renderer
+
 def GL():
     return get_renderer().gl
 
