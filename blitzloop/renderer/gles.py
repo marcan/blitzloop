@@ -415,7 +415,7 @@ class TextureRenderer(SolidRenderer):
 class ImageTexture(object):
     def __init__(self, img_file, texture_renderer):
         self.renderer = texture_renderer
-        self.image = PIL.Image.open(img_file)
+        self.image = PIL.Image.open(img_file).convert("RGBA")
 
         self.tw = 1
         while self.tw < self.width:
