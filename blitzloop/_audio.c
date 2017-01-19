@@ -1601,6 +1601,7 @@ static int __pyx_f_9blitzloop_6_audio_11AudioEngine_process(struct __pyx_obj_9bl
   float __pyx_v_s;
   float __pyx_v_acc;
   int __pyx_v_p;
+  double __pyx_v_v;
   int __pyx_r;
   int __pyx_t_1;
   int __pyx_t_2;
@@ -1763,7 +1764,7 @@ static int __pyx_f_9blitzloop_6_audio_11AudioEngine_process(struct __pyx_obj_9bl
  *                 p += self.delay_max
  *             acc = 0             # <<<<<<<<<<<<<<
  *             for j in range(self.num_mics):
- *                 acc += self.mic_volume[j] * i_mic[j][i]
+ *                 v = i_mic[j][i]
  */
     __pyx_v_acc = 0.0;
 
@@ -1771,8 +1772,8 @@ static int __pyx_f_9blitzloop_6_audio_11AudioEngine_process(struct __pyx_obj_9bl
  *                 p += self.delay_max
  *             acc = 0
  *             for j in range(self.num_mics):             # <<<<<<<<<<<<<<
- *                 acc += self.mic_volume[j] * i_mic[j][i]
- *             s = self.delay_buf[p] * self.mic_feedback + acc
+ *                 v = i_mic[j][i]
+ *                 if v > 1.0:
  */
     __pyx_t_2 = __pyx_v_self->num_mics;
     for (__pyx_t_4 = 0; __pyx_t_4 < __pyx_t_2; __pyx_t_4+=1) {
@@ -1781,24 +1782,89 @@ static int __pyx_f_9blitzloop_6_audio_11AudioEngine_process(struct __pyx_obj_9bl
       /* "blitzloop/_audio.pyx":145
  *             acc = 0
  *             for j in range(self.num_mics):
- *                 acc += self.mic_volume[j] * i_mic[j][i]             # <<<<<<<<<<<<<<
+ *                 v = i_mic[j][i]             # <<<<<<<<<<<<<<
+ *                 if v > 1.0:
+ *                     v = 1.0
+ */
+      __pyx_v_v = ((__pyx_v_i_mic[__pyx_v_j])[__pyx_v_i]);
+
+      /* "blitzloop/_audio.pyx":146
+ *             for j in range(self.num_mics):
+ *                 v = i_mic[j][i]
+ *                 if v > 1.0:             # <<<<<<<<<<<<<<
+ *                     v = 1.0
+ *                 if v < -1.0:
+ */
+      __pyx_t_3 = ((__pyx_v_v > 1.0) != 0);
+      if (__pyx_t_3) {
+
+        /* "blitzloop/_audio.pyx":147
+ *                 v = i_mic[j][i]
+ *                 if v > 1.0:
+ *                     v = 1.0             # <<<<<<<<<<<<<<
+ *                 if v < -1.0:
+ *                     v = -1.0
+ */
+        __pyx_v_v = 1.0;
+
+        /* "blitzloop/_audio.pyx":146
+ *             for j in range(self.num_mics):
+ *                 v = i_mic[j][i]
+ *                 if v > 1.0:             # <<<<<<<<<<<<<<
+ *                     v = 1.0
+ *                 if v < -1.0:
+ */
+      }
+
+      /* "blitzloop/_audio.pyx":148
+ *                 if v > 1.0:
+ *                     v = 1.0
+ *                 if v < -1.0:             # <<<<<<<<<<<<<<
+ *                     v = -1.0
+ *                 acc += self.mic_volume[j] * v
+ */
+      __pyx_t_3 = ((__pyx_v_v < -1.0) != 0);
+      if (__pyx_t_3) {
+
+        /* "blitzloop/_audio.pyx":149
+ *                     v = 1.0
+ *                 if v < -1.0:
+ *                     v = -1.0             # <<<<<<<<<<<<<<
+ *                 acc += self.mic_volume[j] * v
+ *             s = self.delay_buf[p] * self.mic_feedback + acc
+ */
+        __pyx_v_v = -1.0;
+
+        /* "blitzloop/_audio.pyx":148
+ *                 if v > 1.0:
+ *                     v = 1.0
+ *                 if v < -1.0:             # <<<<<<<<<<<<<<
+ *                     v = -1.0
+ *                 acc += self.mic_volume[j] * v
+ */
+      }
+
+      /* "blitzloop/_audio.pyx":150
+ *                 if v < -1.0:
+ *                     v = -1.0
+ *                 acc += self.mic_volume[j] * v             # <<<<<<<<<<<<<<
  *             s = self.delay_buf[p] * self.mic_feedback + acc
  *             o_l[i] = s
  */
-      __pyx_v_acc = (__pyx_v_acc + ((__pyx_v_self->mic_volume[__pyx_v_j]) * ((__pyx_v_i_mic[__pyx_v_j])[__pyx_v_i])));
+      __pyx_v_acc = (__pyx_v_acc + ((__pyx_v_self->mic_volume[__pyx_v_j]) * __pyx_v_v));
     }
 
-    /* "blitzloop/_audio.pyx":146
- *             for j in range(self.num_mics):
- *                 acc += self.mic_volume[j] * i_mic[j][i]
+    /* "blitzloop/_audio.pyx":151
+ *                     v = -1.0
+ *                 acc += self.mic_volume[j] * v
  *             s = self.delay_buf[p] * self.mic_feedback + acc             # <<<<<<<<<<<<<<
  *             o_l[i] = s
  *             o_r[i] = s
  */
     __pyx_v_s = (((__pyx_v_self->delay_buf[__pyx_v_p]) * __pyx_v_self->mic_feedback) + __pyx_v_acc);
 
-    /* "blitzloop/_audio.pyx":147
- *                 acc += self.mic_volume[j] * i_mic[j][i]
+    /* "blitzloop/_audio.pyx":152
+ *                 acc += self.mic_volume[j] * v
  *             s = self.delay_buf[p] * self.mic_feedback + acc
  *             o_l[i] = s             # <<<<<<<<<<<<<<
  *             o_r[i] = s
@@ -1806,7 +1872,7 @@ static int __pyx_f_9blitzloop_6_audio_11AudioEngine_process(struct __pyx_obj_9bl
  */
     (__pyx_v_o_l[__pyx_v_i]) = __pyx_v_s;
 
-    /* "blitzloop/_audio.pyx":148
+    /* "blitzloop/_audio.pyx":153
  *             s = self.delay_buf[p] * self.mic_feedback + acc
  *             o_l[i] = s
  *             o_r[i] = s             # <<<<<<<<<<<<<<
@@ -1815,7 +1881,7 @@ static int __pyx_f_9blitzloop_6_audio_11AudioEngine_process(struct __pyx_obj_9bl
  */
     (__pyx_v_o_r[__pyx_v_i]) = __pyx_v_s;
 
-    /* "blitzloop/_audio.pyx":149
+    /* "blitzloop/_audio.pyx":154
  *             o_l[i] = s
  *             o_r[i] = s
  *             self.delay_buf[self.delay_ptr] = s             # <<<<<<<<<<<<<<
@@ -1824,7 +1890,7 @@ static int __pyx_f_9blitzloop_6_audio_11AudioEngine_process(struct __pyx_obj_9bl
  */
     (__pyx_v_self->delay_buf[__pyx_v_self->delay_ptr]) = __pyx_v_s;
 
-    /* "blitzloop/_audio.pyx":150
+    /* "blitzloop/_audio.pyx":155
  *             o_r[i] = s
  *             self.delay_buf[self.delay_ptr] = s
  *             self.delay_ptr += 1             # <<<<<<<<<<<<<<
@@ -1833,7 +1899,7 @@ static int __pyx_f_9blitzloop_6_audio_11AudioEngine_process(struct __pyx_obj_9bl
  */
     __pyx_v_self->delay_ptr = (__pyx_v_self->delay_ptr + 1);
 
-    /* "blitzloop/_audio.pyx":151
+    /* "blitzloop/_audio.pyx":156
  *             self.delay_buf[self.delay_ptr] = s
  *             self.delay_ptr += 1
  *             if self.delay_ptr >= self.delay_max:             # <<<<<<<<<<<<<<
@@ -1843,7 +1909,7 @@ static int __pyx_f_9blitzloop_6_audio_11AudioEngine_process(struct __pyx_obj_9bl
     __pyx_t_3 = ((__pyx_v_self->delay_ptr >= __pyx_v_self->delay_max) != 0);
     if (__pyx_t_3) {
 
-      /* "blitzloop/_audio.pyx":152
+      /* "blitzloop/_audio.pyx":157
  *             self.delay_ptr += 1
  *             if self.delay_ptr >= self.delay_max:
  *                 self.delay_ptr = 0             # <<<<<<<<<<<<<<
@@ -1852,7 +1918,7 @@ static int __pyx_f_9blitzloop_6_audio_11AudioEngine_process(struct __pyx_obj_9bl
  */
       __pyx_v_self->delay_ptr = 0;
 
-      /* "blitzloop/_audio.pyx":151
+      /* "blitzloop/_audio.pyx":156
  *             self.delay_buf[self.delay_ptr] = s
  *             self.delay_ptr += 1
  *             if self.delay_ptr >= self.delay_max:             # <<<<<<<<<<<<<<
@@ -1875,7 +1941,7 @@ static int __pyx_f_9blitzloop_6_audio_11AudioEngine_process(struct __pyx_obj_9bl
   return __pyx_r;
 }
 
-/* "blitzloop/_audio.pyx":154
+/* "blitzloop/_audio.pyx":159
  *                 self.delay_ptr = 0
  * 
  *     def shutdown(self):             # <<<<<<<<<<<<<<
@@ -1902,7 +1968,7 @@ static PyObject *__pyx_pf_9blitzloop_6_audio_11AudioEngine_2shutdown(struct __py
   int __pyx_t_1;
   __Pyx_RefNannySetupContext("shutdown", 0);
 
-  /* "blitzloop/_audio.pyx":155
+  /* "blitzloop/_audio.pyx":160
  * 
  *     def shutdown(self):
  *         if self.dead:             # <<<<<<<<<<<<<<
@@ -1912,7 +1978,7 @@ static PyObject *__pyx_pf_9blitzloop_6_audio_11AudioEngine_2shutdown(struct __py
   __pyx_t_1 = (__pyx_v_self->dead != 0);
   if (__pyx_t_1) {
 
-    /* "blitzloop/_audio.pyx":156
+    /* "blitzloop/_audio.pyx":161
  *     def shutdown(self):
  *         if self.dead:
  *             return             # <<<<<<<<<<<<<<
@@ -1923,7 +1989,7 @@ static PyObject *__pyx_pf_9blitzloop_6_audio_11AudioEngine_2shutdown(struct __py
     __pyx_r = Py_None; __Pyx_INCREF(Py_None);
     goto __pyx_L0;
 
-    /* "blitzloop/_audio.pyx":155
+    /* "blitzloop/_audio.pyx":160
  * 
  *     def shutdown(self):
  *         if self.dead:             # <<<<<<<<<<<<<<
@@ -1932,7 +1998,7 @@ static PyObject *__pyx_pf_9blitzloop_6_audio_11AudioEngine_2shutdown(struct __py
  */
   }
 
-  /* "blitzloop/_audio.pyx":157
+  /* "blitzloop/_audio.pyx":162
  *         if self.dead:
  *             return
  *         jack_client_close(self.client)             # <<<<<<<<<<<<<<
@@ -1941,7 +2007,7 @@ static PyObject *__pyx_pf_9blitzloop_6_audio_11AudioEngine_2shutdown(struct __py
  */
   jack_client_close(__pyx_v_self->client);
 
-  /* "blitzloop/_audio.pyx":158
+  /* "blitzloop/_audio.pyx":163
  *             return
  *         jack_client_close(self.client)
  *         free(self.delay_buf)             # <<<<<<<<<<<<<<
@@ -1950,7 +2016,7 @@ static PyObject *__pyx_pf_9blitzloop_6_audio_11AudioEngine_2shutdown(struct __py
  */
   free(__pyx_v_self->delay_buf);
 
-  /* "blitzloop/_audio.pyx":159
+  /* "blitzloop/_audio.pyx":164
  *         jack_client_close(self.client)
  *         free(self.delay_buf)
  *         self.delay_buf = NULL             # <<<<<<<<<<<<<<
@@ -1959,7 +2025,7 @@ static PyObject *__pyx_pf_9blitzloop_6_audio_11AudioEngine_2shutdown(struct __py
  */
   __pyx_v_self->delay_buf = NULL;
 
-  /* "blitzloop/_audio.pyx":160
+  /* "blitzloop/_audio.pyx":165
  *         free(self.delay_buf)
  *         self.delay_buf = NULL
  *         self.dead = True             # <<<<<<<<<<<<<<
@@ -1968,7 +2034,7 @@ static PyObject *__pyx_pf_9blitzloop_6_audio_11AudioEngine_2shutdown(struct __py
  */
   __pyx_v_self->dead = 1;
 
-  /* "blitzloop/_audio.pyx":154
+  /* "blitzloop/_audio.pyx":159
  *                 self.delay_ptr = 0
  * 
  *     def shutdown(self):             # <<<<<<<<<<<<<<
@@ -1984,7 +2050,7 @@ static PyObject *__pyx_pf_9blitzloop_6_audio_11AudioEngine_2shutdown(struct __py
   return __pyx_r;
 }
 
-/* "blitzloop/_audio.pyx":162
+/* "blitzloop/_audio.pyx":167
  *         self.dead = True
  * 
  *     def set_mic_volume(self, channel, value):             # <<<<<<<<<<<<<<
@@ -2020,11 +2086,11 @@ static PyObject *__pyx_pw_9blitzloop_6_audio_11AudioEngine_5set_mic_volume(PyObj
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_value)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("set_mic_volume", 1, 2, 2, 1); __PYX_ERR(0, 162, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("set_mic_volume", 1, 2, 2, 1); __PYX_ERR(0, 167, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "set_mic_volume") < 0)) __PYX_ERR(0, 162, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "set_mic_volume") < 0)) __PYX_ERR(0, 167, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -2037,7 +2103,7 @@ static PyObject *__pyx_pw_9blitzloop_6_audio_11AudioEngine_5set_mic_volume(PyObj
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("set_mic_volume", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 162, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("set_mic_volume", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 167, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("blitzloop._audio.AudioEngine.set_mic_volume", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -2057,18 +2123,18 @@ static PyObject *__pyx_pf_9blitzloop_6_audio_11AudioEngine_4set_mic_volume(struc
   Py_ssize_t __pyx_t_2;
   __Pyx_RefNannySetupContext("set_mic_volume", 0);
 
-  /* "blitzloop/_audio.pyx":163
+  /* "blitzloop/_audio.pyx":168
  * 
  *     def set_mic_volume(self, channel, value):
  *         self.mic_volume[channel] = value             # <<<<<<<<<<<<<<
  * 
  *     def set_mic_delay(self, value):
  */
-  __pyx_t_1 = __pyx_PyFloat_AsFloat(__pyx_v_value); if (unlikely((__pyx_t_1 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 163, __pyx_L1_error)
-  __pyx_t_2 = __Pyx_PyIndex_AsSsize_t(__pyx_v_channel); if (unlikely((__pyx_t_2 == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 163, __pyx_L1_error)
+  __pyx_t_1 = __pyx_PyFloat_AsFloat(__pyx_v_value); if (unlikely((__pyx_t_1 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 168, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyIndex_AsSsize_t(__pyx_v_channel); if (unlikely((__pyx_t_2 == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 168, __pyx_L1_error)
   (__pyx_v_self->mic_volume[__pyx_t_2]) = __pyx_t_1;
 
-  /* "blitzloop/_audio.pyx":162
+  /* "blitzloop/_audio.pyx":167
  *         self.dead = True
  * 
  *     def set_mic_volume(self, channel, value):             # <<<<<<<<<<<<<<
@@ -2088,7 +2154,7 @@ static PyObject *__pyx_pf_9blitzloop_6_audio_11AudioEngine_4set_mic_volume(struc
   return __pyx_r;
 }
 
-/* "blitzloop/_audio.pyx":165
+/* "blitzloop/_audio.pyx":170
  *         self.mic_volume[channel] = value
  * 
  *     def set_mic_delay(self, value):             # <<<<<<<<<<<<<<
@@ -2115,17 +2181,17 @@ static PyObject *__pyx_pf_9blitzloop_6_audio_11AudioEngine_6set_mic_delay(struct
   float __pyx_t_1;
   __Pyx_RefNannySetupContext("set_mic_delay", 0);
 
-  /* "blitzloop/_audio.pyx":166
+  /* "blitzloop/_audio.pyx":171
  * 
  *     def set_mic_delay(self, value):
  *         self.mic_delay = value             # <<<<<<<<<<<<<<
  * 
  *     def set_mic_feedback(self, value):
  */
-  __pyx_t_1 = __pyx_PyFloat_AsFloat(__pyx_v_value); if (unlikely((__pyx_t_1 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 166, __pyx_L1_error)
+  __pyx_t_1 = __pyx_PyFloat_AsFloat(__pyx_v_value); if (unlikely((__pyx_t_1 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 171, __pyx_L1_error)
   __pyx_v_self->mic_delay = __pyx_t_1;
 
-  /* "blitzloop/_audio.pyx":165
+  /* "blitzloop/_audio.pyx":170
  *         self.mic_volume[channel] = value
  * 
  *     def set_mic_delay(self, value):             # <<<<<<<<<<<<<<
@@ -2145,7 +2211,7 @@ static PyObject *__pyx_pf_9blitzloop_6_audio_11AudioEngine_6set_mic_delay(struct
   return __pyx_r;
 }
 
-/* "blitzloop/_audio.pyx":168
+/* "blitzloop/_audio.pyx":173
  *         self.mic_delay = value
  * 
  *     def set_mic_feedback(self, value):             # <<<<<<<<<<<<<<
@@ -2172,17 +2238,17 @@ static PyObject *__pyx_pf_9blitzloop_6_audio_11AudioEngine_8set_mic_feedback(str
   float __pyx_t_1;
   __Pyx_RefNannySetupContext("set_mic_feedback", 0);
 
-  /* "blitzloop/_audio.pyx":169
+  /* "blitzloop/_audio.pyx":174
  * 
  *     def set_mic_feedback(self, value):
  *         self.mic_feedback = value             # <<<<<<<<<<<<<<
  * 
  *     def __del__(self):
  */
-  __pyx_t_1 = __pyx_PyFloat_AsFloat(__pyx_v_value); if (unlikely((__pyx_t_1 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 169, __pyx_L1_error)
+  __pyx_t_1 = __pyx_PyFloat_AsFloat(__pyx_v_value); if (unlikely((__pyx_t_1 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 174, __pyx_L1_error)
   __pyx_v_self->mic_feedback = __pyx_t_1;
 
-  /* "blitzloop/_audio.pyx":168
+  /* "blitzloop/_audio.pyx":173
  *         self.mic_delay = value
  * 
  *     def set_mic_feedback(self, value):             # <<<<<<<<<<<<<<
@@ -2202,7 +2268,7 @@ static PyObject *__pyx_pf_9blitzloop_6_audio_11AudioEngine_8set_mic_feedback(str
   return __pyx_r;
 }
 
-/* "blitzloop/_audio.pyx":171
+/* "blitzloop/_audio.pyx":176
  *         self.mic_feedback = value
  * 
  *     def __del__(self):             # <<<<<<<<<<<<<<
@@ -2230,12 +2296,12 @@ static PyObject *__pyx_pf_9blitzloop_6_audio_11AudioEngine_10__del__(struct __py
   PyObject *__pyx_t_3 = NULL;
   __Pyx_RefNannySetupContext("__del__", 0);
 
-  /* "blitzloop/_audio.pyx":172
+  /* "blitzloop/_audio.pyx":177
  * 
  *     def __del__(self):
  *         self.shutdown()             # <<<<<<<<<<<<<<
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_shutdown); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 172, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_shutdown); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 177, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_3 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
@@ -2248,16 +2314,16 @@ static PyObject *__pyx_pf_9blitzloop_6_audio_11AudioEngine_10__del__(struct __py
     }
   }
   if (__pyx_t_3) {
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 172, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 177, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   } else {
-    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 172, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 177, __pyx_L1_error)
   }
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "blitzloop/_audio.pyx":171
+  /* "blitzloop/_audio.pyx":176
  *         self.mic_feedback = value
  * 
  *     def __del__(self):             # <<<<<<<<<<<<<<

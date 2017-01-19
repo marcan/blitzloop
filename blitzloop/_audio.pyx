@@ -142,7 +142,12 @@ cdef class AudioEngine:
                 p += self.delay_max
             acc = 0
             for j in range(self.num_mics):
-                acc += self.mic_volume[j] * i_mic[j][i]
+                v = i_mic[j][i]
+                if v > 1.0:
+                    v = 1.0
+                if v < -1.0:
+                    v = -1.0
+                acc += self.mic_volume[j] * v
             s = self.delay_buf[p] * self.mic_feedback + acc
             o_l[i] = s
             o_r[i] = s
