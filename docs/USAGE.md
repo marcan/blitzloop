@@ -4,10 +4,11 @@ There's a couple of command line flags you can use with `blitzloop` - run
 `blitzloop --help` to see them. All of them can be overriden via one of two
 config files:
 
- * `/etc/blitzloop/cfg`
- * `~/.blitzloop/cfg`
+ * `/etc/blitzloop/blitzloop.conf`
+ * `$XDG_CONFIG_HOME/blitzloop/blitzloop.conf` (generally
+   `~/.config/blitzloop/blitzloop.conf`)
 
-See [this file][example.cfg] for an example. You don't **need** a config file,
+See [this file][example.conf] for an example. You don't **need** a config file,
 if you're happy with defaults.
 
 # One shot

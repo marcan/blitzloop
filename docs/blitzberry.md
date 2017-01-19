@@ -105,8 +105,8 @@ cd ~
 python -m venv blitz --system-site-packages
 source blitz/bin/activate
 pip install 'git+git://github.com/marcan/blitzloop.git'
-mkdir -p ~/.blitzloop
-cat <<EOF >~/.blitzloop/cfg
+mkdir -p ~/.config/blitzloop
+cat <<EOF >~/.config/blitzloop/blitzloop.conf
 display=rpi
 fps=60
 mpv-vo=rpi
@@ -115,7 +115,7 @@ EOF
 
 ### Get songs
 
-Put your songs in `/home/alarm/.blitzloop/songs/` (create it first).
+Put your songs in `/home/alarm/.local/share/blitzloop/songs/` (create it first).
 
 ### Test out BlitzLoop
 

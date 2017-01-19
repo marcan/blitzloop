@@ -29,8 +29,13 @@ CFG = {
 }
 
 def init_argparser():
+    config_home = os.getenv('XDG_CONFIG_HOME', '~/.config')
+    home = os.getenv('HOME')
+    if config_home.startswith(home):
+        config_home = '~' + config_home[len(home):]
+    config_file = os.path.join(config_home, 'blitzloop', 'blitzloop.conf')
     configargparse.init_argument_parser(
-            default_config_files=['/etc/blitzloop/cfg', '~/.blitzloop/cfg'])
+            default_config_files=['/etc/blitzloop/blitzloop.conf', config_file])
     parser = configargparse.get_argument_parser()
     parser.add_argument(
         '--fullscreen', default=False, action='store_true',
