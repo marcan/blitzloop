@@ -198,7 +198,7 @@ def queue_remove(qid):
         return HTTPError(404)
     except ValueError:
         return HTTPError(500)
-    return ""
+    return "OK"
 
 @route("/queue/change/<qid:int>", method="POST")
 def queue_change(qid):
@@ -240,6 +240,7 @@ def settings_change():
     for attr in ("volume", "headstart", "mic_channels", "mic_feedback", "mic_delay"):
         if attr in request.json:
             setattr(audio_config, attr, request.json[attr])
+    return "OK"
 
 def queue_change(qid):
     try:
