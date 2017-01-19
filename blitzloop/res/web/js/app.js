@@ -353,7 +353,7 @@ app.controller('SettingsCtrl', function($scope, $rootScope, $routeParams, $http,
             $scope.settings = data;
             $scope.serverSettings = angular.toJson($scope.settings);
             $scope.loaded = true;
-            $nudge();
+            nudge();
         }).error(function(data) {
             $location.path("/settings")
         });
