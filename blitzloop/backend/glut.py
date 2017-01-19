@@ -45,6 +45,8 @@ class Display(BaseDisplay):
         glut.glutKeyboardFunc(self._on_keyboard)
         glut.glutSpecialFunc(self._on_keyboard)
 
+        self._initialize()
+
     def _on_reshape(self, width, height):
         self.win_width = width
         self.win_height = height

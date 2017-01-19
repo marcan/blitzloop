@@ -31,6 +31,7 @@ class BaseDisplay(object):
         self.viewmatrix = Matrix()
         self.set_aspect(aspect)
         self.clear_color = self.BLACK
+        self.cleanup = None
 
     def set_aspect(self, aspect):
         if aspect is None:
@@ -65,6 +66,12 @@ class BaseDisplay(object):
 
     def set_keyboard_handler(self, f):
         self.kbd_handler = f
+
+    def _initialize(self):
+        # Set up common GL state
+        self.gl.glActiveTexture(self.gl.GL_TEXTURE0)
+        self.gl.glBlendFunc(self.gl.GL_ONE, self.gl.GL_ONE_MINUS_SRC_ALPHA)
+        self.gl.glEnable(self.gl.GL_BLEND)
 
     def _render(self):
         self.matrix.reset()

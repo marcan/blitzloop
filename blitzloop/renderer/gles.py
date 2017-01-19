@@ -241,8 +241,6 @@ class RenderedLine(object):
             self.display.matrix.translate(x, y)
             self.display.commit_matrix(renderer.l_transform)
 
-            renderer.enable_attribs()
-
             stride = 25*4
             off = 0
             off += renderer.attrib_pointer("coords", stride, off, self.vbo)
@@ -257,8 +255,9 @@ class RenderedLine(object):
 
             gl.glDrawElements(gl.GL_TRIANGLES, 6*self.count, gl.GL_UNSIGNED_SHORT, self.ibo)
 
-            renderer.disable_attribs()
             self.display.matrix.pop()
+
+_current_renderer = None
 
 class BaseRenderer(object):
     TYPE_LEN = {
@@ -291,6 +290,19 @@ class BaseRenderer(object):
             if i >= 0:
                 gl.glDisableVertexAttribArray(i)
 
+    def activate(self):
+        global _current_renderer
+        if _current_renderer is not self:
+            if _current_renderer is not None:
+                _current_renderer.cleanup()
+            self.setup()
+            _current_renderer = self
+
+    def setup(self):
+        pass
+    def cleanup(self):
+        pass
+
 class KaraokeRenderer(BaseRenderer):
     UNIFORMS = [
         "tex", "time", "transform",
@@ -311,15 +323,20 @@ class KaraokeRenderer(BaseRenderer):
         BaseRenderer.__init__(self, display)
         self.atlas = texture_font.TextureAtlas(depth=3)
 
-    def draw(self, time, layout):
-        gl.glActiveTexture(gl.GL_TEXTURE0)
+    def setup(self):
         gl.glBindTexture(gl.GL_TEXTURE_2D, self.atlas.texid)
-        gl.glBlendFunc(gl.GL_ONE, gl.GL_ONE_MINUS_SRC_ALPHA)
-        gl.glEnable(gl.GL_BLEND)
-        with self.shader:
-            gl.glUniform1i(self.l_tex, 0)
-            gl.glUniform1f(self.l_time, time)
-            layout.draw(time, self)
+        gl.glUseProgram(self.shader)
+        gl.glUniform1i(self.l_tex, 0)
+        self.enable_attribs()
+
+    def draw(self, time, layout):
+        self.activate()
+        gl.glUniform1f(self.l_time, time)
+        layout.draw(time, self)
+
+    def cleanup(self):
+        self.disable_attribs()
+        gl.glUseProgram(0)
 
     def reset(self):
         self.atlas = texture_font.TextureAtlas(depth=3)
@@ -346,50 +363,54 @@ class SolidRenderer(BaseRenderer):
         self.vbo = vbo.VBO(np.asarray(vbodata, np.float32), gl.GL_STATIC_DRAW, gl.GL_ARRAY_BUFFER)
         self.ibo = vbo.VBO(np.asarray(idxdata, np.uint16), gl.GL_STATIC_DRAW, gl.GL_ELEMENT_ARRAY_BUFFER)
 
+    def setup(self):
+        gl.glUseProgram(self.shader)
+        self.vbo.bind()
+        self.ibo.bind()
+        self.enable_attribs()
+        stride = 3*4
+        off = 0
+        off += self.attrib_pointer("coord", stride, off, self.vbo)
+        assert off == stride
+
     def draw(self, pos, size, color):
-        with self.shader, self.vbo, self.ibo:
-            self._draw(pos, size, color)
+        self.activate()
+        self.display.matrix.push()
+        self.display.matrix.translate(*pos)
+        self.display.matrix.scale(*size)
+        self.display.commit_matrix(self.l_transform)
+        gl.glUniform4f(self.l_color, *color)
+        gl.glDrawElements(gl.GL_TRIANGLES, 6, gl.GL_UNSIGNED_SHORT, self.ibo)
+        self.display.matrix.pop()
 
-    def _draw(self, pos, size, color):
-            self.display.matrix.push()
-            self.display.matrix.translate(*pos)
-            self.display.matrix.scale(*size)
-            self.display.commit_matrix(self.l_transform)
-
-            self.enable_attribs()
-
-            stride = 3*4
-            off = 0
-            off += self.attrib_pointer("coord", stride, off, self.vbo)
-            assert off == stride
-
-            gl.glBlendFunc(gl.GL_ONE, gl.GL_ONE_MINUS_SRC_ALPHA)
-            gl.glEnable(gl.GL_BLEND)
-            gl.glUniform4f(self.l_color, *color)
-
-            gl.glDrawElements(gl.GL_TRIANGLES, 6, gl.GL_UNSIGNED_SHORT, self.ibo)
-
-            self.disable_attribs()
-            self.display.matrix.pop()
+    def cleanup(self):
+        self.disable_attribs()
+        self.ibo.unbind()
+        self.vbo.unbind()
+        gl.glUseProgram(0)
 
 class TextureRenderer(SolidRenderer):
     UNIFORMS = [
-        "color", "transform", "textransform"
+        "tex", "color", "transform", "textransform"
     ]
     VS = vs_texture
     FS = fs_texture
 
     def __init__(self, display):
         SolidRenderer.__init__(self, display)
+        self.tmatrix = Matrix()
+
+    def setup(self):
+        SolidRenderer.setup(self)
+        gl.glUniform1i(self.l_tex, 0)
 
     def draw(self, pos, size, tpos, tsize, color):
-        with self.shader, self.vbo, self.ibo:
-            tmatrix = Matrix()
-            tmatrix.translate(*tpos)
-            tmatrix.scale(*tsize)
-            gl.glUniformMatrix4fv(self.l_textransform, 1, False, tmatrix.m.transpose())
-
-            self._draw(pos, size, color)
+        self.activate()
+        self.tmatrix.reset()
+        self.tmatrix.translate(*tpos)
+        self.tmatrix.scale(*tsize)
+        gl.glUniformMatrix4fv(self.l_textransform, 1, False, self.tmatrix.m.transpose())
+        SolidRenderer.draw(self, pos, size, color)
 
 class ImageTexture(object):
     def __init__(self, img_file, texture_renderer):
@@ -449,7 +470,6 @@ class ImageTexture(object):
 
         color = (1., 1., 1., alpha)
 
-        gl.glActiveTexture(gl.GL_TEXTURE0)
         gl.glBindTexture(gl.GL_TEXTURE_2D, self.texid)
 
         self.renderer.draw((x, y), (width, height), (0, self.height / self.th),
