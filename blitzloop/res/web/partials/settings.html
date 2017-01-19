@@ -4,9 +4,9 @@
 		<slider ng-model="settings.volume" min="0" max="100">Volume</slider>
 		<slider ng-model="settings.headstart" min="0" max="50">Sync</slider>
 	</div>
-	<div class="section">
+	<div class="section" ng-show="settings.mic_channels.length > 0">
 		<h2 translate>Microphone</h2>
-		<slider ng-model="settings.mic_volume" min="0" max="100">Volume</slider>
+		<slider ng-repeat="c in settings.mic_channels" ng-model="c.volume" min="0" max="100"><span translate>Volume</span> {{$parent.$index + 1}}</slider>
 		<slider ng-model="settings.mic_feedback" min="0" max="50">Echo</slider>
 		<slider ng-model="settings.mic_delay" min="5" max="25">Delay</slider>
 	</div>

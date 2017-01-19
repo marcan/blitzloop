@@ -25,6 +25,9 @@ from blitzloop._audio import *
 data_home = os.getenv('XDG_DATA_HOME', '~/.local/share')
 songs_dir = os.path.join(data_home, 'blitzloop', 'songs')
 
+def csv_list(s):
+    return s.split(",")
+
 parser = util.get_argparser()
 parser.add_argument(
     '--songdir', default=os.path.expanduser(songs_dir),
@@ -39,6 +42,9 @@ parser.add_argument(
 parser.add_argument(
     '--no-audioengine', action="store_true",
     help='Disable JACK-based audio engine (mic echo effect)')
+parser.add_argument(
+    '--mics', type=csv_list, default=[b"system:capture_1"],
+    help='Mic input connections (list of JACK ports)')
 opts = util.get_opts()
 
 songs_dir = os.path.expanduser(opts.songdir)
@@ -51,16 +57,21 @@ display = graphics.Display(opts.width, opts.height, opts.fullscreen)
 renderer = graphics.get_renderer().KaraokeRenderer(display)
 mpv = mpvplayer.Player(display)
 
-if not opts.no_audioengine:
-    audio = AudioEngine()
+if not opts.no_audioengine and opts.mics:
+    print(repr(opts.mics))
+    audio = AudioEngine([s.encode("ascii") for s in opts.mics])
     print("Engine sample rate: %dHz" % audio.sample_rate)
 
 queue = songlist.SongQueue()
 
 class AudioConfig(object):
     def __init__(self):
+        self.nmics = len(opts.mics) if not opts.no_audioengine else 0
         self.volume = 50
-        self.mic_volume = 80
+        if opts.no_audioengine:
+            self.mic_channels = []
+        else:
+            self.mic_channels = [{"volume": 80} for i in range(self.nmics)]
         self.mic_feedback = 20
         self.mic_delay = 12
         self.headstart = 30
@@ -68,7 +79,8 @@ class AudioConfig(object):
     def update(self, song=None):
         mpv.set_volume(self.volume / 200.0)
         if not opts.no_audioengine:
-            audio.set_mic_volume(self.mic_volume / 100.0)
+            for i, j in enumerate(self.mic_channels):
+                audio.set_mic_volume(i, j["volume"] / 100.0)
             audio.set_mic_feedback(self.mic_feedback / 100.0)
             audio.set_mic_delay(self.mic_delay / 100.0)
 

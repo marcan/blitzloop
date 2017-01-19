@@ -396,7 +396,9 @@ app.controller('SettingsCtrl', function($scope, $rootScope, $routeParams, $http,
     $scope.reset = function() {
         $scope.settings.volume = 50;
         $scope.settings.headstart = 30;
-        $scope.settings.mic_volume = 80;
+        for (var i = 0; i < $scope.settings.mic_channels.length; i++) {
+            $scope.settings.mic_channels[i].volume = 80;
+        }
         $scope.settings.mic_feedback = 20;
         $scope.settings.mic_delay = 12;
     }

@@ -67,14 +67,15 @@ cdef void _shutdown_cb(void *arg) nogil:
 cdef class AudioEngine:
     cdef:
         jack_client_t *client
-        jack_port_t *in_mic
+        jack_port_t *in_mic[32]
         jack_port_t *out_l
         jack_port_t *out_r
         int _sample_rate
 
         int dead
+        int num_mics
 
-        float mic_volume
+        float mic_volume[32]
         float mic_feedback
         float mic_delay
 
@@ -85,9 +86,8 @@ cdef class AudioEngine:
     def sample_rate(self):
         return self._sample_rate
 
-    def __init__(self):
+    def __init__(self, mics):
         self.dead = False
-        self.mic_volume = 0.8
         self.mic_delay = 0.12
         self.mic_feedback = 0.3
         self.delay_ptr = 0;
@@ -98,7 +98,11 @@ cdef class AudioEngine:
         jack_set_process_callback(self.client, _process_cb, <void *>self)
         jack_on_shutdown(self.client, _shutdown_cb, NULL)
 
-        self.in_mic = jack_port_register(self.client, "mic", JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0)
+        self.num_mics = len(mics)
+        for i in range(self.num_mics):
+            self.mic_volume[i] = 0.8
+            name = str("mic_%d" % i).encode("ascii")
+            self.in_mic[i] = jack_port_register(self.client, name, JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0)
         self.out_l = jack_port_register(self.client, "l", JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0)
         self.out_r = jack_port_register(self.client, "r", JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0)
 
@@ -110,32 +114,38 @@ cdef class AudioEngine:
 
         jack_activate(self.client)
 
-        jack_connect(self.client, "system:capture_1", jack_port_name(self.in_mic))
+        for i in range(self.num_mics):
+            jack_connect(self.client, mics[i], jack_port_name(self.in_mic[i]))
         jack_connect(self.client, jack_port_name(self.out_l), "system:playback_1")
         jack_connect(self.client, jack_port_name(self.out_r), "system:playback_2")
 
     cdef int process(self, jack_nframes_t nframes) nogil:
-        cdef float *i_mic = <float *>jack_port_get_buffer(self.in_mic, nframes)
+        cdef float *i_mic[32]
+        cdef int i, j
+
+        for i in range(self.num_mics):
+            i_mic[i] = <float *>jack_port_get_buffer(self.in_mic[i], nframes)
         cdef float *o_l = <float *>jack_port_get_buffer(self.out_l, nframes)
         cdef float *o_r = <float *>jack_port_get_buffer(self.out_r, nframes)
-
-        cdef int i
 
         cdef int delay_samples = <int>(self.mic_delay * self._sample_rate)
         if delay_samples >= self.delay_max:
             delay_samples = self.delay_max - 1
         if delay_samples < 1:
             delay_samples = 1
-        cdef float s
+        cdef float s, acc
         cdef int p
 
         for i from 0 <= i < <int>nframes:
             p = (self.delay_ptr - delay_samples)
             if p < 0:
                 p += self.delay_max
-            s = self.delay_buf[p] * self.mic_feedback + i_mic[i]
-            o_l[i] = s * self.mic_volume
-            o_r[i] = s * self.mic_volume
+            acc = 0
+            for j in range(self.num_mics):
+                acc += self.mic_volume[j] * i_mic[j][i]
+            s = self.delay_buf[p] * self.mic_feedback + acc
+            o_l[i] = s
+            o_r[i] = s
             self.delay_buf[self.delay_ptr] = s
             self.delay_ptr += 1
             if self.delay_ptr >= self.delay_max:
@@ -149,8 +159,8 @@ cdef class AudioEngine:
         self.delay_buf = NULL
         self.dead = True
 
-    def set_mic_volume(self, value):
-        self.mic_volume = value
+    def set_mic_volume(self, channel, value):
+        self.mic_volume[channel] = value
 
     def set_mic_delay(self, value):
         self.mic_delay = value

@@ -230,14 +230,14 @@ def settings_get():
     return {
         "volume": audio_config.volume,
         "headstart": audio_config.headstart,
-        "mic_volume": audio_config.mic_volume,
+        "mic_channels": audio_config.mic_channels,
         "mic_feedback": audio_config.mic_feedback,
         "mic_delay": audio_config.mic_delay,
     }
 
 @route("/settings/change", method="POST")
 def settings_change():
-    for attr in ("volume", "headstart", "mic_volume", "mic_feedback", "mic_delay"):
+    for attr in ("volume", "headstart", "mic_channels", "mic_feedback", "mic_delay"):
         if attr in request.json:
             setattr(audio_config, attr, request.json[attr])
 
