@@ -43,7 +43,7 @@ parser.add_argument(
     '--no-audioengine', action="store_true",
     help='Disable JACK-based audio engine (mic echo effect)')
 parser.add_argument(
-    '--mics', type=csv_list, default=[b"system:capture_1"],
+    '--mics', type=csv_list, default=["system:capture_1"],
     help='Mic input connections (list of JACK ports)')
 opts = util.get_opts()
 
