@@ -54,10 +54,6 @@ class IdleScreen(object):
         elif self.fade < 1:
             self.fade = min(1, self.fade + 0.015)
 
-        self.display.gl.glClearColor(0, 0, 0, 1)
-        self.display.gl.glClear(self.display.gl.GL_COLOR_BUFFER_BIT |
-                                self.display.gl.GL_DEPTH_BUFFER_BIT)
-
         sfac = self.silhouette.aspect / self.display.aspect
         self.silhouette.draw(x=0, width=sfac)
         lx = sfac * 0.7
