@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os
+import sys
 
 from setuptools import setup, find_packages
 from setuptools.extension import Extension
@@ -24,6 +25,11 @@ if USE_CYTHON:
 #         res_files.append(os.path.join(dirpath, fn))
 # print res_files
 
+if sys.version_info[0] >= 3:
+    extra_requires = []
+else:
+    extra_requires = ['3to2']
+
 setup(
         name='blitzloop',
         version='0.1',
@@ -35,11 +41,8 @@ setup(
                 'blitzloop-single = blitzloop.play',
             ]
         },
-        setup_requires=[
-            '3to2',
-        ],
-        install_requires=[
-            '3to2',
+        setup_requires=extra_requires,
+        install_requires=extra_requires + [
             'ConfigArgParse',
             'Pillow',
             'bottle',

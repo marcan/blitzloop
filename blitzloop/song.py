@@ -28,8 +28,7 @@ from blitzloop import util
 
 
 class ParseError(Exception):
-    def __str__(self):
-        return self.message.encode(sys.stderr.encoding)
+    pass
 
 class Particle(object):
     def __init__(self, text):
@@ -374,7 +373,7 @@ class MultiString(OrderedDict):
             return self.get(None, "")
         else:
             raise TypeError()
-    def __eq__(other):
+    def __eq__(self, other):
         for k in self:
             if other.get(k) != self.get(k):
                 return False
@@ -835,7 +834,7 @@ class Song(object):
 
     def save(self, filename):
         fd = open(filename, "w")
-        fd.write(self.dump().encode("utf-8"))
+        fd.write(self.dump())
         fd.close()
 
     @property

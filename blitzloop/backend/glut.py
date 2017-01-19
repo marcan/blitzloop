@@ -54,7 +54,7 @@ class Display(BaseDisplay):
     def _on_keyboard(self, key, x, y):
         if self.kbd_handler:
             self.kbd_handler(key)
-        elif key == "\033":
+        elif key == b"\033":
             os._exit(0)
 
     def _render(self):

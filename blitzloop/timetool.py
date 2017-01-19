@@ -18,10 +18,14 @@
 
 import sys
 
-from blitzloop import mpvplayer, song
+from blitzloop import mpvplayer, song, util
 
 
-s = song.Song(sys.argv[1], ignore_steps=True)
+parser = util.get_argparser()
+parser.add_argument('songpath', help='path to the song file')
+opts = util.get_opts()
+
+s = song.Song(opts.songpath, ignore_steps=True)
 
 mpv = mpvplayer.Player(None)
 mpv.load_song(s)
@@ -69,7 +73,6 @@ try:
 except KeyboardInterrupt:
     print("KeyboardInterrupt!")
     mpv.shutdown()
-    file.close()
 finally:
     beat = 0
     bmap = []
