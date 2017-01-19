@@ -475,6 +475,12 @@ class ImageTexture(object):
         self.renderer.draw((x, y), (width, height), (0, self.height / self.th),
                            (self.width / self.tw, -self.height / self.th), color)
 
+def cleanup():
+    global _current_renderer
+    if _current_renderer is not None:
+        _current_renderer.cleanup()
+        _current_renderer = None
+
 def clear(r, g, b, a):
     gl.glClearColor(r, g, b, a)
     gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)

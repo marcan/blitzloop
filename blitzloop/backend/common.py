@@ -79,6 +79,7 @@ class BaseDisplay(object):
         self.gl.glClearColor(*self.clear_color)
         self.gl.glClear(self.gl.GL_COLOR_BUFFER_BIT | self.gl.GL_DEPTH_BUFFER_BIT)
         next(self.frames)
+        graphics.get_renderer().cleanup()
 
     def main_loop(self):
         while True:
