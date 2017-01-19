@@ -67,7 +67,7 @@ queue = songlist.SongQueue()
 class AudioConfig(object):
     def __init__(self):
         self.nmics = len(opts.mics) if not opts.no_audioengine else 0
-        self.volume = 50
+        self.volume = 80
         if opts.no_audioengine:
             self.mic_channels = []
         else:
@@ -77,10 +77,10 @@ class AudioConfig(object):
         self.headstart = 30
 
     def update(self, song=None):
-        mpv.set_volume(self.volume / 200.0)
+        mpv.set_volume(((self.volume / 100.0) ** 2) * 0.5)
         if not opts.no_audioengine:
             for i, j in enumerate(self.mic_channels):
-                audio.set_mic_volume(i, j["volume"] / 100.0)
+                audio.set_mic_volume(i, ((j["volume"] / 100.0) ** 2) * 2.0)
             audio.set_mic_feedback(self.mic_feedback / 100.0)
             audio.set_mic_delay(self.mic_delay / 100.0)
 
