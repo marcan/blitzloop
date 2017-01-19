@@ -19,6 +19,7 @@
 import time
 
 from blitzloop.matrix import Matrix
+from blitzloop import graphics
 
 class BaseDisplay(object):
     BLACK = (0.0, 0.0, 0.0, 1.0)
@@ -32,6 +33,10 @@ class BaseDisplay(object):
         self.set_aspect(aspect)
         self.clear_color = self.BLACK
         self.cleanup = None
+        self.fullscreen = fullscreen
+
+    def toggle_fullscreen(self):
+        pass
 
     def set_aspect(self, aspect):
         if aspect is None:

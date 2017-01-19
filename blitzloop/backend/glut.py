@@ -38,6 +38,7 @@ class Display(BaseDisplay):
         BaseDisplay.__init__(self, width, height, fullscreen, aspect)
         self._on_reshape(width, height)
         if fullscreen:
+            self.saved_size = (width, height)
             glut.glutFullScreen()
         glut.glutDisplayFunc(self._render)
         glut.glutIdleFunc(self._render)
@@ -46,6 +47,15 @@ class Display(BaseDisplay):
         glut.glutSpecialFunc(self._on_keyboard)
 
         self._initialize()
+
+    def toggle_fullscreen(self):
+        if self.fullscreen:
+            glut.glutReshapeWindow(*self.saved_size)
+        else:
+            self.saved_size = self.win_width, self.win_height
+            glut.glutFullScreen()
+
+        self.fullscreen = not self.fullscreen
 
     def _on_reshape(self, width, height):
         self.win_width = width

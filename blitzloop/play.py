@@ -90,7 +90,9 @@ def key(k):
     if k == b'\x1b':
         mpv.shutdown()
         os._exit(0)
-    if k == b'[' and speed_i > -12:
+    elif k == b'f':
+        display.toggle_fullscreen()
+    elif k == b'[' and speed_i > -12:
         speed_i -= 1
         print("Speed: %d" % speed_i)
         mpv.set_speed(2**(-speed_i/12.0))

@@ -193,6 +193,8 @@ def key(k):
         if not opts.no_audioengine:
             audio.shutdown()
         os._exit(0)
+    elif k == b'f':
+        display.toggle_fullscreen()
 
 display.set_render_gen(main)
 display.set_keyboard_handler(key)
