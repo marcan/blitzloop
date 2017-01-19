@@ -16,6 +16,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+import time
+
 from blitzloop.matrix import Matrix
 
 class BaseDisplay(object):
@@ -74,10 +76,19 @@ class BaseDisplay(object):
     def main_loop(self):
         while True:
             try:
+                self.st = self.lt = time.time()
                 self._render()
             except StopIteration:
                 break
             self.swap_buffers()
+
+    def log(self, msg):
+        t = time.time()
+        print("[%5.02f %5.02f] %s" % (
+            (t - self.st) * 1000,
+            (t - self.lt) * 1000,
+            msg))
+        self.lt = t
     
     def round_coord(self, c):
         return int(round(c * self.width)) / self.width
