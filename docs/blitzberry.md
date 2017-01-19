@@ -48,6 +48,15 @@ dtparam=audio=on
 EOF
 ```
 
+Also set the CPU frequency scaling policy to `performance` (otherwise rendering
+FPS will randomly vary):
+
+```shell
+cat <<EOF | sudo tee /etc/tmpfiles.d/10-fast-cpu.conf
+w /sys/devices/system/cpu/cpufreq/policy0/scaling_governor - - - - performance
+EOF
+```
+
 Reboot.
 
 ### Configure environment
