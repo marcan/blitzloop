@@ -37,8 +37,6 @@ class Player(object):
         if opts.mpv_ao == "jack":
             self.mpv.set_property("jack-autostart", "yes")
         self.mpv.set_property("af", "@pan:pan=2:[1,0,0,1],@rb:rubberband")
-        self.mpv.set_property("video-sync", "display-vdrop")
-        self.mpv.set_property("display-fps", opts.fps)
         for optval in opts.mpv_options.split():
             opt, val = optval.split("=", 1)
             self.mpv.set_property(opt, val)
@@ -48,6 +46,8 @@ class Player(object):
 
         if display:
             if opts.mpv_vo == "opengl-cb":
+                self.mpv.set_property("video-sync", "display-vdrop")
+                self.mpv.set_property("display-fps", opts.fps)
                 def gpa(name):
                     return display.get_proc_address(name)
 

@@ -117,7 +117,6 @@ pip install 'git+git://github.com/marcan/blitzloop.git'
 mkdir -p ~/.config/blitzloop
 cat <<EOF >~/.config/blitzloop/blitzloop.conf
 display=rpi
-fps=60
 mpv-vo=rpi
 EOF
 ```
