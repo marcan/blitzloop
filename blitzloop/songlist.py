@@ -30,7 +30,7 @@ class SongDatabase(object):
     def load(self, root):
         for dirpath, dirnames, filenames in os.walk(root, followlinks=True):
             for name in filenames:
-                if not name.endswith(".txt"):
+                if not name.endswith(".blitz"):
                     continue
                 path = os.path.join(dirpath, name)
                 print(path)

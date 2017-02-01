@@ -1,6 +1,6 @@
 # BlitzLoop songfile format
 
-BlitzLoop songs are simple textfiles along with associated resource files. The songs should have the .txt extension, as the songfile scanner will pick up all .txt files as songs. Generally, one song should live in a single directory, with a song.txt file and associated data. However, sometimes it may be convenient to have multiple songs residing in the same directory, if they share resources (e.g. the same background video for multiple versions of the same song).
+BlitzLoop songs are simple textfiles along with associated resource files. The songs should have the .blitz extension, as the songfile scanner will pick up all .blitz files as songs. Generally, one song should live in a single directory, with a song.blitz file and associated data. However, sometimes it may be convenient to have multiple songs residing in the same directory, if they share resources (e.g. the same background video for multiple versions of the same song).
 
 Songfiles follow a roughly INI-style format, with `[sections]` in brackets and `key=value` pairs, except for the `Lyrics` section. Lines starting with `#` are comments (inline comments after a line are not supported). Blank lines are generally ignored but have significance in the `Lyrics` section. Songfiles always use the UTF-8 character encoding.
 
