@@ -1,7 +1,7 @@
 # Overview
 The suggested way to get Blitzloop running is to install it in a virtualenv and
-use and your operating system's packet manager for libraries. If you want to do
-things your own way, here's a nonexhaustive list of dependencies:
+use and your operating system's package manager for libraries. If you want to
+do things your own way, here's a nonexhaustive list of dependencies:
 
 * Core:
    * Python 3
