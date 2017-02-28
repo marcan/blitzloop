@@ -106,6 +106,13 @@ pip install 'git+git://github.com/marcan/blitzloop.git'
 
 ### macOS
 
+Requires Xcode which can be installed by `xcode-select --install` or through
+the App Store. Remove older versions before updating.
+Also requires [Homebrew](https://brew.sh/ "Homebrew").
+
+Use `brew doctor` and `brew update` to update before running the commands below.
+If you have conflicting Python versions after installing Python 3: `brew link --overwrite python3`
+
 ```shell
 brew install python3 jack jpeg ffms2 rubberband libass freetype
 brew install mpv --with-rubberband --with-jack
@@ -119,6 +126,8 @@ Note: Non-empty `PIP_FLAGS` disables usage of wheels in pip, and makes the whole
 process slower. You might save time running this command twice, once without
 `PIP_FLAGS` to install all dependencies from wheels, and once with `PIP_FLAGS`
 to finish the installation - it's only blitzloop itself that needs these flags.
+
+To run blitzloop without a dependency on JACK: `blitzloop --no-audioengine --mpv-ao=coreaudio`
 
 # Usage
 
