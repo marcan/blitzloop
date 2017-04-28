@@ -5,3 +5,4 @@
 .eggs
 blitzloop/_audio*so
 build
+dist
