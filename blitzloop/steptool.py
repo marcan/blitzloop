@@ -37,7 +37,7 @@ opts = util.get_opts()
 
 s = song.Song(opts.songpath, ignore_steps=True)
 display = graphics.Display(1280,720)
-renderer = layout.Renderer(display)
+renderer = graphics.get_renderer().KaraokeRenderer(display)
 layout = layout.SongLayout(s, list(s.variants.keys())[-1], renderer)
 
 step = 0
