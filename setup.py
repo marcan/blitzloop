@@ -15,6 +15,8 @@ ext = 'pyx' if USE_CYTHON else 'c'
 extensions=[
     Extension('blitzloop._audio',
         ['blitzloop/_audio.%s' % ext], libraries=['jack']),
+    Extension('blitzloop._glfw',
+        ['blitzloop/_glfw.%s' % ext], libraries=['glfw']),
 ]
 if USE_CYTHON:
     extensions=cythonize(extensions)

@@ -25,6 +25,9 @@ def Display(*args, **kwargs):
     if display == "glut":
         from blitzloop.backend import glut
         _display = glut.Display(*args, **kwargs)
+    elif display == "glfw":
+        from blitzloop.backend import glfw
+        _display = glfw.Display(*args, **kwargs)
     elif display == "rpi":
         from blitzloop.backend import rpi
         _display = rpi.Display(*args, **kwargs)
