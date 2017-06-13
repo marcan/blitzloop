@@ -40,12 +40,12 @@ def pre_req():
 @route("/cfg/latin/<val:int>")
 def cfg_set_latin(val):
     response.set_cookie("latin", str(val), path="/")
-    return ""
+    return "OK"
 
 @route("/cfg/lang/<val>")
 def cfg_set_lang(val):
     response.set_cookie("lang", val, path="/")
-    return ""
+    return "OK"
 
 @route("/cfg.js")
 def index():
