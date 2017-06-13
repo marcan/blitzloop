@@ -49,7 +49,7 @@ def cfg_set_lang(val):
 
 @route("/cfg.js")
 def index():
-    response.content_type = 'text/javascript'
+    response.content_type = 'text/javascript; charset=UTF-8'
     cfg = json.dumps({
         "lang": request.lang,
         "lc": request.lc,
@@ -57,7 +57,7 @@ def index():
         "nonce": nonce,
     })
     fp = util.get_webres_path('i18n/%s.json') % request.lang
-    with open(fp) as fd:
+    with open(fp, encoding='utf-8') as fd:
         i18n = fd.read()
     return "g_cfg = %s;\ng_i18n = %s;" % (cfg, i18n)
 
@@ -76,7 +76,7 @@ def index_xs():
 @route("/xw=<width:int>")
 def index_xw(width, user_scalable=False):
     fp = util.get_webres_path('index.html')
-    with open(fp) as fd:
+    with open(fp, encoding='utf-8') as fd:
         data = fd.read()
     data = data.replace("%SCALABLE%", "1" if user_scalable else "0")
     data = data.replace("%WIDTH%", str(width))
