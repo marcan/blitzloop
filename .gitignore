@@ -4,4 +4,5 @@
 *~
 .eggs
 blitzloop/_audio*so
+blitzloop/_audio*pyd
 build

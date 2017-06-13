@@ -17,8 +17,10 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 import OpenGL.GL as gl
+from OpenGL import platform as gl_platform
 import OpenGL.GL.shaders as shaders
 import OpenGL.GLUT as glut
+import ctypes
 import os
 import sys
 
@@ -30,7 +32,7 @@ class Display(BaseDisplay):
         glut.glutInit(sys.argv)
         glut.glutInitDisplayMode(glut.GLUT_DOUBLE | glut.GLUT_RGB | glut.GLUT_DEPTH)
         glut.glutInitWindowPosition(0, 0)
-        glut.glutCreateWindow("BlitzLoop Karaoke")
+        glut.glutCreateWindow(b"BlitzLoop Karaoke")
         if not fullscreen:
             glut.glutReshapeWindow(width, height)
         else:
@@ -86,7 +88,14 @@ class Display(BaseDisplay):
         glut.glutMainLoop()
 
     def get_proc_address(self, s):
-        return glut.glutGetProcAddress(s)
+        proc = glut.glutGetProcAddress(s)
+        if not proc and os.name == "nt":
+            # glutGetProcAddress is documented to only look up GLUT functions.
+            # Since it uses dlsym on Linux, it happens to also work for GL
+            # functions, but that is not the behavior on Windows where a dynamic
+            # lookup needs to specify explicitly what module to search in.
+            proc = ctypes.cast(getattr(gl_platform.PLATFORM.GL, s.decode('ascii')), ctypes.c_void_p).value
+        return proc
 
 if __name__ == "__main__":
     fs_red = """
