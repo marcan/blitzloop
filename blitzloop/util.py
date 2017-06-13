@@ -17,6 +17,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os
+import os.path
 import sys
 import configargparse
 
@@ -30,7 +31,7 @@ CFG = {
 
 def init_argparser():
     config_home = os.getenv('XDG_CONFIG_HOME', '~/.config')
-    home = os.getenv('HOME')
+    home = os.path.expanduser('~')
     if config_home.startswith(home):
         config_home = '~' + config_home[len(home):]
     config_file = os.path.join(config_home, 'blitzloop', 'blitzloop.conf')
