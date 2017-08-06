@@ -208,7 +208,8 @@ app.controller('SongDetailCtrl', function($scope, $rootScope, $routeParams, $htt
                 channels: [3],
                 speed: 0,
                 pitch: 0,
-                pause: false
+                pause: false,
+                expand_lyrics: false,
             };
             for (var i = 0; i < data.variants.length; i++) {
                 if (data.variants[i].default) {
@@ -238,6 +239,9 @@ app.controller('SongDetailCtrl', function($scope, $rootScope, $routeParams, $htt
         $http.post('/queue/add/' + $routeParams.songId, $scope.song.config).success(function(data) {
             $location.path("/queue/" + data.qid + "/new")
         });
+    };
+    $scope.toggleLyrics = function() {
+      $scope.song.config.expand_lyrics = !$scope.song.config.expand_lyrics;
     };
     $scope.refresh();
 });
@@ -329,6 +333,9 @@ app.controller('QueueEntryCtrl', function($scope, $rootScope, $routeParams, $htt
         }).error(function(data) {
             $scope.refresh();
         });;
+    };
+    $scope.toggleLyrics = function() {
+      $scope.song.config.expand_lyrics = !$scope.song.config.expand_lyrics;
     };
     $scope.$on('$destroy',function(){
         $timeout.cancel($scope.refresh_promise);

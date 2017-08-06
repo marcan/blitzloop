@@ -5,10 +5,10 @@
 		<p><span translate>Artist</span>{{song.meta.artist}}</p>
 		<p><span translate>Album</span>{{song.meta.album}}</p>
 		<p><span translate>Seen on</span>{{song.meta.seenon}}</p>
-		<p><span translate>Lyrics</span>{{variant.snippet}}</p>
+		<p><span translate>Lyrics</span><a ng-click="toggleLyrics()">{{variant.snippet}}</a></p>
 	</div>
-	<hr style="margin-top: 0">
-	<div class="lyrics">
+	<hr style="margin-top: 0" ng-show="song.config.expand_lyrics">
+	<div class="lyrics" ng-show="song.config.expand_lyrics">
 		<p><span translate>Lyrics</span>{{variant.lyrics}}</p>
 	</div>
 	<hr style="margin-top: 0">
