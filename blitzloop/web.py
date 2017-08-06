@@ -95,7 +95,8 @@ def get_song_meta(song):
 
 def get_song_variants(song):
     return [{"id": i, "name": v.name, "default": v.default,
-             "snippet": song.get_lyric_snippet(k)}
+             "snippet": song.get_lyric_snippet(k),
+             "lyrics": song.get_lyrics(k)}
             for i, (k, v) in enumerate(song.variants.items())]
 
 def get_qe_config(qe):
