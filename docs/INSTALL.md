@@ -64,16 +64,7 @@ these guides.
 
 ### Arch Linux
 
-These instructions have been tested on Arch Linux ARM (e.g. Raspberry Pi).
-
-```shell
-sudo pacman -S --needed gcc jack ffms2 freetype2 mpv
-# Optionally use distro Python packages to save time with pip
-sudo pacman -S --needed numpy python-pillow python-freetype python-numpy python-opengl
-python -m venv blitz
-source blitz/bin/activate
-pip install 'git+git://github.com/marcan/blitzloop.git'
-```
+Install the `blitzloop-git` package from AUR.
 
 ### Debian
 
