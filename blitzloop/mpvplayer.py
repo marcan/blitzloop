@@ -79,7 +79,7 @@ class Player(object):
 
         self.set_pause(True)
         # Load just the audio first to find out the duration lower bound
-        self.mpv.set_property("audio-file", [])
+        self.mpv.set_property("audio-files", [])
         self.poll()
         self.eof = False
         self.mpv.set_property("vid", "auto")
@@ -91,7 +91,7 @@ class Player(object):
             self.offset = float(song.song["video_offset"])
             self.mpv.set_property("audio-delay", self.offset)
         if song.videofile is not None and song.audiofile != song.videofile:
-            self.mpv.set_property("audio-file", [song.audiofile])
+            self.mpv.set_property("audio-files", [song.audiofile])
             self.mpv.command('stop')
             self._wait_ev(mpv.Events.idle)
             self.eof = False
