@@ -32,6 +32,7 @@ parser = util.get_argparser()
 parser.add_argument(
     '--songdir', default=os.path.expanduser(songs_dir),
     help='directory with songs')
+parser.add_argument('--host', default='0.0.0.0', help='IP to listen on')
 parser.add_argument('--port', default=10111, help='port for the UI')
 parser.add_argument(
     '--width', type=int, default=1024,
@@ -89,7 +90,7 @@ audio_config = AudioConfig()
 web.database = song_database
 web.queue = queue
 web.audio_config = audio_config
-server = web.ServerThread(host="0.0.0.0", port=opts.port, server="paste")
+server = web.ServerThread(host=opts.host, port=opts.port, server="paste")
 server.start()
 
 idle_screen = idlescreen.IdleScreen(display)
