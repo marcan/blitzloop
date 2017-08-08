@@ -16,13 +16,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-import os, sys, time
+import os, time
 
-from blitzloop.matrix import Matrix
-from blitzloop.backend.common import *
+from blitzloop.backend.common import BaseDisplay
 
 import ctypes, ctypes.util
-from ctypes import cdll, POINTER, c_char_p, c_int, c_uint, c_void_p, Structure, byref
+from ctypes import cdll, c_int, Structure, byref
 
 # The shit we have to do to get stuff to work on the Raspberry Pi...
 
@@ -174,7 +173,6 @@ class Display(BaseDisplay):
         egl.eglSwapBuffers(self.disp, self.surface)
 
 if __name__ == "__main__":
-    import OpenGL.GLES2 as gl
     d = Display()
     while True:
         for color in (1.,0.,0.,1.), (0.,1.,0.,1.), (0.,0.,1.,1.):
