@@ -358,15 +358,12 @@ class SolidRenderer(BaseRenderer):
                    [1., 0., 0.],
                    [1., 1., 0.],
                    [0., 1., 0.]]
-        idxdata = [0, 1, 2, 2, 3, 0]
 
         self.vbo = vbo.VBO(np.asarray(vbodata, np.float32), gl.GL_STATIC_DRAW, gl.GL_ARRAY_BUFFER)
-        self.ibo = vbo.VBO(np.asarray(idxdata, np.uint16), gl.GL_STATIC_DRAW, gl.GL_ELEMENT_ARRAY_BUFFER)
 
     def setup(self):
         gl.glUseProgram(self.shader)
         self.vbo.bind()
-        self.ibo.bind()
         self.enable_attribs()
         stride = 3*4
         off = 0
@@ -380,12 +377,11 @@ class SolidRenderer(BaseRenderer):
         self.display.matrix.scale(*size)
         self.display.commit_matrix(self.l_transform)
         gl.glUniform4f(self.l_color, *color)
-        gl.glDrawElements(gl.GL_TRIANGLES, 6, gl.GL_UNSIGNED_SHORT, self.ibo)
+        gl.glDrawArrays(gl.GL_TRIANGLE_FAN, 0, 4)
         self.display.matrix.pop()
 
     def cleanup(self):
         self.disable_attribs()
-        self.ibo.unbind()
         self.vbo.unbind()
         gl.glUseProgram(0)
 
