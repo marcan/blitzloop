@@ -229,6 +229,7 @@ class Player(object):
     def draw(self):
         if self.gl:
             self.gl.draw(0, self.display.win_width, -self.display.win_height)
+            self.display._initialize() # Reset GL state that mpv may have changed
 
     def draw_fade(self, songtime):
         brightness = 1
