@@ -862,24 +862,42 @@ class Song(object):
         else:
             return fractions.Fraction(self.song["aspect"])
 
-    def get_lyric_snippet(self, variant_id, length=100):
+    def _get_lyrics(self, variant_id):
         variant = self.variants[variant_id]
         tags = set(i for i in variant.tag_list if variant.tags[i].edge == TagInfo.BOTTOM)
-        lyrics = ""
+        lyrics = []
         broke = False
+        space = None
         for compound in self.compounds:
-            if len(lyrics) >= length:
-                break
             for tag, molecule in compound.items():
+                if space is None:
+                    space = molecule.SPACE
                 if tag not in tags:
                     continue
-                if molecule.break_before and not broke:
-                    lyrics += "/" + molecule.SPACE
                 broke = False
-                lyrics += molecule.text + molecule.SPACE
+                lyrics.append(molecule.text)
                 if molecule.break_after:
-                    lyrics += "/" + molecule.SPACE
                     broke = True
+
+        return {
+            'lyrics': lyrics,
+            'space': space,
+        }
+
+    def get_lyrics(self, variant_id):
+        return "\n".join(self._get_lyrics(variant_id)['lyrics'])
+
+    def get_lyric_snippet(self, variant_id, length=100):
+        result = self._get_lyrics(variant_id)
+        space = result['space']
+        lyrics = ""
+        for phrase in result['lyrics']:
+            if len(lyrics) >= length:
+                break
+            if lyrics:
+                lyrics += space + "/" + space + phrase
+            else:
+                lyrics += phrase
 
         return lyrics
 

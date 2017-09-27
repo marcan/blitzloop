@@ -293,12 +293,18 @@ body {
 	font-size: 30px;
 }
 
-.song .meta p span{
+.song .meta p span, .song .lyrics p span {
 	position: absolute;
 	margin-top: -6px;
 	font-size: 12px;
 	width: 50%;
 	color: #246;
+}
+
+.song .lyrics p {
+  padding-top: 13px;
+  padding-bottom: 4px;
+  white-space: pre-wrap;
 }
 
 .choice {
