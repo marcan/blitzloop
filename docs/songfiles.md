@@ -35,6 +35,8 @@ This section defines the audio/video content of the song.
 * `aspect`: Forces a specific aspect ratio for the song, specified as a rational or decimal number (e.g. `16/9` is valid). This does not stretch the video itself. Instead, this defines the aspect ratio of the song display. By default, the song aspect ratio is determined from the video file, lyrics are rendered within the bounds of that aspect ratio, and then the result is letterboxed or pillarboxed to match the display aspect. Specifying this value will force the aspect ratio of the song display: `16/9` for a 4:3 video will result in the video being cropped to 16:9, then the song will be rendered on the 16:9 canvas, which will then be letterboxed or pillarboxed to match the display. This is mainly useful for 16:9 source videos that are already letterboxed into 4:3: instead of having the video be pillarboxed again on a widescreen display, this crops it and causes it to display full screen on a 16:9 display, and makes the lyrics fit within the bounds of the image.
 * `cover`: Album cover image, for the remote control UI. This should be nearly square, as currently aspect is not preserved (this may change in the future).
 * `channels`: The number of additional stereo channels expected in the audio file. Defaults to 1, for a 4-track karaoke audio track. Specify 0 for a standard stereo track. See the following section for details.
+* `channel_names`: Comma-separated list of channel names. Important when `channels` is greater than 1.
+* `channel_defaults`: Comma-separated list of default channel volumes, in units of 1/10th full volume. Defaults to 3 for the first channel and 0 for the rest.
 * `fade_in`: Time over which to fade in the video at the beginning of the song, in seconds.
 * `fade_out`: Time over which to fade out the video at the end of the song, in seconds.
 * `volume`: Adjust the playback volume of the audio (defaults to 1, linear scale). Eventually there should be some tool to automatically calculate this based on ReplayGain normalization.
@@ -57,9 +59,11 @@ The reason why this case differs from the n > 2 case is that most songs are avai
 
 There is a rather primitive tool to help align the tracks into phase in the [blitzloop-tools](https://github.com/marcan/blitzloop-tools) repo.
 
-#### `channels=<n>` for <n> > 2
+#### `channels=<n>` for <n> >= 2
 
-The file should contain n + 1 stereo pairs. The first stereo pair should be the instrumental version of the song, and each subsequent stereo pair represents an optional channel that will be mixed in (added) to the base instrumental track. The controls allow for mixing volumes from 0% to 200%. This could be used to have multiple vocal tracks that can be independently mixed in.
+The file should contain n + 1 stereo pairs. The first stereo pair should be the instrumental version of the song, and each subsequent stereo pair represents an optional channel that will be mixed in (added) to the base instrumental track. The controls allow for mixing volumes from 0% to 200%. This could be used to have multiple vocal tracks that can be independently mixed in, or to have a separate guide melody track.
+
+In this case, the `[Song]` section should also have a `channel_names` entry giving user-friendly names to the channels, and you may also want a `channel_defaults` to set the default volumes.
 
 ## `[Timing]`
 

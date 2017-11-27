@@ -13,8 +13,8 @@
 			<slider ng-model="song.config.pitch" min="-12" max="12" plus>Pitch</slider>
 			<slider ng-model="song.config.speed" min="-12" max="12" plus>Tempo</slider>
 		</div>
-		<div class="right" ng-show="song.channels > 0">
-			<slider ng-model="song.config.channels[0]" min="0" max="20">Vocals</slider>
+		<div class="right" ng-show="song.channels.length > 0">
+			<slider ng-repeat="c in song.config.channels" ng-model="c.volume" min="0" max="20">{{$parent.song.channel_names[$parent.$index]}}</slider>
 		</div>
 		<div class="wide"></div>
 	</div>

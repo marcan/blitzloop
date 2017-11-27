@@ -862,6 +862,29 @@ class Song(object):
         else:
             return fractions.Fraction(self.song["aspect"])
 
+    @property
+    def channels(self):
+        return int(self.song.get("channels", "1"))
+
+    @property
+    def channel_defaults(self):
+        if "channel_defaults" in self.song:
+            return [int(i) for i in self.song["channel_defaults"].split(",")]
+        else:
+            return ([3] + [0] * self.channels)[:-1]
+
+    @property
+    def channel_names(self):
+        if "channel_names" in self.song:
+            return self.song["channel_names"].split(",")
+        else:
+            if self.channels == 0:
+                return []
+            elif self.channels == 1:
+                return ["Vocals"]
+            else:
+                return ["Ch %d" % (i+1) for i in range(self.channels)]
+
     def get_lyric_snippet(self, variant_id, length=100):
         variant = self.variants[variant_id]
         tags = set(i for i in variant.tag_list if variant.tags[i].edge == TagInfo.BOTTOM)

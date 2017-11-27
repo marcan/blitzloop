@@ -43,7 +43,9 @@ class SongQueueEntry(object):
         self.song = song
         self.qid = None
         self.variant = 0
-        self.channels = [3]
+        self.channels = []
+        for i in range(song.channels):
+            self.channels.append({"volume": i})
         self.speed = 0
         self.pitch = 0
         self.pause = False

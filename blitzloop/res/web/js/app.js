@@ -203,9 +203,13 @@ app.controller('SongDetailCtrl', function($scope, $rootScope, $routeParams, $htt
         $http.get('/song/' + $routeParams.songId).success(function(data) {
             $scope.song = data;
             $scope.coverUrl = "/song/" + data.id + "/cover/200" + "?" + g_cfg.nonce;
+            var channels = [];
+            for (var i = 0; i < data.channels.length; i++) {
+                channels.push({"volume": data.channels[i]});
+            }
             $scope.song.config = {
                 variant: 0,
-                channels: [3],
+                channels: channels,
                 speed: 0,
                 pitch: 0,
                 pause: false

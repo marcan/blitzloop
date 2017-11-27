@@ -122,7 +122,8 @@ def get_song(id):
         "id": id,
         "meta": get_song_meta(song),
         "variants": get_song_variants(song),
-        "channels": int(song.song.get("channels", 1))
+        "channels": song.channel_defaults,
+        "channel_names": song.channel_names,
     }
 
 @route("/song/<id:int>/cover/<size:int>")
@@ -173,8 +174,9 @@ def queue_get(qid):
         "qid": qid,
         "meta": get_song_meta(qe.song),
         "variants": get_song_variants(qe.song),
-        "channels": int(qe.song.song.get("channels", 1)),
-        "config": get_qe_config(qe)
+        "channels": qe.song.channel_defaults,
+        "channel_names": qe.song.channel_names,
+        "config": get_qe_config(qe),
     }
 
 def apply_qe(qe, json):

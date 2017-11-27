@@ -132,7 +132,7 @@ def main_render():
         mpv.set_speed(1.0 / (2**(qe.speed / 12.0)))
         mpv.set_pitch(2**(qe.pitch / 12.0))
         for i, j in enumerate(qe.channels):
-            mpv.set_channel(i, j / 10.0)
+            mpv.set_channel(i, j["volume"] / 10.0)
         mpv.set_pause(qe.pause)
 
     update_params()

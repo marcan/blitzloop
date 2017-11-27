@@ -56,7 +56,7 @@ song_time = -10
 
 speed_i = 0
 pitch_i = 0
-vocals_i = 10
+channels_i = s.channel_defaults
 
 if opts.offset:
     mpv.seek_to(opts.offset)
@@ -84,6 +84,9 @@ def render():
 
 pause = False
 
+CH_UP = b"+456"
+CH_DOWN = b"-123"
+
 def key(k):
     import OpenGL.GLUT as glut
     global speed_i, pitch_i, vocals_i, pause
@@ -108,14 +111,18 @@ def key(k):
         pitch_i -= 1
         print("Pitch: %d" % pitch_i)
         mpv.set_pitch(2**(pitch_i/12.0))
-    elif k == b'+' and vocals_i < 30:
-        vocals_i += 1
-        print("Vocals: %d" % vocals_i)
-        mpv.set_channel(0, vocals_i/10.0)
-    elif k == b'-' and vocals_i > 0:
-        vocals_i -= 1
-        print("Vocals: %d" % vocals_i)
-        mpv.set_channel(0, vocals_i/10.0)
+    elif k in CH_UP:
+        idx = CH_UP.index(k)
+        if len(channels_i) > idx and channels_i[idx] < 30:
+            channels_i[idx] += 1
+            print("Channel %d: %d" % (idx, channels_i[idx]))
+            mpv.set_channel(idx, channels_i[idx]/10.0)
+    elif k in CH_DOWN:
+        idx = CH_DOWN.index(k)
+        if len(channels_i) > idx and channels_i[idx] > 0:
+            channels_i[idx] -= 1
+            print("Channel %d: %d" % (idx, channels_i[idx]))
+            mpv.set_channel(idx, channels_i[idx]/10.0)
     elif k == glut.GLUT_KEY_LEFT:
         mpv.seek(-10)
     elif k == glut.GLUT_KEY_RIGHT:
