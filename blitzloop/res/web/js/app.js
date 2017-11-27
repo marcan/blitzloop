@@ -124,6 +124,25 @@ app.directive('slider', function($document){
     }
 });
 
+app.filter('normalize', function() {
+    return function(input) {
+        if (!input) {
+            return input;
+        }
+        var val = japanese.katakanize(input);
+        var out = "";
+        for (var i = 0; i < val.length; i++) {
+            var v = g_cfg.normalize_tbl[val.charCodeAt(i)];
+            if (v === undefined) {
+                out += val.charAt(i);
+            } else if (v !== null) {
+                out += String.fromCharCode(v);
+            }
+        }
+        return out;
+    };
+});
+
 app.run(['translate', function(translate) {
     translate.add(g_i18n);
 }]);

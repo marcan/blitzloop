@@ -10,6 +10,8 @@ import random
 import sys
 import threading
 import time
+import jaconv
+import unicodedata
 
 from blitzloop import songlist, util
 
@@ -24,6 +26,9 @@ DEFAULT_WIDTH = 1024
 database = None
 queue = None
 audio_config = None
+
+normalize_tbl = dict.fromkeys(i for i in range(sys.maxunicode)
+                              if unicodedata.category(chr(i))[0] in "PMSZ")
 
 @hook("before_request")
 def pre_req():
@@ -55,6 +60,7 @@ def index():
         "lc": request.lc,
         "latin": request.latin,
         "nonce": nonce,
+        "normalize_tbl": normalize_tbl,
     })
     fp = util.get_webres_path('i18n/%s.json') % request.lang
     with open(fp, encoding='utf-8') as fd:
@@ -83,14 +89,36 @@ def index_xw(width, user_scalable=False):
     response.content_type = "text/html; charset=UTF-8"
     return data
 
+def normalize(s):
+    val = jaconv.h2z(s)
+    val = jaconv.hira2kata(val)
+    val = val.translate(normalize_tbl)
+    return val
 
 def get_song_meta(song):
     d = {}
+    search = set()
     for k, v in song.meta.items():
         if request.latin:
             d[k] = v[(request.lc, "l")]
         else:
             d[k] = v[request.lc]
+    for k in ("title", "artist", "seenon", "album"):
+        if k in song.meta:
+            v = song.meta[k]
+            search.add(normalize(v[request.lc]))
+            search.add(normalize(v["k"]))
+            search.add(normalize(v["l"]))
+            search.add(normalize(jaconv.kana2alphabet(jaconv.kata2hira(v["k"]))).replace("ー",""))
+    for k in ("genre",):
+        if k in song.meta:
+            v = song.meta[k]
+            search.add(normalize(v[request.lc]))
+    d["search"] = list(search)
+    if request.latin:
+        d["sort"] = song.meta["title"][(request.lc, "l")]
+    else:
+        d["sort"] = song.meta["title"][(request.lc, "k")]
     return d
 
 def get_song_variants(song):

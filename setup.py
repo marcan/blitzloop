@@ -51,6 +51,7 @@ setup(
             'paste',
             'pympv',
             'pyopengl',
+            'jaconv',
         ],
         include_package_data=True,
         zip_safe=False,

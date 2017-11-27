@@ -1,10 +1,10 @@
 <div>
 	<!--<div ng-show="tab=='songs'">-->
-	<div ng-show="false">
-		<span translate>Search</span>: <input ng-model="query">
+	<div class="searchbox">
+		<input placeholder="{{'Search'|translate}}" ng-model="query">
 	</div>
 	<ul ng-class="{'song-list': 1, 'queue-list': {{tab=='queue'}}}">
-		<li ng-repeat="song in songs | filter:query">
+		<li ng-repeat="song in songs | filter:(query|normalize) | orderBy:'meta.sort'">
 			<a href="{{song.link}}">
 				<div class="queue-index" len="{{(''+(song.idx+1)).length}}">
 					<div><div> <!-- ugh vertical alignment -->
