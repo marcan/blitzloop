@@ -84,7 +84,7 @@ class Molecule(object):
         return "Molecule<[%r]" % self.steps + " ".join(map(str, self.atoms)) + ">"
 
 class JapaneseMolecule(Molecule):
-    COMBINE_CHARS = "ぁぃぅぇぉゃゅょァィゥェォャュョ 　？！?!…。、.,-「」―-"
+    COMBINE_CHARS = "ぁぃぅぇぉゃゅょァィゥェォャュョ 　？！?!…。、.,-「」―-◇・”\""
     SPACE = "　"
 
     def parse(self, source):
