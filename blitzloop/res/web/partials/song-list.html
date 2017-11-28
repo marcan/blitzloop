@@ -1,6 +1,5 @@
 <div>
-	<!--<div ng-show="tab=='songs'">-->
-	<div class="searchbox">
+	<div ng-show="tab=='songs'" class="searchbox">
 		<input placeholder="{{'Search'|translate}}" ng-model="query">
 	</div>
 	<ul ng-class="{'song-list': 1, 'queue-list': {{tab=='queue'}}}">
