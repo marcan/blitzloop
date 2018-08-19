@@ -36,7 +36,7 @@ class Player(object):
         self.mpv.set_property("fs", True)
         if opts.mpv_ao == "jack":
             self.mpv.set_property("jack-autostart", "yes")
-        self.mpv.set_property("af", "@pan:pan=2:[1,0,0,1],@rb:rubberband")
+        self.mpv.set_property("af", '@rb:rubberband,@lavfi:lavfi="pan=stereo|c0=c0|c1=c1"')
         for optval in opts.mpv_options.split():
             opt, val = optval.split("=", 1)
             self.mpv.set_property(opt, val)
@@ -180,15 +180,20 @@ class Player(object):
             self._update_matrix()
 
     def _update_matrix(self):
-        if self.channels == 1:
-            mtx = [1-self.volumes[0], 0, 0, 1-self.volumes[0], self.volumes[0], 0, 0, self.volumes[0]]
-        else:
-            mtx = [1, 0, 0, 1]
-            for v in self.volumes:
-                mtx += [v, 0, 0, v]
         sv = float(self.song.song["volume"]) if "volume" in self.song.song else 1
-        mtx = [i * self.volume * self.fadevol * sv for i in mtx]
-        self.mpv.command("af-command", "pan", "set-matrix", ",".join(map(str, mtx)))
+        if self.channels == 1:
+            expr = "stereo|c0=%f*c0+%f*c2|c1=%f*c1+%f*c3" % (
+                (1-self.volumes[0]) * sv, self.volumes[0] * sv,
+                (1-self.volumes[0]) * sv, self.volumes[0] * sv)
+        else:
+            expr_l = "c0=%f*c0" % sv
+            expr_r = "c1=%f*c1" % sv
+            for i, v in enumerate(self.volumes):
+                expr_l += "+%f*c%d" % (v*sv, 2*i+2)
+                expr_r += "+%f*c%d" % (v*sv, 2*i+3)
+            expr = "stereo|%s|%s" % (expr_l, expr_r)
+        filters = '@lavfi:lavfi="pan=%s"' % expr
+        self.mpv.command("af", "add", filters)
 
     def set_speed(self, speed):
         if self.speed != speed:
