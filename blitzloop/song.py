@@ -405,10 +405,14 @@ class Compound(OrderedDict):
 
     def get_atom_time(self, steps, length):
         if self.timing is not None and self.song_timing is not None:
-            start = self.start + sum(self.timing[i] for i in range(steps))
-            end = start + sum(self.timing[i] for i in range(steps, steps + length))
-            start = self.song_timing.beat2time(start)
-            end = self.song_timing.beat2time(end)
+            if self.timing:
+                start = self.start + sum(self.timing[i] for i in range(steps))
+                end = start + sum(self.timing[i] for i in range(steps, steps + length))
+                start = self.song_timing.beat2time(start)
+                end = self.song_timing.beat2time(end)
+            else:
+                single = self.song_timing.beat2time(self.start)
+                return single, single
         else:
             start = self.start + steps
             end = start + length
@@ -743,7 +747,7 @@ class Song(object):
                     if first.steps != val.steps:
                         raise ParseError("%d: Duration mismatch: %d!=%d (%s) (%s)" % (lineno, first.steps, val.steps, str(first), str(val)))
                 if compound.timing is not None:
-                    if compound.steps != len(compound.timing):
+                    if compound.timing and compound.steps != len(compound.timing):
                         raise ParseError("%d: Timing line length mismatch: %d!=%d" % (lineno, len(compound.timing), compound.steps))
                 else:
                     compound.start = self.fake_time
@@ -771,7 +775,7 @@ class Song(object):
                 compound.timing = timing[1:]
                 if compound:
                     first = compound[list(compound.keys())[0]]
-                    if first.steps != len(compound.timing):
+                    if compound.timing and first.steps != len(compound.timing):
                         raise ParseError("%d: Timing line length mismatch: %d!=%d" % (lineno, len(compound.timing), compound.steps))
                 continue
 
