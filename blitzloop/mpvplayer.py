@@ -22,7 +22,10 @@ from blitzloop import util, graphics
 
 
 class Player(object):
+    MIN_AUDIO_RECONFIGURE_INTERVAL = 0.1
     def __init__(self, display):
+        self.last_audio_reconfig = 0
+        self.audio_reconfig_pending = False
         self.volume = 0.5
         self.song = None
         self.display = display
@@ -36,7 +39,7 @@ class Player(object):
         self.mpv.set_property("fs", True)
         if opts.mpv_ao == "jack":
             self.mpv.set_property("jack-autostart", "yes")
-        self.mpv.set_property("af", '@rb:rubberband,@lavfi:lavfi="pan=stereo|c0=c0|c1=c1"')
+        self.mpv.set_property("af", '@lavfi:lavfi="pan=stereo|c0=c0|c1=c1",@rb:rubberband')
         for optval in opts.mpv_options.split():
             opt, val = optval.split("=", 1)
             self.mpv.set_property(opt, val)
@@ -180,6 +183,10 @@ class Player(object):
             self._update_matrix()
 
     def _update_matrix(self):
+        if (time.time() - self.last_audio_reconfig) < self.MIN_AUDIO_RECONFIGURE_INTERVAL:
+            self.audio_reconfig_pending = True
+            return
+        self.audio_reconfig_pending = False
         sv = float(self.song.song["volume"]) if "volume" in self.song.song else 1
         sv *= self.fadevol
         if self.channels == 1:
@@ -194,6 +201,7 @@ class Player(object):
                 expr_r += "+%f*c%d" % (v*sv, 2*i+3)
             expr = "stereo|%s|%s" % (expr_l, expr_r)
         filters = '@lavfi:lavfi="pan=%s"' % expr
+        self.last_audio_reconfig = time.time()
         self.mpv.command("af", "add", filters)
 
     def set_speed(self, speed):
@@ -208,6 +216,8 @@ class Player(object):
         self.mpv.set_property("time-pos", t)
 
     def poll(self):
+        if self.audio_reconfig_pending:
+            self._update_matrix()
         repoll = set()
         evs = []
         while True:
