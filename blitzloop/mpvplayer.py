@@ -181,6 +181,7 @@ class Player(object):
 
     def _update_matrix(self):
         sv = float(self.song.song["volume"]) if "volume" in self.song.song else 1
+        sv *= self.fadevol
         if self.channels == 1:
             expr = "stereo|c0=%f*c0+%f*c2|c1=%f*c1+%f*c3" % (
                 (1-self.volumes[0]) * sv, self.volumes[0] * sv,
