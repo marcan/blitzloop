@@ -106,7 +106,7 @@ class Player(object):
                 self.mpv.set_property("lavfi-complex", self.opts.mpv_visualizer)
                 self.mpv.set_property("keepaspect", False)
                 # dim visualization a bit
-                self.mpv.set_property("brightness", -20)
+                self.mpv.set_property("brightness", -30)
 
         if "duration" in song.song:
             self.duration = float(song.song["duration"])
