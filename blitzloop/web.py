@@ -117,6 +117,9 @@ def get_song_meta(song):
     d["search"] = list(search)
     if request.latin:
         d["sort"] = song.meta["title"][(request.lc, "l")]
+        if ord(d["sort"][0:1]) > 0x100:
+            # Try again with kana-to-romaji, might help manufacture some sensible sort order
+            d["sort"] = jaconv.kana2alphabet(jaconv.kata2hira(song.meta["title"][(request.lc, "l", "k")]))
     else:
         d["sort"] = song.meta["title"][(request.lc, "k")]
     return d
