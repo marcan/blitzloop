@@ -29,7 +29,7 @@ class Player(object):
         self.volume = 0.5
         self.song = None
         self.display = display
-        opts = util.get_opts()
+        self.opts = opts = util.get_opts()
         self.mpv = mpv.Context()
         self.mpv.initialize()
         self.mpv.set_property("audio-file-auto", "no")
@@ -102,6 +102,11 @@ class Player(object):
             self._wait_ev(mpv.Events.file_loaded)
         elif song.videofile is None:
             self.mpv.set_property("vid", "no")
+            if self.opts.mpv_visualizer:
+                self.mpv.set_property("lavfi-complex", self.opts.mpv_visualizer)
+                self.mpv.set_property("keepaspect", False)
+                # dim visualization a bit
+                self.mpv.set_property("brightness", -20)
 
         if "duration" in song.song:
             self.duration = float(song.song["duration"])
