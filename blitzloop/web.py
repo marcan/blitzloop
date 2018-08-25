@@ -161,7 +161,7 @@ def get_song(id):
 def get_songcover(id, size):
     song = database.songs[id]
     if song.coverfile is None:
-        return None
+        return b'Nothing to see here'
     else:
         stats = os.stat(song.coverfile)
         lm = time.strftime("%a, %d %b %Y %H:%M:%S GMT", time.gmtime(stats.st_mtime))
