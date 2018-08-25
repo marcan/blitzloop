@@ -235,9 +235,12 @@ class TextureAtlas(object):
     def __del__(self):
         if self.texid is not None:
             gl = graphics.GL()
-            arrays = graphics.arrays()
-            tex = arrays.GLintArray.asArray([self.texid])
-            gl.glDeleteTextures(1, tex)
+            try:
+                gl.glDeleteTextures([tex])
+            except: # old style
+                arrays = graphics.arrays()
+                tex = arrays.GLintArray.asArray([self.texid])
+                gl.glDeleteTextures(1, tex)
 
 def bitmap_to_numpy(bitmap, dtype=np.uint8):
     pitch = bitmap.pitch
