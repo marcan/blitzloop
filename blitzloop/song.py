@@ -871,6 +871,12 @@ class Song(object):
         return int(self.song.get("channels", "1"))
 
     @property
+    def volume(self):
+        v = 10 ** (float(self.song.get("track_gain", "0")) / 20)
+        v *= float(self.song.get("volume", "1"))
+        return v
+
+    @property
     def channel_defaults(self):
         if "channel_defaults" in self.song:
             return [int(i) for i in self.song["channel_defaults"].split(",")]

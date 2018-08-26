@@ -103,7 +103,9 @@ class Player(object):
         elif song.videofile is None:
             self.mpv.set_property("vid", "no")
             if self.opts.mpv_visualizer:
-                self.mpv.set_property("lavfi-complex", self.opts.mpv_visualizer)
+                self.mpv.set_property("lavfi-complex", self.opts.mpv_visualizer % {
+                    "volume": song.volume
+                })
                 self.mpv.set_property("keepaspect", False)
                 # dim visualization a bit
                 self.mpv.set_property("brightness", -30)
@@ -192,7 +194,7 @@ class Player(object):
             self.audio_reconfig_pending = True
             return
         self.audio_reconfig_pending = False
-        sv = float(self.song.song["volume"]) if "volume" in self.song.song else 1
+        sv = self.song.volume
         sv *= self.fadevol
         if self.channels == 1:
             expr = "stereo|c0=%f*c0+%f*c2|c1=%f*c1+%f*c3" % (
