@@ -176,6 +176,7 @@ def main_render():
         graphics.get_renderer().clear(0, 0, 0, 1)
 
     print("Song complete.")
+    del song_layout
     try:
         queue.pop(qe.qid)
     except (IndexError, KeyError):
