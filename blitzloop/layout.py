@@ -425,10 +425,6 @@ class SongLayout(object):
                 l.y = self.renderer.display.top - self.margin - max_ascender - row_height * l.row
             prev_l = l
 
-    def _layout_lines_top(self, lines):
-        if not lines:
-            return
-
     def draw(self, t, renderer):
         for edge, lines in self.lines.items():
             for l in lines:
