@@ -195,7 +195,7 @@ class Player(object):
             return
         self.audio_reconfig_pending = False
         sv = self.song.volume
-        sv *= self.fadevol
+        sv *= self.fadevol * self.volume
         if self.channels == 1:
             expr = "stereo|c0=%f*c0+%f*c2|c1=%f*c1+%f*c3" % (
                 (1-self.volumes[0]) * sv, self.volumes[0] * sv,
