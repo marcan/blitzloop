@@ -93,6 +93,8 @@ class Player(object):
         self.mpv.set_property("keepaspect", True)
         self.mpv.set_property("lavfi-complex", "")
         self.mpv.set_property("brightness", 0)
+        self.mpv.set_property("audio-delay", 0)
+        self.mpv.set_property("vf", "")
 
         if "video_offset" in song.song:
             self.offset = float(song.song["video_offset"])
