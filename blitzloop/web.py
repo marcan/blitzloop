@@ -1,7 +1,8 @@
 #!/usr/bin/python
 
 from PIL import Image
-from bottle import route, static_file, request, response, hook, HTTPError
+from bottle import route, static_file, request, response, hook, HTTPError, HTTPResponse
+from urllib.parse import urljoin
 import bottle
 import io
 import json
@@ -29,6 +30,14 @@ audio_config = None
 
 normalize_tbl = dict.fromkeys(i for i in range(sys.maxunicode)
                               if unicodedata.category(chr(i))[0] in "PMSZ")
+
+# Fixed version of Bottle redirect
+def redirect(url):
+    res = response.copy(cls=HTTPResponse)
+    res.status = 302
+    res.body = b"Redirect"
+    res.set_header('Location', urljoin(request.url, url))
+    raise res
 
 @hook("before_request")
 def pre_req():
@@ -66,6 +75,25 @@ def index():
     with open(fp, encoding='utf-8') as fd:
         i18n = fd.read()
     return "g_cfg = %s;\ng_i18n = %s;" % (cfg, i18n)
+
+def get_cover(filename, size):
+    stats = os.stat(filename)
+    lm = time.strftime("%a, %d %b %Y %H:%M:%S GMT", time.gmtime(stats.st_mtime))
+    response.headers['Last-Modified'] = lm
+    response.content_type = "image/png"
+    if request.method != 'HEAD':
+        im = Image.open(filename).resize((size, size), Image.ANTIALIAS)
+        fd = io.BytesIO()
+        im.save(fd, "PNG")
+        fd.seek(0)
+        return fd
+    else:
+        fd = io.BytesIO("TEST")
+        return fd  # FIXME: this sets content-length: 0 and I don't know how to avoid that
+
+@route("/s/no_cover/<size:int>")
+def get_nocover(size):
+    return get_cover(util.get_webres_path('img/no_cover.png'), size)
 
 @route("/s/<filename:path>")
 def send_static(filename):
@@ -160,22 +188,11 @@ def get_song(id):
 @route("/song/<id:int>/cover/<size:int>")
 def get_songcover(id, size):
     song = database.songs[id]
-    if song.coverfile is None:
-        return b'Nothing to see here'
+    coverfile = song.coverfile
+    if coverfile is None:
+        return redirect("/s/no_cover/%d" % size)
     else:
-        stats = os.stat(song.coverfile)
-        lm = time.strftime("%a, %d %b %Y %H:%M:%S GMT", time.gmtime(stats.st_mtime))
-        response.headers['Last-Modified'] = lm
-        response.content_type = "image/png"
-        if request.method != 'HEAD':
-            im = Image.open(song.coverfile).resize((size, size), Image.ANTIALIAS)
-            fd = io.BytesIO()
-            im.save(fd, "PNG")
-            fd.seek(0)
-            return fd
-        else:
-            fd = io.BytesIO("TEST")
-            return fd  # FIXME: this sets content-length: 0 and I don't know how to avoid that
+        return get_cover(coverfile, size)
 
 @route("/queue")
 def get_queuelist():
