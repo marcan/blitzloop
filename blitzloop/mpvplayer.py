@@ -90,6 +90,10 @@ class Player(object):
         self._wait_ev(mpv.Events.file_loaded)
         self.duration = self._getprop("duration")
 
+        self.mpv.set_property("keepaspect", True)
+        self.mpv.set_property("lavfi-complex", "")
+        self.mpv.set_property("brightness", 0)
+
         if "video_offset" in song.song:
             self.offset = float(song.song["video_offset"])
             self.mpv.set_property("audio-delay", self.offset)
