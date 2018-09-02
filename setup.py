@@ -17,7 +17,7 @@ extensions=[
         ['blitzloop/_audio.%s' % ext], libraries=['jack']),
 ]
 if USE_CYTHON:
-    extensions=cythonize(extensions)
+    extensions=cythonize(extensions, force=True)
 
 # res_files = []
 # for dirpath, dirname, files in os.walk('blitzloop/res'):
