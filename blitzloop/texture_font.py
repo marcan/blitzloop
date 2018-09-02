@@ -236,7 +236,7 @@ class TextureAtlas(object):
         if self.texid is not None:
             gl = graphics.GL()
             try:
-                gl.glDeleteTextures([tex])
+                gl.glDeleteTextures([self.texid])
             except: # old style
                 arrays = graphics.arrays()
                 tex = arrays.GLintArray.asArray([self.texid])
