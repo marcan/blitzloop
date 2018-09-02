@@ -39,7 +39,7 @@ class Player(object):
         self.mpv.set_property("fs", True)
         if opts.mpv_ao == "jack":
             self.mpv.set_property("jack-autostart", "yes")
-        self.mpv.set_property("af", '@lavfi:lavfi="pan=stereo|c0=c0|c1=c1",@rb:rubberband')
+        self.mpv.set_property("af", '@lavfi:lavfi="pan=stereo|c0=c0|c1=c1",@rb:rubberband=pitch=speed')
         for optval in opts.mpv_options.split():
             opt, val = optval.split("=", 1)
             self.mpv.set_property(opt, val)
