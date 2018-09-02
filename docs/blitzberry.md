@@ -84,36 +84,37 @@ Log out and back in.
 sudo pacman -Syu
 ```
 
-### Install dependencies
+### Install dependencies and BlitzLoop
+
+We need a bunch of dependencies from AUR, which will be a lot easier to do with
+yaourt:
 
 ```shell
-sudo pacman -S --needed base-devel jack ffms2 freetype2 python-numpy python-pillow python-opengl alsa-tools alsa-utils wget
-```
+# Manually pull in jack2 instead of jack, which works better here
+sudo pacman -S --needed base-devel jack2 alsa-tools alsa-utils wget
 
-We need to build mpv-rpi and ffmpeg-mmal from AUR. This will take a while:
-
-```shell
-sudo pacman -S --needed hardening-wrapper ladspa yasm python-docutils enca
 mkdir -p ~/pkg; cd ~/pkg
-wget https://aur.archlinux.org/cgit/aur.git/snapshot/ffmpeg-mmal.tar.gz
-wget https://aur.archlinux.org/cgit/aur.git/snapshot/mpv-rpi.tar.gz
-tar xvzf ffmpeg-mmal.tar.gz
-tar xvzf mpv-rpi.tar.gz
-cd ~/pkg/ffmpeg-mal
-MAKEFLAGS="-j4" makepkg --skippgpcheck
-sudo pacman -U ffmpeg-mmal-*.pkg.tar.xz
-cd ~/pkg/mpv-rpi
-MAKEFLAGS="-j4" makepkg --skippgpcheck
-sudo pacman -U mpv-rpi-*.pkg.tar.xz
+wget https://aur.archlinux.org/cgit/aur.git/snapshot/package-query.tar.gz
+tar xvzf package-query.tar.gz
+cd ~/pkg/package-query
+MAKEFLAGS="-j4" makepkg --skippgpcheck --syncdeps
+sudo pacman -U package-query-*.pkg.tar.xz
+
+cd ~/pkg
+wget https://aur.archlinux.org/cgit/aur.git/snapshot/yaourt.tar.gz
+tar xvzf yaourt.tar.gz
+cd ~/pkg/yaourt
+MAKEFLAGS="-j4" makepkg --skippgpcheck --syncdeps
+sudo pacman -U package-query-*.pkg.tar.xz
+
+cd ~/pkg
+yaourt -S mpv-rpi
+yaourt -S blitzloop-git
 ```
 
-### Install and configure BlitzLoop
+### Configure BlitzLoop
 
 ```shell
-cd ~
-python -m venv blitz --system-site-packages
-source blitz/bin/activate
-pip install 'git+git://github.com/marcan/blitzloop.git'
 mkdir -p ~/.config/blitzloop
 cat <<EOF >~/.config/blitzloop/blitzloop.conf
 display=rpi
@@ -131,8 +132,7 @@ Run:
 
 ```shell
 cd ~
-source blitz/bin/activate
-blitzloop
+blitzloop --mpv-ao=alsa --no-audioengine
 ```
 
 Connect to TCP port 10111 and check to see if everything works properly.
@@ -148,8 +148,7 @@ cat >~/startblitz.sh <<EOF
 #!/bin/sh
 cd "\$(dirname "\$0")"
 amixer cset numid=3 2
-source blitz/bin/activate
-blitzloop --port=80
+python -u /usr/bin/blitzloop --port=80 --no-audioengine --mpv-ao=alsa
 EOF
 chmod +x ~/startblitz.sh
 
@@ -172,6 +171,45 @@ EOF
 
 sudo systemctl enable blitzloop
 sudo systemctl start blitzloop
+```
+
+## Mic setup
+
+To get microphones supported, you will need to configure JACK. If you have a
+single USB sound card you want to use for input/output, do something like this
+in `~/startblitz.sh`:
+
+```shell
+cd "$(dirname "$0")"
+export JACK_NO_AUDIO_RESERVATION=1
+jackd -R --timeout 10000 -d alsa -P hw:AUDIO -r 48000 -p 240 -n 2 -o 2 &
+jack_pid=$!
+alsa_in -j mic -d hw:Receiver -c 2 -p 240 -n 2 -q 0 &
+alsa_pid=$!
+trap "kill $jack_pid $alsa_pid" TERM INT
+sleep 1
+python -u /usr/bin/blitzloop --port=80 --mpv-ao=jack
+```
+
+Where `hw:1` is your desired audio device (you can look in `/proc/asound/cards`
+for symbolic names you can use instead of index numbers which may change,
+and use them as e.g. `hw:AUDIO`).
+
+If you have separate cards for input/output (e.g. you want to use built-in or
+HDMI audio for output, or have a separate USB microphone and sound card), try
+something like this:
+
+```shell
+cd "$(dirname "$0")"
+ulimit -a
+export JACK_NO_AUDIO_RESERVATION=1
+jackd -R --timeout 10000 -d alsa -P hw:AUDIO -r 48000 -p 240 -n 2 -o 2 &
+jack_pid=$!
+alsa_in -j mic -d hw:Receiver -c 2 -p 240 -n 2 -q 0 &
+alsa_pid=$!
+trap "kill $jack_pid $alsa_pid" TERM INT
+sleep 2
+python -u /usr/bin/blitzloop --port=80 --mpv-ao=jack --mics=mic:capture_1,mic:capture_2 "$@"
 ```
 
 ## WiFi setup
@@ -217,3 +255,8 @@ sudo systemctl restart systemd-networkd.service
 ```
 
 Now you can connect to the `BlitzLoop` SSID and browse to http://b/.
+
+## Limitations / known bugs
+
+Audio processing already uses most of one core by default. Changing the speed
+or tempo in certain ways causes increased CPU usage and drop-outs.
