@@ -49,7 +49,7 @@ setup(
             'freetype-py',
             'numpy',
             'paste',
-            'pympv',
+            'pympv>=0.5.0',
             'pyopengl',
             'jaconv',
         ],

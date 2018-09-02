@@ -159,7 +159,7 @@ class Player(object):
 
     def set_pause(self, pause):
         if self.pause != pause:
-            self.mpv.set_property("pause", pause, async=True)
+            self.mpv.set_property("pause", pause, asynchronous=True)
             self.pause = pause
 
     def set_pitch(self, pitch):
@@ -217,7 +217,7 @@ class Player(object):
             self.speed = speed
 
     def seek(self, offset):
-        self.mpv.command("seek", offset, async=True)
+        self.mpv.command("seek", offset, asynchronous=True)
 
     def seek_to(self, t):
         self.mpv.set_property("time-pos", t)
@@ -266,8 +266,8 @@ class Player(object):
             self.solid_renderer.draw((0, 0), (1, 1), (0., 0., 0., 1 - brightness))
         return brightness
 
-    def get_song_time(self, async=True):
-        if async:
+    def get_song_time(self, asynchronous=True):
+        if asynchronous:
             return self.poll_props["audio-pts"]
         else:
             return self.mpv.get_property("audio-pts")
