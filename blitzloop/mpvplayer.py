@@ -18,6 +18,7 @@
 
 import mpv
 import time
+import shlex
 from blitzloop import util, graphics
 
 
@@ -67,6 +68,14 @@ class Player(object):
             self.gl = None
             self.mpv.set_property("vo", "null")
             self.mpv.set_property("vid", "no")
+
+        if opts.mpv_extra:
+            for opt in shlex.split(opts.mpv_extra):
+                if "=" not in opt:
+                    key, val = opt, True
+                else:
+                    key, val = opt.split("=", 1)
+                self.mpv.set_property(key, val)
 
     def load_song(self, song):
         self.song = song
