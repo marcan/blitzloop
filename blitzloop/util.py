@@ -45,8 +45,11 @@ def init_argparser():
         '--display', default="glut",
         help='Choose a display backend')
     parser.add_argument(
-        '--mpv-ao', default="jack",
-        help='Audio output driver for libmpv')
+        '--mpv-audio-device', default="jack",
+        help='Audio output driver and device for libmpv')
+    parser.add_argument(
+        '--mpv-ao', default=None,
+        help='Audio output driver for libmpv (deprecated, use --mpv-audio-device)')
     parser.add_argument(
         '--mpv-vo', default="opengl-cb",
         help='Video output driver for libmpv')

@@ -35,7 +35,10 @@ class Player(object):
         self.mpv.set_property("audio-file-auto", "no")
         self.mpv.set_property("terminal", True)
         self.mpv.set_property("quiet", True)
-        self.mpv.set_property("ao", opts.mpv_ao)
+        if opts.mpv_ao:
+            self.mpv.set_property("ao", opts.mpv_ao)
+        elif opts.mpv_audio_device:
+            self.mpv.set_property("audio-device", opts.mpv_audio_device)
         self.mpv.set_property("fs", True)
         if opts.mpv_ao == "jack":
             self.mpv.set_property("jack-autostart", "yes")
