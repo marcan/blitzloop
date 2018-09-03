@@ -91,7 +91,7 @@ yaourt:
 
 ```shell
 # Manually pull in jack2 instead of jack, which works better here
-sudo pacman -S --needed base-devel jack2 alsa-tools alsa-utils wget
+sudo pacman -S --needed base-devel jack2 alsa-tools alsa-utils wget git
 
 mkdir -p ~/pkg; cd ~/pkg
 wget https://aur.archlinux.org/cgit/aur.git/snapshot/package-query.tar.gz
@@ -105,7 +105,7 @@ wget https://aur.archlinux.org/cgit/aur.git/snapshot/yaourt.tar.gz
 tar xvzf yaourt.tar.gz
 cd ~/pkg/yaourt
 MAKEFLAGS="-j4" makepkg --skippgpcheck --syncdeps
-sudo pacman -U package-query-*.pkg.tar.xz
+sudo pacman -U yaourt-*.pkg.tar.xz
 
 cd ~/pkg
 yaourt -S mpv-rpi
@@ -180,15 +180,14 @@ single USB sound card you want to use for input/output, do something like this
 in `~/startblitz.sh`:
 
 ```shell
+#!/bin/sh
 cd "$(dirname "$0")"
 export JACK_NO_AUDIO_RESERVATION=1
-jackd -R --timeout 10000 -d alsa -P hw:AUDIO -r 48000 -p 240 -n 2 -o 2 &
+jackd -R --timeout 10000 -d alsa -D hw:AUDIO -r 48000 -p 240 -n 2 -o 2 &
 jack_pid=$!
-alsa_in -j mic -d hw:Receiver -c 2 -p 240 -n 2 -q 0 &
-alsa_pid=$!
-trap "kill $jack_pid $alsa_pid" TERM INT
+trap "kill $jack_pid" TERM INT
 sleep 1
-python -u /usr/bin/blitzloop --port=80 --mpv-ao=jack
+python -u /usr/bin/blitzloop --port=80 --mpv-ao=jack --mics=system:capture_1,system:capture_2
 ```
 
 Where `hw:1` is your desired audio device (you can look in `/proc/asound/cards`
@@ -200,8 +199,8 @@ HDMI audio for output, or have a separate USB microphone and sound card), try
 something like this:
 
 ```shell
+#!/bin/sh
 cd "$(dirname "$0")"
-ulimit -a
 export JACK_NO_AUDIO_RESERVATION=1
 jackd -R --timeout 10000 -d alsa -P hw:AUDIO -r 48000 -p 240 -n 2 -o 2 &
 jack_pid=$!
