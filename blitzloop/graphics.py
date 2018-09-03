@@ -28,6 +28,9 @@ def Display(*args, **kwargs):
     elif display == "rpi":
         from blitzloop.backend import rpi
         _display = rpi.Display(*args, **kwargs)
+    elif display == "kms":
+        from blitzloop.backend import kms
+        _display = kms.Display(*args, **kwargs)
     return _display
 
 _renderer = None
