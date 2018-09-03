@@ -99,6 +99,8 @@ void main() {
 """
 
 fs_karaoke = """
+precision highp float;
+
 uniform float time;
 uniform sampler2D tex;
 
@@ -158,6 +160,8 @@ void main() {
 """
 
 fs_solid = """
+precision highp float;
+
 varying vec4 v_color;
 
 void main() {
@@ -188,6 +192,7 @@ void main() {
 """
 
 fs_texture = """
+precision highp float;
 uniform sampler2D tex;
 
 varying vec2 v_texcoord;
