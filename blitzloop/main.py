@@ -19,7 +19,6 @@
 import os
 
 from blitzloop import graphics, idlescreen, layout, mpvplayer, songlist, util, web
-from blitzloop._audio import *
 
 
 data_home = os.getenv('XDG_DATA_HOME', '~/.local/share')
@@ -59,6 +58,7 @@ renderer = graphics.get_renderer().KaraokeRenderer(display)
 mpv = mpvplayer.Player(display)
 
 if not opts.no_audioengine and opts.mics:
+    from blitzloop._audio import *
     print(repr(opts.mics))
     audio = AudioEngine([s.encode("ascii") for s in opts.mics])
     print("Engine sample rate: %dHz" % audio.sample_rate)
