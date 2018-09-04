@@ -62,9 +62,6 @@ class Display(BaseDisplay):
         monitor = glfw.get_primary_monitor() if fullscreen else None
         self.window = glfw.create_window(width, height, "BlitzLoop Karaoke",
                                          monitor, None)
-        if monitor:
-            mode = glfw.get_video_mode(monitor)
-            self.fps = mode.refresh_rate
         glfw.make_context_current(self.window)
         BaseDisplay.__init__(self, width, height, fullscreen, aspect)
         self._on_reshape(self.window, width, height)
@@ -82,13 +79,10 @@ class Display(BaseDisplay):
         if self.fullscreen:
             glfw.set_window_monitor(self.window, None, *self.saved_size,
                                     util.get_opts().fps)
-            self.fps = None
         else:
             self.saved_size = self.x, self.y, self.win_width, self.win_height
             monitor = glfw.get_primary_monitor()
             mode = glfw.get_video_mode(monitor)
-            print(mode.refresh_rate)
-            self.fps = mode.refresh_rate
             glfw.set_window_monitor(self.window, monitor, 0, 0,
                                     mode.size.width, mode.size.height,
                                     mode.refresh_rate)
