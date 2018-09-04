@@ -99,7 +99,9 @@ void main() {
 """
 
 fs_karaoke = """
+#ifdef GL_ES
 precision highp float;
+#endif
 
 uniform float time;
 uniform sampler2D tex;
@@ -160,7 +162,9 @@ void main() {
 """
 
 fs_solid = """
+#ifdef GL_ES
 precision highp float;
+#endif
 
 varying vec4 v_color;
 
@@ -192,7 +196,10 @@ void main() {
 """
 
 fs_texture = """
+#ifdef GL_ES
 precision highp float;
+#endif
+
 uniform sampler2D tex;
 
 varying vec2 v_texcoord;
