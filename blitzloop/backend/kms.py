@@ -23,12 +23,15 @@ import pykms
 from blitzloop.backend.common import BaseDisplay
 
 import ctypes, ctypes.util
-from ctypes import cdll, c_int, Structure, byref, c_void_p, c_uint32
+from ctypes import cdll, c_int, Structure, byref, c_void_p, c_uint32, c_char_p
 
 import blitzloop.backend.gles_fixes
 import OpenGL.GLES2 as gl
 import OpenGL.EGL as egl
 from OpenGL import arrays
+
+libdrm = cdll.LoadLibrary("libdrm.so")
+libdrm.drmGetRenderDeviceNameFromFd.restype = c_char_p
 
 libgbm = cdll.LoadLibrary("libgbm.so")
 libgbm.gbm_create_device.restype = c_void_p
@@ -68,6 +71,18 @@ class Display(BaseDisplay):
         print("DRM fd: %d" % self.card.fd)
         print("Has atomic: %r" % self.card.has_atomic)
 
+        self.render_fd = -1
+
+        render_name = libdrm.drmGetRenderDeviceNameFromFd(self.card.fd)
+        print("Render device name: %r" % render_name)
+
+        if render_name:
+            try:
+                self.render_fd = os.open(render_name, os.O_RDWR)
+            except OSError:
+                print("Render node not available")
+
+        print("Render fd: %d" % self.render_fd)
         self.gbm_dev = libgbm.gbm_create_device(self.card.fd)
         if not self.gbm_dev:
             raise Exception("Failed to create GBM device")
@@ -226,6 +241,12 @@ class Display(BaseDisplay):
 
     def get_proc_address(self, s):
         return egl.eglGetProcAddress(s)
+
+    def get_mpv_params(self):
+        return { "drm_display": {
+            "fd": self.card.fd,
+            "render_fd": self.render_fd,
+        } }
 
 if __name__ == "__main__":
     d = Display()
