@@ -177,7 +177,6 @@ vs_texture = """
 attribute vec3 coord;
 
 uniform vec4 color;
-uniform mat4 textransform;
 uniform mat4 transform;
 
 varying vec2 v_texcoord;
@@ -190,8 +189,7 @@ void main() {
     vec4 pos = vec4(coord.x, coord.y, coord.z, 1.0);
     gl_Position = transform * pos;
 
-    vec4 texcoord = textransform * pos;
-    v_texcoord = texcoord.xy;
+    v_texcoord = vec2(coord.x, 1.0 - coord.y);
 }
 """
 
@@ -399,42 +397,19 @@ class SolidRenderer(BaseRenderer):
 
 class TextureRenderer(SolidRenderer):
     UNIFORMS = [
-        "tex", "color", "transform", "textransform"
+        "tex", "color", "transform"
     ]
     VS = vs_texture
     FS = fs_texture
-
-    def __init__(self, display):
-        SolidRenderer.__init__(self, display)
-        self.tmatrix = Matrix()
 
     def setup(self):
         SolidRenderer.setup(self)
         gl.glUniform1i(self.l_tex, 0)
 
-    def draw(self, pos, size, tpos, tsize, color):
-        self.activate()
-        self.tmatrix.reset()
-        self.tmatrix.translate(*tpos)
-        self.tmatrix.scale(*tsize)
-        gl.glUniformMatrix4fv(self.l_textransform, 1, False, self.tmatrix.m.transpose())
-        SolidRenderer.draw(self, pos, size, color)
-
 class ImageTexture(object):
     def __init__(self, img_file, texture_renderer):
         self.renderer = texture_renderer
-        self.image = PIL.Image.open(img_file).convert("RGBA")
-
-        self.tw = 1
-        while self.tw < self.width:
-            self.tw *= 2
-        self.th = 1
-        while self.th < self.height:
-            self.th *= 2
-
-        self.teximage = PIL.Image.new("RGBA", (self.tw, self.th), (0, 0, 0, 0))
-        self.teximage.paste(self.image, (0,0), self.image)
-        self.teximage = self.teximage.convert("RGBa") # premultiply alpha
+        self.image = PIL.Image.open(img_file).convert("RGBA").convert("RGBa")
 
         self.texid = gl.glGenTextures(1)
         gl.glBindTexture(gl.GL_TEXTURE_2D, self.texid)
@@ -444,15 +419,15 @@ class ImageTexture(object):
         gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T, gl.GL_CLAMP_TO_EDGE)
 
         try:
-            blob = self.teximage.tobytes()
+            blob = self.image.tobytes()
         except AttributeError:
-            blob = self.teximage.tostring()
+            blob = self.image.tostring()
 
         if glu is not None:
-            glu.gluBuild2DMipmaps(gl.GL_TEXTURE_2D, 4, self.tw, self.th,
+            glu.gluBuild2DMipmaps(gl.GL_TEXTURE_2D, 4, self.width, self.height,
                 gl.GL_RGBA, gl.GL_UNSIGNED_BYTE, blob)
         else:
-            gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGBA, self.tw, self.th,
+            gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGBA, self.width, self.height,
                             0, gl.GL_RGBA, gl.GL_UNSIGNED_BYTE, blob)
             gl.glGenerateMipmap(gl.GL_TEXTURE_2D)
 
@@ -480,8 +455,7 @@ class ImageTexture(object):
 
         gl.glBindTexture(gl.GL_TEXTURE_2D, self.texid)
 
-        self.renderer.draw((x, y), (width, height), (0, self.height / self.th),
-                           (self.width / self.tw, -self.height / self.th), color)
+        self.renderer.draw((x, y), (width, height), color)
 
 def cleanup():
     global _current_renderer
