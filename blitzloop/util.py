@@ -51,8 +51,8 @@ def init_argparser():
         '--mpv-ao', default=None,
         help='Audio output driver for libmpv (deprecated, use --mpv-audio-device)')
     parser.add_argument(
-        '--mpv-extra', default=None,
-        help='Additional properties for mpv, in prop=value format')
+        '--mpv-options', default="",
+        help='Additional options for libmpv (space separated opt=val)')
     parser.add_argument(
         '--mpv-msg-level', default=None,
         help='Message level for mpv')
@@ -65,9 +65,6 @@ def init_argparser():
     parser.add_argument(
         '--fps', default="60", type=int,
         help='Display FPS (required for correct video sync)')
-    parser.add_argument(
-        '--mpv-options', default="",
-        help='Additional options for libmpv (space separated opt=val)')
 
 def get_argparser():
     return configargparse.get_argument_parser()

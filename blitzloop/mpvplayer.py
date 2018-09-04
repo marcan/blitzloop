@@ -47,9 +47,13 @@ class Player(object):
         if opts.mpv_ao == "jack":
             self.mpv.set_property("jack-autostart", "yes")
         self.mpv.set_property("af", '@lavfi:lavfi="pan=stereo|c0=c0|c1=c1",@rb:rubberband=pitch=speed')
-        for optval in opts.mpv_options.split():
-            opt, val = optval.split("=", 1)
-            self.mpv.set_property(opt, val)
+        if opts.mpv_options:
+            for opt in shlex.split(opts.mpv_options):
+                if "=" not in opt:
+                    key, val = opt, True
+                else:
+                    key, val = opt.split("=", 1)
+                self.mpv.set_property(key, val)
         self.poll_props = {"audio-pts": None}
         for i in self.poll_props:
             self.mpv.get_property_async(i)
@@ -73,13 +77,6 @@ class Player(object):
             self.mpv.set_property("vo", "null")
             self.mpv.set_property("vid", "no")
 
-        if opts.mpv_extra:
-            for opt in shlex.split(opts.mpv_extra):
-                if "=" not in opt:
-                    key, val = opt, True
-                else:
-                    key, val = opt.split("=", 1)
-                self.mpv.set_property(key, val)
 
     def load_song(self, song):
         self.song = song
