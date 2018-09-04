@@ -60,6 +60,9 @@ def init_argparser():
         '--mpv-vo', default="opengl-cb",
         help='Video output driver for libmpv')
     parser.add_argument(
+        '--mpv-hwdec', default=None,
+        help='Hardware decoding mode for libmpv (try --mpv-hwdec=vaapi)')
+    parser.add_argument(
         '--mpv-visualizer', default="[aid1]asplit=2[ao][a1]; [a1]volume=volume=%(volume)f * 3.0,showcqt=bar_v=8:count=1:basefreq=120:csp=bt709:s=128x72:axis=0:fps=60:sono_h=0:bar_g=3:cscheme=0.5|1|0|0|0.5|1,format=pix_fmts=rgb24,split[c1][c2]; [c2]vflip,hflip[c3]; [c1][c3]blend=all_mode=addition[vo]",
         help='Visualizer filter for no-video songs')
     parser.add_argument(

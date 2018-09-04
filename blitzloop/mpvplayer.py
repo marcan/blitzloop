@@ -59,6 +59,8 @@ class Player(object):
             self.mpv.get_property_async(i)
 
         if display:
+            if opts.mpv_hwdec:
+                self.mpv.set_property("hwdec", opts.mpv_hwdec)
             vo = opts.mpv_vo
             if vo in ("opengl-cb", "libmpv"):
                 vo = "libmpv"
