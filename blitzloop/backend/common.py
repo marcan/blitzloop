@@ -26,6 +26,7 @@ class BaseDisplay(object):
     TRANSPARENT = (0.0, 0.0, 0.0, 0.0)
     def __init__(self, width=640, height=480, fullscreen=False, aspect=None):
         self.kbd_handler = None
+        self.exit_handler = None
         self.win_width = self.width = width
         self.win_height = self.height = height
         self.matrix = Matrix()
@@ -72,6 +73,9 @@ class BaseDisplay(object):
 
     def set_keyboard_handler(self, f):
         self.kbd_handler = f
+
+    def set_exit_handler(self, f):
+        self.exit_handler = f
 
     def _initialize(self):
         # Set up common GL state

@@ -84,30 +84,29 @@ def render():
 
 pause = False
 
-CH_UP = b"+456"
-CH_DOWN = b"-123"
+CH_UP = "+456"
+CH_DOWN = "-123"
 
 def key(k):
-    import OpenGL.GLUT as glut
     global speed_i, pitch_i, vocals_i, pause
-    if k == b'\x1b':
+    if k == 'KEY_ESCAPE':
         mpv.shutdown()
         os._exit(0)
-    elif k == b'f':
+    elif k == 'f':
         display.toggle_fullscreen()
-    elif k == b'[' and speed_i > -12:
+    elif k == '[' and speed_i > -12:
         speed_i -= 1
         print("Speed: %d" % speed_i)
         mpv.set_speed(2**(-speed_i/12.0))
-    elif k == b']' and speed_i < 12:
+    elif k == ']' and speed_i < 12:
         speed_i += 1
         print("Speed: %d" % speed_i)
         mpv.set_speed(2**(-speed_i/12.0))
-    elif k == glut.GLUT_KEY_UP and pitch_i < 12:
+    elif k == 'KEY_UP' and pitch_i < 12:
         pitch_i += 1
         print("Pitch: %d" % pitch_i)
         mpv.set_pitch(2**(pitch_i/12.0))
-    elif k == glut.GLUT_KEY_DOWN and pitch_i > -12:
+    elif k == 'KEY_DOWN' and pitch_i > -12:
         pitch_i -= 1
         print("Pitch: %d" % pitch_i)
         mpv.set_pitch(2**(pitch_i/12.0))
@@ -123,11 +122,11 @@ def key(k):
             channels_i[idx] -= 1
             print("Channel %d: %d" % (idx, channels_i[idx]))
             mpv.set_channel(idx, channels_i[idx]/10.0)
-    elif k == glut.GLUT_KEY_LEFT:
+    elif k == 'KEY_LEFT':
         mpv.seek(-10)
-    elif k == glut.GLUT_KEY_RIGHT:
+    elif k == 'KEY_RIGHT':
         mpv.seek(10)
-    elif k == b' ':
+    elif k == ' ':
         pause = not pause
         t = time.time()
         mpv.set_pause(pause)

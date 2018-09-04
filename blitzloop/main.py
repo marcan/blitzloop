@@ -189,15 +189,19 @@ def main():
         for i in main_render():
             yield i
 
+def exit():
+    mpv.shutdown()
+    if not opts.no_audioengine:
+        audio.shutdown()
+    os._exit(0)
+
 def key(k):
-    if k == b'\x1b':
-        mpv.shutdown()
-        if not opts.no_audioengine:
-            audio.shutdown()
-        os._exit(0)
-    elif k == b'f':
+    if k == 'KEY_ESCAPE':
+        exit()
+    elif k == 'f':
         display.toggle_fullscreen()
 
 display.set_render_gen(main)
 display.set_keyboard_handler(key)
+display.set_exit_handler(exit)
 display.main_loop()

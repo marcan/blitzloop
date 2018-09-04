@@ -27,6 +27,14 @@ import sys
 from blitzloop.backend.common import *
 
 class Display(BaseDisplay):
+    KEYMAP = {
+        b"\x1b": "KEY_ESCAPE",
+        b"\r": "KEY_ENTER",
+        glut.GLUT_KEY_UP: "KEY_UP",
+        glut.GLUT_KEY_DOWN: "KEY_DOWN",
+        glut.GLUT_KEY_LEFT: "KEY_LEFT",
+        glut.GLUT_KEY_RIGHT: "KEY_RIGHT",
+    }
     def __init__(self, width=640, height=480, fullscreen=False, aspect=None):
         self.gl = gl
         glut.glutInit(sys.argv)
@@ -67,6 +75,10 @@ class Display(BaseDisplay):
 
     def _on_keyboard(self, key, x, y):
         if self.kbd_handler:
+            if key in self.KEYMAP:
+                key = self.KEYMAP[key]
+            else:
+                key = key.decode("ascii").lower()
             self.kbd_handler(key)
         elif key == b"\033":
             os._exit(0)

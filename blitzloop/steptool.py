@@ -70,7 +70,7 @@ def key(k):
     global step, compound, cur_beat
     song_time = mpv.get_song_time() or 0
     beat = s.timing.time2beat(song_time)
-    if k == b' ':
+    if k == ' ':
         if compound is not None:
             time = song.MixedFraction(round_beat(beat - cur_beat), opts.quant)
             cur_beat += time
@@ -103,7 +103,7 @@ def key(k):
                 step += 0.5
             else:
                 step += 1
-    elif k == b'\r':
+    elif k == 'KEY_ENTER':
         if compound and len(compound.timing) == (compound.steps - 1):
             time = song.MixedFraction(round_beat(beat - cur_beat), opts.quant)
             compound.timing.append(time)
