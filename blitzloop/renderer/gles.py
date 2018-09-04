@@ -26,7 +26,7 @@ from blitzloop import texture_font
 from blitzloop.util import map_from, map_to, get_opts
 from blitzloop.matrix import Matrix
 
-if get_opts().display in ("glut",):
+if get_opts().display in ("glut", "glfw"):
     import OpenGL.GL as gl
     import OpenGL.GL.shaders as shaders
     import OpenGL.GLU as glu
