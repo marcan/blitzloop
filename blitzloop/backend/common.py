@@ -34,6 +34,7 @@ class BaseDisplay(object):
         self.clear_color = self.BLACK
         self.cleanup = None
         self.fullscreen = fullscreen
+        self.fps = None
 
     def toggle_fullscreen(self):
         pass
@@ -109,3 +110,6 @@ class BaseDisplay(object):
     @property
     def top(self):
         return self.height / self.width
+
+    def get_mpv_params(self):
+        return {}

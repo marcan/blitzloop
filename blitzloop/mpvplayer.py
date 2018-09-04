@@ -32,6 +32,7 @@ class Player(object):
         self.display = display
         self.opts = opts = util.get_opts()
         self.mpv = mpv.Context()
+        self.gl = None
         self.mpv.initialize()
         self.mpv.set_property("audio-file-auto", "no")
         self.mpv.set_property("terminal", True)
@@ -52,17 +53,18 @@ class Player(object):
             self.mpv.get_property_async(i)
 
         if display:
-            if opts.mpv_vo == "opengl-cb":
+            vo = opts.mpv_vo
+            if vo in ("opengl-cb", "libmpv"):
+                vo = "libmpv"
                 self.mpv.set_property("video-sync", "display-vdrop")
-                self.mpv.set_property("display-fps", opts.fps)
+                self.mpv.set_property("display-fps", display.fps or opts.fps)
                 def gpa(name):
                     return display.get_proc_address(name)
-
-                self.gl = self.mpv.opengl_cb_api()
-                self.gl.init_gl(None, gpa)
+                self.gl = mpv.OpenGLRenderContext(self.mpv, gpa,
+                                                  **display.get_mpv_params())
             else:
                 self.gl = None
-            self.mpv.set_property("vo", opts.mpv_vo)
+            self.mpv.set_property("vo", vo)
             self.solid_renderer = graphics.get_solid_renderer()
         else:
             self.gl = None
@@ -265,11 +267,16 @@ class Player(object):
 
     def flip(self):
         if self.gl:
-            self.gl.report_flip(0)
+            self.gl.report_swap()
 
     def draw(self):
         if self.gl:
-            self.gl.draw(0, self.display.win_width, -self.display.win_height)
+            fbo = {
+                "fbo": 0,
+                "w": self.display.win_width,
+                "h": self.display.win_height,
+            }
+            self.gl.render(opengl_fbo=fbo, flip_y=True)
             self.display._initialize() # Reset GL state that mpv may have changed
 
     def draw_fade(self, songtime):
@@ -298,8 +305,11 @@ class Player(object):
         self.mpv.command('stop')
         self.song = None
 
+    def __del__(self):
+        self.shutdown()
+
     def shutdown(self):
         if self.gl:
-            self.gl.uninit_gl()
+            self.gl.close()
         self.mpv.shutdown()
 
