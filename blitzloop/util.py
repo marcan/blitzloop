@@ -52,7 +52,10 @@ def init_argparser():
         help='Audio output driver for libmpv (deprecated, use --mpv-audio-device)')
     parser.add_argument(
         '--mpv-extra', default=None,
-        help='Additional properties for mpv, in prop=value format.')
+        help='Additional properties for mpv, in prop=value format')
+    parser.add_argument(
+        '--mpv-msg-level', default=None,
+        help='Message level for mpv')
     parser.add_argument(
         '--mpv-vo', default="opengl-cb",
         help='Video output driver for libmpv')

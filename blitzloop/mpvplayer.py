@@ -34,6 +34,8 @@ class Player(object):
         self.mpv = mpv.Context()
         self.gl = None
         self.mpv.initialize()
+        if opts.mpv_msg_level:
+            self.mpv.set_property("msg-level", opts.mpv_msg_level)
         self.mpv.set_property("audio-file-auto", "no")
         self.mpv.set_property("terminal", True)
         self.mpv.set_property("quiet", True)
