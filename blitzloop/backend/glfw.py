@@ -62,6 +62,8 @@ class Display(BaseDisplay):
         monitor = glfw.get_primary_monitor() if fullscreen else None
         self.window = glfw.create_window(width, height, "BlitzLoop Karaoke",
                                          monitor, None)
+        self.x = 0
+        self.y = 0
         glfw.make_context_current(self.window)
         BaseDisplay.__init__(self, width, height, fullscreen, aspect)
         self._on_reshape(self.window, width, height)
