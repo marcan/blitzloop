@@ -98,7 +98,10 @@ class Display(BaseDisplay):
 
         self.mode = mode = self.conn.get_default_mode()
 
-        print("Creating GBM surface (%dx%d)" % (mode.hdisplay, mode.vdisplay))
+        BaseDisplay.__init__(self, mode.hdisplay, mode.vdisplay, True, aspect)
+
+        self.fps = 1000 * mode.clock / (mode.htotal * mode.vtotal)
+        print("Creating GBM surface (%dx%d %f Hz)" % (mode.hdisplay, mode.vdisplay, self.fps))
 
         self.gbm_surface = libgbm.gbm_surface_create(
             c_void_p(self.gbm_dev), mode.hdisplay, mode.vdisplay,
@@ -163,8 +166,6 @@ class Display(BaseDisplay):
         self.win_height = self.height = mode.vdisplay
 
         gl.glViewport(0, 0, self.win_width, self.win_height)
-
-        BaseDisplay.__init__(self, mode.hdisplay, mode.vdisplay, True, aspect)
 
         self.clear_color = self.BLACK
 
