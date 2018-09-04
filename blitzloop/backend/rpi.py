@@ -42,19 +42,10 @@ ctypes.util.find_library = find_library
 # Raspberry Pi libs are missing dependencies, we need GLES before EGL...
 cdll.LoadLibrary("/opt/vc/lib/libGLESv2.so")
 
+import blitzloop.backend.gles_fixes
 import OpenGL.GLES2 as gl
 import OpenGL.EGL as egl
 from OpenGL import arrays
-
-# Now fix stupid missing imports in PyOpenGL GLES support...
-import OpenGL.GLES2.VERSION.GLES2_2_0 as gl2
-from OpenGL._bytes import _NULL_8_BYTE
-from OpenGL.arrays.arraydatatype import ArrayDatatype
-from OpenGL import contextdata
-gl2._NULL_8_BYTE = _NULL_8_BYTE
-gl2.ArrayDatatype = ArrayDatatype
-gl2.contextdata = contextdata
-del gl2, _NULL_8_BYTE, ArrayDatatype, contextdata
 
 class DISPMANX_MODEINFO_T(Structure):
     _fields_ = [("width", c_int),
