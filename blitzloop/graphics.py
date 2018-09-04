@@ -34,6 +34,8 @@ def Display(*args, **kwargs):
     elif display == "kms":
         from blitzloop.backend import kms
         _display = kms.Display(*args, **kwargs)
+    else:
+        raise Exception("Unknown display: %s" % display)
     return _display
 
 _renderer = None
