@@ -67,7 +67,7 @@ class Display(BaseDisplay):
         self._on_reshape(self.window, width, height)
         if fullscreen:
             self.saved_size = (0, 0, width, height)
-            glfw.set_input_mode(selfd.window, glfw.CURSOR, glfw.CURSOR_HIDDEN)
+            glfw.set_input_mode(self.window, glfw.CURSOR, glfw.CURSOR_HIDDEN)
 
         glfw.set_key_callback(self.window, self._on_keyboard)
         glfw.set_window_pos_callback(self.window, self._on_move)
