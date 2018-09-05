@@ -417,7 +417,7 @@ class TextureRenderer(SolidRenderer):
         self.tmatrix.reset()
         self.tmatrix.translate(*tpos)
         self.tmatrix.scale(*tsize)
-        gl.glUniformMatrix4fv(self.l_textransform, 1, False, self.tmatrix.m.transpose())
+        gl.glUniformMatrix4fv(self.l_textransform, 1, False, self.tmatrix.m)
         SolidRenderer.draw(self, pos, size, color)
 
 class ImageTexture(object):

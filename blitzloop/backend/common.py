@@ -73,8 +73,8 @@ class BaseDisplay(object):
         self.aspect_cache[self.aspect] = matrix
 
     def commit_matrix(self, uniform):
-        m = self.viewmatrix.m * self.matrix.m
-        self.gl.glUniformMatrix4fv(uniform, 1, False, m.transpose())
+        m = self.viewmatrix * self.matrix
+        self.gl.glUniformMatrix4fv(uniform, 1, False, m.m)
 
     def set_render_gen(self, gen):
         self.frames = gen()
