@@ -43,7 +43,7 @@ class BaseDisplay(object):
         pass
 
     def set_aspect(self, aspect):
-        if aspect is None:
+        if not aspect:
             aspect = self.win_width / self.win_height
         self.aspect = aspect
 
@@ -55,16 +55,12 @@ class BaseDisplay(object):
             return
 
         display_aspect = self.win_width / self.win_height
-        if self.aspect:
-            if display_aspect > self.aspect:
-                self.width = int(round(self.aspect * self.win_height))
-                self.height = self.win_height
-            else:
-                self.width = self.win_width
-                self.height = int(round(self.win_width / self.aspect))
+        if display_aspect > self.aspect:
+            self.width = int(round(self.aspect * self.win_height))
+            self.height = self.win_height
         else:
             self.width = self.win_width
-            self.height = self.win_height
+            self.height = int(round(self.win_width / self.aspect))
         off_x = int((self.win_width - self.width) / 2)
         off_y = int((self.win_height - self.height) / 2)
 
