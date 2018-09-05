@@ -29,8 +29,9 @@ class BaseDisplay(object):
         self.exit_handler = None
         self.win_width = self.width = width
         self.win_height = self.height = height
+        self.cache_win = None
+        self.aspect_cache = None
         self.matrix = Matrix()
-        self.viewmatrix = Matrix()
         self.set_aspect(aspect)
         self.clear_color = self.BLACK
         self.cleanup = None
@@ -44,6 +45,14 @@ class BaseDisplay(object):
         if aspect is None:
             aspect = self.win_width / self.win_height
         self.aspect = aspect
+
+        if self.cache_win != (self.win_width, self.win_height):
+            self.aspect_cache = {}
+            self.cache_win = (self.win_width, self.win_height)
+        if aspect in self.aspect_cache:
+            self.viewmatrix = self.aspect_cache[aspect]
+            return
+
         display_aspect = self.win_width / self.win_height
         if self.aspect:
             if display_aspect > self.aspect:
@@ -58,11 +67,13 @@ class BaseDisplay(object):
         off_x = int((self.win_width - self.width) / 2)
         off_y = int((self.win_height - self.height) / 2)
 
-        self.viewmatrix.reset()
-        self.viewmatrix.translate(-1.0, -1.0)
-        self.viewmatrix.scale(2.0/self.win_width, 2.0/self.win_height)
-        self.viewmatrix.translate(off_x, off_y, 0)
-        self.viewmatrix.scale(self.width, self.width, 1)
+        matrix = Matrix()
+        matrix.translate(-1.0, -1.0)
+        matrix.scale(2.0/self.win_width, 2.0/self.win_height)
+        matrix.translate(off_x, off_y, 0)
+        matrix.scale(self.width, self.width, 1)
+        self.viewmatrix = matrix
+        self.aspect_cache[self.aspect] = matrix
 
     def commit_matrix(self, uniform):
         m = self.viewmatrix.m * self.matrix.m
