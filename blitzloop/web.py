@@ -1,8 +1,10 @@
 #!/usr/bin/python
 
 from PIL import Image
-from bottle import route, static_file, request, response, hook, HTTPError, HTTPResponse
+from bottle import route, static_file, request, response, hook, HTTPError, HTTPResponse, Bottle, ServerAdapter
 from urllib.parse import urljoin
+from urllib.request import urlopen
+from paste import httpserver
 import bottle
 import io
 import json
@@ -15,7 +17,6 @@ import jaconv
 import unicodedata
 
 from blitzloop import songlist, util
-
 
 LANGUAGES = ("en-gb", "es-es", "ja-jp", "de-de", "es-eu", "fr-fr")
 
@@ -304,13 +305,33 @@ def queue_change(qid):
     return {"qid": qe.qid}
 
 class ServerThread(threading.Thread):
-    def __init__(self, *args, **kwargs):
-        self.args = args
+    def __init__(self, host, port, **kwargs):
+        self.running = False
         self.kwargs = kwargs
+        self.host = host
+        self.dhost = self.host
+        if self.dhost == "::":
+            self.dhost = "::1"
+        elif self.dhost == "0.0.0.0":
+            self.dhost = "127.0.0.1"
+        self.port = port
         threading.Thread.__init__(self)
 
     def run(self):
-        bottle.run(*self.args, **self.kwargs)
+        handler = bottle.default_app()
+        self.server = httpserver.serve(handler, host=self.host, port=self.port, start_loop=False, use_threadpool=False, **self.kwargs)
+        print("web: serving on %s:%d at http://%s:%d" % (self.host, self.port, self.dhost, self.port))
+        #print(self.server.thread_pool)
+        self.running = True
+        try:
+            self.server.serve_forever(poll_interval = 0.5)
+        finally:
+            self.running = False
+        print("web: Server thread exited")
+
+    def stop(self):
+        if self.running:
+            self.server.shutdown()
 
 if __name__ == "__main__":
     opts = util.get_opts()

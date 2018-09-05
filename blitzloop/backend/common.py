@@ -27,6 +27,7 @@ class BaseDisplay(object):
     def __init__(self, width=640, height=480, fullscreen=False, aspect=None):
         self.kbd_handler = None
         self.exit_handler = None
+        self.should_exit = False
         self.win_width = self.width = width
         self.win_height = self.height = height
         self.cache_win = None
@@ -88,6 +89,15 @@ class BaseDisplay(object):
     def set_exit_handler(self, f):
         self.exit_handler = f
 
+    def queue_exit(self):
+        self.should_exit = True
+
+    def do_exit(self):
+        if self.exit_handler:
+            eh = self.exit_handler
+            self.exit_handler = None
+            eh()
+
     def _initialize(self):
         # Set up common GL state
         self.gl.glActiveTexture(self.gl.GL_TEXTURE0)
@@ -118,7 +128,7 @@ class BaseDisplay(object):
             (t - self.lt) * 1000,
             msg))
         self.lt = t
-    
+
     def round_coord(self, c):
         return int(round(c * self.width)) / self.width
 

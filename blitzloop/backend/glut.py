@@ -55,7 +55,11 @@ class Display(BaseDisplay):
         glut.glutReshapeFunc(self._on_reshape)
         glut.glutKeyboardFunc(self._on_keyboard)
         glut.glutSpecialFunc(self._on_keyboard)
-
+        try:
+            glut.glutSetOption(glut.GLUT_ACTION_ON_WINDOW_CLOSE, glut.GLUT_ACTION_GLUTMAINLOOP_RETURNS)
+            print("Using FreeGLUT mainloop return feature")
+        except:
+            pass
         self._initialize()
 
     def toggle_fullscreen(self):
@@ -77,27 +81,40 @@ class Display(BaseDisplay):
         if self.kbd_handler:
             if key in self.KEYMAP:
                 key = self.KEYMAP[key]
-            else:
+            elif isinstance(key, bytes):
                 key = key.decode("ascii").lower()
+            else:
+                return
             self.kbd_handler(key)
         elif key == b"\033":
-            os._exit(0)
+            self.queue_exit()
 
     def _render(self):
         try:
             BaseDisplay._render(self)
         except StopIteration:
-            pass
+            self.do_exit()
+            try:
+                glut.glutLeaveMainLoop()
+            except:
+                os._exit(0)
         except BaseException as e:
             sys.excepthook(*sys.exc_info())
-            os._exit(0)
         self.swap_buffers()
+        if self.should_exit:
+            self.do_exit()
+            try:
+                glut.glutLeaveMainLoop()
+            except:
+                os._exit(0)
 
     def swap_buffers(self):
         glut.glutSwapBuffers()
 
     def main_loop(self):
         glut.glutMainLoop()
+        print("GLUT main loop exited")
+        self.do_exit() # This may be called twice, exit handler only runs on first call
 
     def get_proc_address(self, s):
         proc = glut.glutGetProcAddress(s)

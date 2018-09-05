@@ -118,8 +118,6 @@ class Display(BaseDisplay):
     def _render(self):
         try:
             BaseDisplay._render(self)
-        except StopIteration:
-            pass
         except BaseException as e:
             sys.excepthook(*sys.exc_info())
             os._exit(0)
@@ -131,11 +129,14 @@ class Display(BaseDisplay):
     def main_loop(self):
         while True:
             glfw.poll_events()
-            if glfw.window_should_close(self.window):
-                if self.exit_handler:
-                    self.exit_handler()
+            if glfw.window_should_close(self.window) or self.should_exit:
+                self.do_exit()
                 return
-            self._render()
+            try:
+                self._render()
+            except StopIteration:
+                self.do_exit()
+                return
 
     def get_proc_address(self, s):
         return glfw.get_proc_address(s.decode("ascii"))

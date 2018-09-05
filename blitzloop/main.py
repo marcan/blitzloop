@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-import os
+import os, threading
 
 from blitzloop import graphics, idlescreen, layout, mpvplayer, songlist, util, web
 
@@ -90,7 +90,7 @@ audio_config = AudioConfig()
 web.database = song_database
 web.queue = queue
 web.audio_config = audio_config
-server = web.ServerThread(host=opts.host, port=opts.port, server="paste")
+server = web.ServerThread(host=opts.host, port=opts.port)
 server.start()
 
 idle_screen = idlescreen.IdleScreen(display)
@@ -190,14 +190,16 @@ def main():
             yield i
 
 def exit():
+    print("Exit handler called")
     mpv.shutdown()
     if not opts.no_audioengine:
         audio.shutdown()
-    os._exit(0)
+    server.stop()
+    print("Exit handler done")
 
 def key(k):
     if k == 'KEY_ESCAPE':
-        exit()
+        display.queue_exit()
     elif k == 'f':
         display.toggle_fullscreen()
 
@@ -205,3 +207,6 @@ display.set_render_gen(main)
 display.set_keyboard_handler(key)
 display.set_exit_handler(exit)
 display.main_loop()
+threads = threading.enumerate()
+if len(threads) > 1:
+    print("Loose threads: %r" % threads)
