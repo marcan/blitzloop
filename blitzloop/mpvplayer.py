@@ -138,7 +138,7 @@ class Player(object):
         assert ch == 1 or (ch % 2 == 0)
         self.channels = ((ch + 1) // 2) - 1
         self.volumes = [0] * self.channels
-        self.set_channel(0, 1)
+        self._update_matrix(True)
 
         if song.videofile is not None and self.display is not None:
             w = self._getprop("video-params/w")
@@ -188,30 +188,34 @@ class Player(object):
             self.mpv.command("af-command", "rb", "set-pitch", str(pitch))
             self.pitch = pitch
 
-    def set_channel(self, channel, value):
+    def set_channel(self, channel, value, defer=False):
         if self.channels == 0:
             return
         if self.volumes[channel] == value:
             return
         self.volumes[channel] = value
-        self._update_matrix()
+        if self.song is not None and not defer:
+            self._update_matrix()
 
-    def set_volume(self, volume):
+    def set_volume(self, volume, defer=False):
         if self.volume == volume:
             return
         self.volume = volume
-        if self.song is not None:
+        if self.song is not None and not defer:
             self._update_matrix()
 
-    def set_fadevol(self, volume):
+    def set_fadevol(self, volume, defer=False):
         if self.fadevol == volume:
             return
         self.fadevol = volume
-        if self.song is not None:
+        if self.song is not None and not defer:
             self._update_matrix()
 
-    def _update_matrix(self):
-        if (time.time() - self.last_audio_reconfig) < self.MIN_AUDIO_RECONFIGURE_INTERVAL:
+    def update_mixer(self, force=False):
+        self._update_matrix(force)
+
+    def _update_matrix(self, force=False):
+        if not force and (time.time() - self.last_audio_reconfig) < self.MIN_AUDIO_RECONFIGURE_INTERVAL:
             self.audio_reconfig_pending = True
             return
         self.audio_reconfig_pending = False

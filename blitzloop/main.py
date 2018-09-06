@@ -123,20 +123,22 @@ def main_render():
     mpv.load_song(qe.song)
     display.set_aspect(mpv.aspect)
 
+    def update_params(defer=False):
+        mpv.set_speed(1.0 / (2**(qe.speed / 12.0)))
+        mpv.set_pitch(2**(qe.pitch / 12.0))
+        for i, j in enumerate(qe.channels):
+            mpv.set_channel(i, j["volume"] / 10., defer=defer)
+        mpv.set_pause(qe.pause)
+
+    update_params(True)
+    mpv.update_mixer(force=True)
+
     print("Laying out song...")
     renderer.reset()
     variant_key = list(qe.song.variants.keys())[qe.variant]
     song_layout = layout.SongLayout(qe.song, variant_key, renderer)
     print("Loaded.")
 
-    def update_params():
-        mpv.set_speed(1.0 / (2**(qe.speed / 12.0)))
-        mpv.set_pitch(2**(qe.pitch / 12.0))
-        for i, j in enumerate(qe.channels):
-            mpv.set_channel(i, j["volume"] / 10.0)
-        mpv.set_pause(qe.pause)
-
-    update_params()
     song_time = -10
     stopping = False
     while not (mpv.eof_reached() or (stopping and qe.pause)):
