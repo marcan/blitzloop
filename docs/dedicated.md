@@ -168,7 +168,7 @@ jackd -R --timeout 10000 -d alsa -P hw:chtrt5645 -r 48000 -p 240 -n 2 -o 2 -S &
 jack_pid=$!
 alsa_in -j mic -d hw:Receiver -c 2 -p 240 -n 2 -q 0 &
 alsa_pid=$!
-trap "kill $jack_pid $alsa_pid" TERM INT
+trap "kill $jack_pid $alsa_pid" EXIT
 sleep 2
 python -u /usr/bin/blitzloop --port=80 --mpv-ao=jack --mics=mic:capture_1,mic:capture_2 "$@"
 EOF
@@ -184,6 +184,8 @@ User=blitz
 Group=blitz
 ExecStart=/home/blitz/startblitz.sh
 AmbientCapabilities=CAP_NET_BIND_SERVICE
+KillMode=mixed
+TimeoutStopSec=5
 LimitRTPRIO=99
 LimitMEMLOCK=1024000000
 

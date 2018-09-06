@@ -161,6 +161,8 @@ Type=simple
 User=alarm
 Group=alarm
 ExecStart=/home/alarm/startblitz.sh
+KillMode=mixed
+TimeoutStopSec=5
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 LimitRTPRIO=99
 LimitMEMLOCK=1024000000
@@ -185,7 +187,7 @@ cd "$(dirname "$0")"
 export JACK_NO_AUDIO_RESERVATION=1
 jackd -R --timeout 10000 -d alsa -D hw:AUDIO -r 48000 -p 240 -n 2 -o 2 &
 jack_pid=$!
-trap "kill $jack_pid" TERM INT
+trap "kill $jack_pid" EXIT
 sleep 1
 python -u /usr/bin/blitzloop --port=80 --mpv-ao=jack --mics=system:capture_1,system:capture_2
 ```
@@ -206,7 +208,7 @@ jackd -R --timeout 10000 -d alsa -P hw:AUDIO -r 48000 -p 240 -n 2 -o 2 &
 jack_pid=$!
 alsa_in -j mic -d hw:Receiver -c 2 -p 240 -n 2 -q 0 &
 alsa_pid=$!
-trap "kill $jack_pid $alsa_pid" TERM INT
+trap "kill $jack_pid $alsa_pid" EXIT
 sleep 2
 python -u /usr/bin/blitzloop --port=80 --mpv-ao=jack --mics=mic:capture_1,mic:capture_2 "$@"
 ```
