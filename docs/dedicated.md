@@ -93,6 +93,14 @@ sudo ln -s /usr/lib/systemd/system/alsa-restore.service /etc/systemd/system/mult
 sudo alsactl store
 ```
 
+We also want to disable some CPU C-states, since otherwise the latency spikes
+cause frame dropping:
+```shell
+cat <<EOF | sudo tee /etc/tmpfiles.d/10-cpuidle-control.conf
+w /sys/devices/system/cpu/cpu*/cpuidle/state[2345]/disable - - - - 1
+EOF
+```
+
 Reboot for the changes to take effect. The system should now come up with
 functional audio. The audio device name is `hw:chtrt5645`.
 
