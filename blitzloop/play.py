@@ -58,6 +58,9 @@ speed_i = 0
 pitch_i = 0
 channels_i = s.channel_defaults
 
+for idx, val in enumerate(channels_i):
+    mpv.set_channel(idx, val / 10.0)
+
 if opts.offset:
     mpv.seek_to(opts.offset)
 

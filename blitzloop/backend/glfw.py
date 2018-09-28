@@ -40,6 +40,22 @@ class Display(BaseDisplay):
         glfw.KEY_DOWN: "KEY_DOWN",
         glfw.KEY_LEFT: "KEY_LEFT",
         glfw.KEY_RIGHT: "KEY_RIGHT",
+        glfw.KEY_KP_0: "0",
+        glfw.KEY_KP_1: "1",
+        glfw.KEY_KP_2: "2",
+        glfw.KEY_KP_3: "3",
+        glfw.KEY_KP_4: "4",
+        glfw.KEY_KP_5: "5",
+        glfw.KEY_KP_6: "6",
+        glfw.KEY_KP_7: "7",
+        glfw.KEY_KP_8: "8",
+        glfw.KEY_KP_9: "9",
+        glfw.KEY_KP_DECIMAL: ".",
+        glfw.KEY_KP_DIVIDE: "/",
+        glfw.KEY_KP_MULTIPLY: "*",
+        glfw.KEY_KP_SUBTRACT: "-",
+        glfw.KEY_KP_ADD: "+",
+        glfw.KEY_KP_ENTER: "KEY_ENTER",
     }
     def __init__(self, width=640, height=480, fullscreen=False, aspect=None):
         self.gl = gl
