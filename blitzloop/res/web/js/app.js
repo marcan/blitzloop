@@ -160,6 +160,7 @@ app.controller('MenuCtrl', function($scope, $rootScope, $http) {
         $http.get('/cfg/latin/' + (0+latin)).success(function(data) {
             $scope.latin = 0+latin;
             $rootScope.$broadcast('latinChanged', 0+latin)
+            $rootScope.song_cache = null;
         });
     };
 });
@@ -168,18 +169,26 @@ app.controller('SongListCtrl', function($scope, $rootScope, $http) {
     $rootScope.tab = "songs";
     $scope.refresh = function() {
         $http.get('/songlist').success(function(data) {
-            for (var i = 0; i < data.songs.length; i++) {
-                data.songs[i].coverUrl = "/song/" + data.songs[i].id + "/cover/105" + "?" + g_cfg.nonce;
-                data.songs[i].link = "#/songs/" + data.songs[i].id
-            }
-            $scope.songs = data.songs;
-            nudge(); // WTF webkit
+            $rootScope.song_cache = data;
+            $scope.update(data)
         });
     };
+    $scope.update = function(data) {
+        for (var i = 0; i < data.songs.length; i++) {
+            data.songs[i].coverUrl = "/song/" + data.songs[i].id + "/cover/105" + "?" + g_cfg.nonce;
+            data.songs[i].link = "#/songs/" + data.songs[i].id
+        }
+        $scope.songs = data.songs;
+        nudge(); // WTF webkit
+    }
     $scope.$on('latinChanged', function(e, arg){
         $scope.refresh();
     });
-    $scope.refresh();
+    if (!$rootScope.song_cache) {
+        $scope.refresh();
+    } else {
+        $scope.update($rootScope.song_cache);
+    }
 });
 
 app.controller('QueueListCtrl', function($scope, $rootScope, $http, $timeout) {
