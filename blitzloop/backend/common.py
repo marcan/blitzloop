@@ -51,7 +51,7 @@ class BaseDisplay(object):
             self.aspect_cache = {}
             self.cache_win = (self.win_width, self.win_height)
         if aspect in self.aspect_cache:
-            self.viewmatrix = self.aspect_cache[aspect]
+            self.viewmatrix, self.width, self.height = self.aspect_cache[aspect]
             return
 
         display_aspect = self.win_width / self.win_height
@@ -70,7 +70,7 @@ class BaseDisplay(object):
         matrix.translate(off_x, off_y, 0)
         matrix.scale(self.width, self.width, 1)
         self.viewmatrix = matrix
-        self.aspect_cache[self.aspect] = matrix
+        self.aspect_cache[self.aspect] = matrix, self.width, self.height
 
     def commit_matrix(self, uniform):
         m = self.viewmatrix * self.matrix
