@@ -37,8 +37,8 @@ setup(
         ext_modules=extensions,
         entry_points={
             'console_scripts': [
-                'blitzloop = blitzloop.main',
-                'blitzloop-single = blitzloop.play',
+                'blitzloop = blitzloop.main:entry',
+                'blitzloop-single = blitzloop.play:entry',
             ]
         },
         setup_requires=extra_requires,

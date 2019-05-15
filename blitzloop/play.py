@@ -21,122 +21,127 @@ import time
 
 from blitzloop import graphics, layout, mpvplayer, song, util
 
-parser = util.get_argparser()
-parser.add_argument(
-    'songpath', metavar='SONGPATH', help='path to the song file')
-parser.add_argument(
-    '--show-timings', dest='st', action='store_true',
-    help='show mpv timings')
-parser.add_argument(
-    '--offset', type=float, default=0.0, help='song offset')
-parser.add_argument(
-    '--variant', type=int, default=0, help='song variant')
-opts = util.get_opts()
 
-fullscreen = opts.fullscreen
-s = song.Song(opts.songpath)
+def entry():
+    parser = util.get_argparser()
+    parser.add_argument(
+        'songpath', metavar='SONGPATH', help='path to the song file')
+    parser.add_argument(
+        '--show-timings', dest='st', action='store_true',
+        help='show mpv timings')
+    parser.add_argument(
+        '--offset', type=float, default=0.0, help='song offset')
+    parser.add_argument(
+        '--variant', type=int, default=0, help='song variant')
+    opts = util.get_opts()
 
-headstart = 0.3
+    fullscreen = opts.fullscreen
+    s = song.Song(opts.songpath)
 
-if fullscreen:
-    display = graphics.Display(1920, 1200, fullscreen, None)
-else:
-    display = graphics.Display(1280, 720, fullscreen, None)
-print(display.width, display.height)
+    headstart = 0.3
 
-mpv = mpvplayer.Player(display)
-mpv.load_song(s)
+    if fullscreen:
+        display = graphics.Display(1920, 1200, fullscreen, None)
+    else:
+        display = graphics.Display(1280, 720, fullscreen, None)
+    print(display.width, display.height)
 
-display.set_aspect(mpv.aspect)
+    mpv = mpvplayer.Player(display)
+    mpv.load_song(s)
 
-renderer = graphics.get_renderer().KaraokeRenderer(display)
-layout = layout.SongLayout(s, list(s.variants.keys())[opts.variant], renderer)
+    display.set_aspect(mpv.aspect)
 
-song_time = -10
+    renderer = graphics.get_renderer().KaraokeRenderer(display)
+    song_layout = layout.SongLayout(s, list(s.variants.keys())[opts.variant], renderer)
 
-speed_i = 0
-pitch_i = 0
-channels_i = s.channel_defaults
+    song_time = -10
 
-for idx, val in enumerate(channels_i):
-    mpv.set_channel(idx, val / 10.0)
+    speed_i = 0
+    pitch_i = 0
+    channels_i = s.channel_defaults
 
-if opts.offset:
-    mpv.seek_to(opts.offset)
+    for idx, val in enumerate(channels_i):
+        mpv.set_channel(idx, val / 10.0)
 
-def render():
-    t = time.time()
-    global song_time
-    while not mpv.eof_reached():
-        graphics.get_renderer().clear(0, 0, 0, 1)
-        t1 = time.time()
-        mpv.draw()
-        dt = time.time() - t1
-        mpv.poll()
-        song_time = mpv.get_song_time() or song_time
-        mpv.draw_fade(song_time)
-        renderer.draw(song_time + headstart * 2**(speed_i/12.0), layout)
-        yield None
-        t2 = time.time()
-        if opts.st:
-            print("T:%7.3f/%7.3f B:%7.3f FPS:%.2f draw:%.3f" % (song_time, mpv.duration, s.timing.time2beat(song_time), (1.0/(t2-t)), dt))
-        t = t2
-        mpv.flip()
-    mpv.shutdown()
-    os._exit(0)
+    if opts.offset:
+        mpv.seek_to(opts.offset)
 
-pause = False
-
-CH_UP = "+456"
-CH_DOWN = "-123"
-
-def key(k):
-    global speed_i, pitch_i, vocals_i, pause
-    if k == 'KEY_ESCAPE':
+    def render():
+        t = time.time()
+        nonlocal song_time
+        while not mpv.eof_reached():
+            graphics.get_renderer().clear(0, 0, 0, 1)
+            t1 = time.time()
+            mpv.draw()
+            dt = time.time() - t1
+            mpv.poll()
+            song_time = mpv.get_song_time() or song_time
+            mpv.draw_fade(song_time)
+            renderer.draw(song_time + headstart * 2**(speed_i/12.0), song_layout)
+            yield None
+            t2 = time.time()
+            if opts.st:
+                print("T:%7.3f/%7.3f B:%7.3f FPS:%.2f draw:%.3f" % (song_time, mpv.duration, s.timing.time2beat(song_time), (1.0/(t2-t)), dt))
+            t = t2
+            mpv.flip()
         mpv.shutdown()
         os._exit(0)
-    elif k == 'f':
-        display.toggle_fullscreen()
-    elif k == '[' and speed_i > -12:
-        speed_i -= 1
-        print("Speed: %d" % speed_i)
-        mpv.set_speed(2**(-speed_i/12.0))
-    elif k == ']' and speed_i < 12:
-        speed_i += 1
-        print("Speed: %d" % speed_i)
-        mpv.set_speed(2**(-speed_i/12.0))
-    elif k == 'KEY_UP' and pitch_i < 12:
-        pitch_i += 1
-        print("Pitch: %d" % pitch_i)
-        mpv.set_pitch(2**(pitch_i/12.0))
-    elif k == 'KEY_DOWN' and pitch_i > -12:
-        pitch_i -= 1
-        print("Pitch: %d" % pitch_i)
-        mpv.set_pitch(2**(pitch_i/12.0))
-    elif k in CH_UP:
-        idx = CH_UP.index(k)
-        if len(channels_i) > idx and channels_i[idx] < 30:
-            channels_i[idx] += 1
-            print("Channel %d: %d" % (idx, channels_i[idx]))
-            mpv.set_channel(idx, channels_i[idx]/10.0)
-    elif k in CH_DOWN:
-        idx = CH_DOWN.index(k)
-        if len(channels_i) > idx and channels_i[idx] > 0:
-            channels_i[idx] -= 1
-            print("Channel %d: %d" % (idx, channels_i[idx]))
-            mpv.set_channel(idx, channels_i[idx]/10.0)
-    elif k == 'KEY_LEFT':
-        mpv.seek(-10)
-    elif k == 'KEY_RIGHT':
-        mpv.seek(10)
-    elif k == ' ':
-        pause = not pause
-        t = time.time()
-        mpv.set_pause(pause)
-        print("P %.03f" % (time.time()-t))
 
-mpv.play()
-display.set_render_gen(render)
-display.set_keyboard_handler(key)
-display.main_loop()
-mpv.shutdown()
+    pause = False
+
+    CH_UP = "+456"
+    CH_DOWN = "-123"
+
+    def key(k):
+        nonlocal speed_i, pitch_i, pause
+        if k == 'KEY_ESCAPE':
+            mpv.shutdown()
+            os._exit(0)
+        elif k == 'f':
+            display.toggle_fullscreen()
+        elif k == '[' and speed_i > -12:
+            speed_i -= 1
+            print("Speed: %d" % speed_i)
+            mpv.set_speed(2**(-speed_i/12.0))
+        elif k == ']' and speed_i < 12:
+            speed_i += 1
+            print("Speed: %d" % speed_i)
+            mpv.set_speed(2**(-speed_i/12.0))
+        elif k == 'KEY_UP' and pitch_i < 12:
+            pitch_i += 1
+            print("Pitch: %d" % pitch_i)
+            mpv.set_pitch(2**(pitch_i/12.0))
+        elif k == 'KEY_DOWN' and pitch_i > -12:
+            pitch_i -= 1
+            print("Pitch: %d" % pitch_i)
+            mpv.set_pitch(2**(pitch_i/12.0))
+        elif k in CH_UP:
+            idx = CH_UP.index(k)
+            if len(channels_i) > idx and channels_i[idx] < 30:
+                channels_i[idx] += 1
+                print("Channel %d: %d" % (idx, channels_i[idx]))
+                mpv.set_channel(idx, channels_i[idx]/10.0)
+        elif k in CH_DOWN:
+            idx = CH_DOWN.index(k)
+            if len(channels_i) > idx and channels_i[idx] > 0:
+                channels_i[idx] -= 1
+                print("Channel %d: %d" % (idx, channels_i[idx]))
+                mpv.set_channel(idx, channels_i[idx]/10.0)
+        elif k == 'KEY_LEFT':
+            mpv.seek(-10)
+        elif k == 'KEY_RIGHT':
+            mpv.seek(10)
+        elif k == ' ':
+            pause = not pause
+            t = time.time()
+            mpv.set_pause(pause)
+            print("P %.03f" % (time.time()-t))
+
+    mpv.play()
+    display.set_render_gen(render)
+    display.set_keyboard_handler(key)
+    display.main_loop()
+    mpv.shutdown()
+
+if __name__ == '__main__':
+    entry()
