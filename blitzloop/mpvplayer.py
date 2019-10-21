@@ -134,6 +134,8 @@ class Player(object):
         if "duration" in song.song:
             self.duration = float(song.song["duration"])
 
+        self.file_duration = self._getprop("length")
+
         ch = self._getprop("audio-params/channel-count")
         assert ch == 1 or (ch % 2 == 0)
         self.channels = ((ch + 1) // 2) - 1
