@@ -33,6 +33,7 @@ class Player(object):
         self.opts = opts = util.get_opts()
         self.mpv = mpv.Context()
         self.gl = None
+        self.rendering = rendering
         self.mpv.initialize()
         if opts.mpv_msg_level:
             self.mpv.set_property("msg-level", opts.mpv_msg_level)
@@ -144,6 +145,9 @@ class Player(object):
         self.channels = ((ch + 1) // 2) - 1
         self.volumes = [0] * self.channels
         self._update_matrix(True)
+
+        if self.rendering:
+            self.mpv.set_property("audio", False)
 
         if song.videofile is not None and self.display is not None:
             w = self._getprop("video-params/w")
