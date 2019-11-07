@@ -67,15 +67,6 @@ class Display(BaseDisplay):
         num_configs = ctypes.c_long()
         egl.eglChooseConfig(self.disp, attribList, byref(config), 1, byref(num_configs))
 
-        # *Sigh* this works for now
-        for i in os.listdir("/proc/self/fd"):
-            try:
-                target = os.readlink("/proc/self/fd/%s" % i)
-                if target.startswith("/dev/dri/render"):
-                    self.render_fd = int(i)
-            except:
-                pass
-
         ret = ctypes.c_int()
         egl.eglBindAPI(egl.EGL_OPENGL_ES_API)
 
@@ -106,8 +97,8 @@ class Display(BaseDisplay):
 
     def get_mpv_params(self):
         return { "drm_display": {
-            "fd": self.render_fd,
-            "render_fd": self.render_fd,
+            "fd": -1,
+            "render_fd": -1,
         } }
 
 if __name__ == "__main__":
