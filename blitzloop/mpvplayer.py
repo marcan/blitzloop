@@ -24,7 +24,7 @@ from blitzloop import util, graphics
 
 class Player(object):
     MIN_AUDIO_RECONFIGURE_INTERVAL = 0.1
-    def __init__(self, display):
+    def __init__(self, display, rendering=False):
         self.last_audio_reconfig = 0
         self.audio_reconfig_pending = False
         self.volume = 0.5
@@ -64,7 +64,10 @@ class Player(object):
             vo = opts.mpv_vo
             if vo in ("opengl-cb", "libmpv"):
                 vo = "libmpv"
-                self.mpv.set_property("video-sync", "display-vdrop")
+                if not rendering:
+                    self.mpv.set_property("video-sync", "display-vdrop")
+                else:
+                    self.mpv.set_property("video-sync", "display-desync")
                 self.mpv.set_property("display-fps", display.fps or opts.fps)
                 def gpa(name):
                     return display.get_proc_address(name)
