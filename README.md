@@ -11,3 +11,4 @@ prepare your own songs for it.
 
 [install]: docs/INSTALL.md
 [jsmax]: https://www.youtube.com/playlist?list=PLqgwjlmAepbjV4DlSIBFKZM40MiqB-Zjz
+# thanks for your visit.
