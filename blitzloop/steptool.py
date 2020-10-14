@@ -114,6 +114,9 @@ def key(k):
         mpv.shutdown()
         os._exit(0)
 
+for idx in range(len(s.channel_defaults)):
+    mpv.set_channel(idx, 1.0)
+
 mpv.set_pause(False)
 display.set_render_gen(render)
 display.set_keyboard_handler(key)
