@@ -55,7 +55,8 @@ class Player(object):
                 else:
                     key, val = opt.split("=", 1)
                 self.mpv.set_property(key, val)
-        self.poll_props = {"audio-pts": None}
+        self.poll_props = {"audio-pts": None,
+                           "time-pos": None}
         for i in self.poll_props:
             self.mpv.get_property_async(i)
 
@@ -310,6 +311,12 @@ class Player(object):
             return self.poll_props["audio-pts"]
         else:
             return self.mpv.get_property("audio-pts")
+
+    def get_video_time(self, asynchronous=True):
+        if asynchronous:
+            return self.poll_props["time-pos"]
+        else:
+            return self.mpv.get_property("time-pos")
 
     def eof_reached(self):
         t = self.get_song_time() or 0
