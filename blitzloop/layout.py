@@ -54,6 +54,7 @@ class DisplayLine(object):
         self._end_t = None
         self.start = None
         self.end = None
+        self.molecules = []
         self.fade_in_time = self.fade_out_time = 1
 
         self.descender = 0
@@ -75,6 +76,7 @@ class DisplayLine(object):
         l.end = self.end
         l.ascender = self.ascender
         l.descender = self.descender
+        l.molecules = self.molecules
 
         l.want_row = self.want_row
         return l
@@ -96,6 +98,7 @@ class DisplayLine(object):
         return self._end_t + self.fade_in_time
 
     def add(self, molecule, get_atom_time, style, font, ruby_font):
+        self.molecules.append((molecule, get_atom_time))
         # append a space if we are joining with a previous molecule
         space_char = molecule.SPACE
         if self.glyphs:
