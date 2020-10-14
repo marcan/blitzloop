@@ -220,8 +220,11 @@ class RenderedLine(object):
         vbodata = []
         idxdata = []
         for i,g in enumerate(self.line.glyphs):
-            tleft = map_to(map_from(g.x + g.glyph.left, g.tx1, g.tx2), g.t1, g.t2)
-            tright = map_to(map_from(g.x + g.glyph.right, g.tx1, g.tx2), g.t1, g.t2)
+            if get_opts().instant:
+                tleft = tright = g.t1
+            else:
+                tleft = map_to(map_from(g.x + g.glyph.left, g.tx1, g.tx2), g.t1, g.t2)
+                tright = map_to(map_from(g.x + g.glyph.right, g.tx1, g.tx2), g.t1, g.t2)
             const_vbodata = [self.line.start, self.line.end]
             const_vbodata += list(i/255.0 for i in sum(g.colors + g.colors_on, ()))
             vbodata.append(

@@ -68,6 +68,9 @@ def init_argparser():
     parser.add_argument(
         '--fps', default="60", type=int,
         help='Display FPS (required for correct video sync)')
+    parser.add_argument(
+        '--instant', default=False, action='store_true',
+        help='use instant syllable display instead of scrolling')
 
 def get_argparser():
     return configargparse.get_argument_parser()
