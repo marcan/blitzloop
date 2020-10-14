@@ -33,12 +33,12 @@ def entry():
         '--offset', type=float, default=0.0, help='song offset')
     parser.add_argument(
         '--variant', type=int, default=0, help='song variant')
+    parser.add_argument(
+        '--headstart', type=float, default=0.3, help='time offset')
     opts = util.get_opts()
 
     fullscreen = opts.fullscreen
     s = song.Song(opts.songpath)
-
-    headstart = 0.3
 
     if fullscreen:
         display = graphics.Display(1920, 1200, fullscreen, None)
@@ -77,7 +77,7 @@ def entry():
             mpv.poll()
             song_time = mpv.get_song_time() or song_time
             mpv.draw_fade(song_time)
-            renderer.draw(song_time + headstart * 2**(speed_i/12.0), song_layout)
+            renderer.draw(song_time + opts.headstart * 2**(speed_i/12.0), song_layout)
             yield None
             t2 = time.time()
             if opts.st:
