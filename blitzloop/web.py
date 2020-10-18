@@ -18,7 +18,7 @@ import unicodedata
 
 from blitzloop import songlist, util
 
-LANGUAGES = ("en-gb", "es-es", "ja-jp", "de-de", "es-eu", "fr-fr")
+LANGUAGES = ("en-gb", "es-es", "ja-jp", "de-de", "es-eu", "fr-fr", "sk-sk")
 
 nonce = random.randint(0, 2**32)
 
