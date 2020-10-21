@@ -10,14 +10,12 @@ do things your own way, here's a nonexhaustive list of dependencies:
 * Python modules/bindings:
    * Pillow
    * bottle
-   * ffms (optional, for record.py)
    * freetype-py
    * numpy
    * paste
    * pympv
    * pyopengl
 * Libraries
-   * libffms2
    * libfreetype
    * libjack
    * libmpv
@@ -31,7 +29,6 @@ First, install the required OS dependencies:
 
 * Python 3
 * JACK
-* ffms
 * freetype
 * OpenGL
 
@@ -72,7 +69,7 @@ NOTE: not tested recently, please report back feedback and any problems/missing
 deps.
 
 ```shell
-sudo apt-get install libjack-jackd2-dev librubberband-dev libffms2-dev libfreetype6-dev libgl1-mesa-dev libavfilter-dev python3-dev
+sudo apt-get install libjack-jackd2-dev librubberband-dev libfreetype6-dev libgl1-mesa-dev libavfilter-dev python3-dev
 git clone https://github.com/mpv-player/mpv
 cd mpv
 ./bootstrap.py
@@ -105,7 +102,7 @@ Use `brew doctor` and `brew update` to update before running the commands below.
 If you have conflicting Python versions after installing Python 3: `brew link --overwrite python3`
 
 ```shell
-brew install python3 jack jpeg ffms2 rubberband libass freetype
+brew install python3 jack jpeg rubberband libass freetype
 brew install mpv --with-rubberband --with-jack
 PIP_FLAGS=(--global-option=build_ext --global-option=-I$(brew --prefix)/include --global-option=-L$(brew --prefix)/lib)
 python3 -m venv blitz
