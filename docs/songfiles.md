@@ -65,6 +65,40 @@ The file should contain n + 1 stereo pairs. The first stereo pair should be the 
 
 In this case, the `[Song]` section should also have a `channel_names` entry giving user-friendly names to the channels, and you may also want a `channel_defaults` to set the default volumes.
 
+#### Making appropriate audio files
+
+If you're using `combine_karaoke` from the blitzloop-tools repo to align songs, it will already write the output in the correct 4-channel format:
+
+```
+./combine_karaoke <full song.flac> <instrumental song.flac> <output.flac>
+```
+
+You may wish to edit the output anyway to trim silence and/or confirm that it worked well. The tool is rough and doesn't really have any settings at the moment.
+
+If you have a 2-channel file with the left channel containing the (mono) instrumental and the right channel containing the (mono) full song, you can convert it to the required stereo layout like this:
+
+```
+sox <input>.flac <output>.flac remix 1 1 2 2
+```
+
+Or, using `ffmpeg` (which supports more formats, e.g. video muxed inputs) and opus output:
+
+```
+ffmpeg -i <input>.mp4 -filter_complex "[0:a]pan=4c|c0=c0|c1=c0|c2=c1|c3=c1[a]" -map "[a]" <output>.opus
+```
+
+If you have separate input audio files that are already perfectly aligned, you don't need `combine_karaoke`, and you can just do this:
+
+```
+sox --combine merge <instrumental>.flac <full song>.flac <output>.flac
+```
+
+If you have the instrumental and separate clean vocals, you can merge them into the required 4-channel structure like this (the `vol` filter is to avoid clipping, you might need to adjust it based on any warnings):
+
+```
+sox --combine merge <instrumental>.flac <vocal>.flac <output>.flac vol 0.75 remix 1 2 1p0,3p0 2p0,4p0
+```
+
 ## `[Timing]`
 
 BlitzLoop internally times songs using beats, which are a piecewise-linear mapping of beat numbers to the song time. This section defines this mapping. It consists of a number of `@<time>=<beat>` control points, where `<time>` is specified in seconds and `<beat>` is an integer beat number. Both values should always be in ascending order. The mapping will interpolate between control points, and extrapolate at the edges. At least two entries are required.
