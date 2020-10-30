@@ -11,3 +11,11 @@ prepare your own songs for it.
 
 [install]: docs/INSTALL.md
 [jsmax]: https://www.youtube.com/playlist?list=PLqgwjlmAepbjV4DlSIBFKZM40MiqB-Zjz
+
+
+## Songs
+
+Some BlitzLoop songs are publicly available in the
+[blitzloop-songs](https://github.com/marcan/blitzloop-songs) repository.
+If you use them, please be mindful of following the license terms, which are
+different from BlitzLoop itself.
