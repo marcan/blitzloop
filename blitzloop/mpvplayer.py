@@ -130,7 +130,9 @@ class Player(object):
             self.mpv.set_property("vid", "no")
             if self.opts.mpv_visualizer:
                 self.mpv.set_property("lavfi-complex", self.opts.mpv_visualizer % {
-                    "volume": song.volume
+                    "volume": song.volume,
+                    "vo": "vo",
+                    "ao": "ao"
                 })
                 self.mpv.set_property("keepaspect", False)
                 # dim visualization a bit
