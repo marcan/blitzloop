@@ -116,6 +116,10 @@ class Player(object):
         self.mpv.set_property("audio-delay", 0)
         self.mpv.set_property("vf", "")
 
+        # Fix seek behavior when using a static background
+        if any(song.videofile.endswith(e) for e in [".jpg", ".png", ".bmp"]):
+            self.mpv.set_property("hr-seek", "yes")
+
         if "video_offset" in song.song:
             self.offset = float(song.song["video_offset"])
             self.mpv.set_property("audio-delay", self.offset)
