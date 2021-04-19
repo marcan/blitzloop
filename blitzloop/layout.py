@@ -55,7 +55,13 @@ class DisplayLine(object):
         self.start = None
         self.end = None
         self.molecules = []
-        self.fade_in_time = self.fade_out_time = 1
+        self.fade_in = self.fade_out_time = 1
+        self.layout_options = {
+            "fade_in": 1.0,
+            "fade_out": 1.0,
+            "early_limit": 5.0,
+            "reverse_stagger": 1.5,
+        }
 
         self.descender = 0
         self.ascender = 0
@@ -77,6 +83,7 @@ class DisplayLine(object):
         l.ascender = self.ascender
         l.descender = self.descender
         l.molecules = self.molecules
+        l.layout_options = dict(self.layout_options)
 
         l.want_row = self.want_row
         return l
@@ -91,11 +98,11 @@ class DisplayLine(object):
 
     @property
     def lim_start(self):
-        return self._start_t - self.fade_in_time
+        return self._start_t - self.layout_options["fade_in"]
 
     @property
     def lim_end(self):
-        return self._end_t + self.fade_in_time
+        return self._end_t + self.layout_options["fade_out"]
 
     def add(self, molecule, get_atom_time, style, font, ruby_font):
         self.molecules.append((molecule, get_atom_time))
@@ -219,8 +226,6 @@ class SongLayout(object):
         self.margin = 0.07
         self.rowspacing = 0.01
         self.wrapwidth = 1.0 - self.margin * 2
-        self.pre_line = 1.0
-        self.post_line = 1.0
 
         self.lines = {}
         self.fonts = {}
@@ -267,6 +272,7 @@ class SongLayout(object):
                     ruby_font = None
                 if molecule.break_before or line is None:
                     line = DisplayLine(self.renderer.display)
+                    line.layout_options.update(tag_info.layout_options)
                     line.add(molecule, get_atom_time, tag_info.style, font, ruby_font)
                     lines.append(line)
                     if molecule.row is not None:
@@ -276,6 +282,7 @@ class SongLayout(object):
                     tmp.add(molecule, get_atom_time, tag_info.style, font, ruby_font)
                     if tmp.px > self.wrapwidth:
                         line = DisplayLine(self.renderer.display)
+                        line.layout_options.update(tag_info.layout_options)
                         line.add(molecule, get_atom_time, tag_info.style, font, ruby_font)
                         lines.append(line)
                     else:
@@ -420,9 +427,9 @@ class SongLayout(object):
                     l.x = self.margin + (self.wrapwidth - l.width) / 2.0 # center
             if max_end > l.start and prev_l:
                 orig_start = l.start
-                l.start = max(min(l.start, prev_l.lim_start), l.start - 5)
+                l.start = max(min(l.start, prev_l.lim_start), l.start - l.layout_options["early_limit"])
                 if prev_l.row < l.row:
-                    l.start = min(orig_start, max(l.start, prev_l.start + 1.5))
+                    l.start = min(orig_start, max(l.start, prev_l.start + l.layout_options["reverse_stagger"]))
                 prev_in_row = rows[l.row].index(l) - 1
                 if prev_in_row >= 0:
                     l.start = max(l.start, rows[l.row][prev_in_row].end)

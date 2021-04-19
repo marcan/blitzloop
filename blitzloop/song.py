@@ -543,8 +543,10 @@ class TagInfo(object):
     def __init__(self, style=None, edge=BOTTOM):
         self.style = style
         self.edge = edge
+        self.layout_options = {}
 
 class Variant(object):
+    LAYOUT_OPTIONS = ["early_limit", "reverse_stagger", "fade_in", "fade_out"]
     def __init__(self, data):
         self.data = data
         self.name = None
@@ -552,6 +554,7 @@ class Variant(object):
         self.tag_list = None
         self.style = None
         self.default = False
+        self.layout_options = {}
         self.tag_data = {}
 
         if data is None:
@@ -567,6 +570,8 @@ class Variant(object):
                     self.tag_list = []
             elif key == "default":
                 self.default = value.lower() in ("1", "true")
+            elif key in self.LAYOUT_OPTIONS:
+                self.layout_options[key] = float(value)
             elif "." in key:
                 tag, key = key.split(".", 1)
                 if tag not in self.tag_data:
@@ -590,6 +595,7 @@ class Variant(object):
         self.tags = {}
         for tag in self.tag_list:
             tag_info = TagInfo()
+            tag_info.layout_options = dict(self.layout_options)
             self.tags[tag] = tag_info
             if tag in self.tag_data:
                 for key, value in self.tag_data[tag].items():
@@ -602,6 +608,8 @@ class Variant(object):
                         if value.upper() not in ("TOP", "BOTTOM"):
                             raise ParseError("Unknown edge %s in variant %s tag %s" % (value, self.name, tag))
                         tag_info.edge = getattr(TagInfo, value.upper())
+                    elif key in self.LAYOUT_OPTIONS:
+                        tag.layout_options[key] = float(value)
                     else:
                         raise ParseError("Unknown key %s in variant %s tag %s" % (key, self.name, tag))
             if tag_info.style is None:
