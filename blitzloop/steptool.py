@@ -45,7 +45,7 @@ step = 0
 cur_beat = 0
 
 compound = None
-compounds = iter(s.compounds)
+cidx = 0
 
 mpv = mpvplayer.Player(None)
 mpv.load_song(s)
@@ -66,8 +66,15 @@ def render():
 def round_beat(b):
     return song.MixedFraction(int(round(opts.quant * float(b))))
 
+def save_and_quit():
+    d = s.dump()
+    s.save(opts.songpath + ".new")
+    print("Saved!")
+    mpv.shutdown()
+    os._exit(0)
+
 def key(k):
-    global step, compound, cur_beat
+    global step, compound, cur_beat, cidx
     song_time = mpv.get_song_time() or 0
     beat = s.timing.time2beat(song_time)
     if k == ' ':
@@ -85,18 +92,17 @@ def key(k):
             else:
                 step += 0.5
                 compound = None
+                cidx += 1
+                if cidx >= len(s.compounds):
+                    save_and_quit()
                 print()
         if compound is None:
             start = song.MixedFraction(round_beat(beat), opts.quant)
             cur_beat = start
-            try:
-                compound = next(compounds)
-            except StopIteration:
-                d = s.dump()
-                s.save(opts.songpath + ".new")
-                return
+            compound = s.compounds[cidx]
             compound.start = start
             compound.timing = []
+            compound.start_step = step
             print(start, " ", end=' ')
             sys.stdout.flush()
             if compound.steps == 1:
@@ -109,8 +115,35 @@ def key(k):
             compound.timing.append(time)
             step += 0.5
             compound = None
+            cidx += 1
+            if cidx >= len(s.compounds):
+                save_and_quit()
             print(time)
-    if k == b'\033':
+    elif k == '\x08':
+        print("<Undo")
+        if cidx == 0:
+            if compound is None:
+                new_time = max(0, song_time - 1)
+            else:
+                new_time = s.timing.beat2time(s.compounds[0].start) - 1
+                compound = None
+            step = 0
+        elif cidx == 1 and compound is None:
+            cidx = 0
+            new_time = s.timing.beat2time(s.compounds[0].start) - 1
+            step = 0
+        else:
+            if compound is None:
+                cidx -= 1
+            compound = None
+            new_time = s.timing.beat2time(s.compounds[cidx - 1].end) - 1
+            step = s.compounds[cidx - 1].start_step + s.compounds[cidx - 1].steps
+        mpv.seek_to(new_time)
+    elif k == 'KEY_LEFT':
+        mpv.seek(-2)
+    elif k == 'KEY_RIGHT':
+        mpv.seek(2)
+    elif k == 'KEY_ESCAPE':
         mpv.shutdown()
         os._exit(0)
 
