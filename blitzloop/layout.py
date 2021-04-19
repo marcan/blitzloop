@@ -119,11 +119,14 @@ class DisplayLine(object):
         for atom in molecule.atoms:
             atom_x, atom_y = self.px, self.py
             edge_px = None
+            edge_l_px = None
             glyphs = []
             # add the atom's base text as glyphs
             for i,c in enumerate(atom.text):
                 if atom.particle_edge is not None and i == atom.particle_edge:
                     edge_px = self.px
+                if atom.particle_edge_l is not None and i == atom.particle_edge_l:
+                    edge_l_px = self.px
                 self.text += c
                 glyph = font.get_glyph(c)
                 gi = GlyphInstance(glyph, self.px, self.py, style)
@@ -180,6 +183,8 @@ class DisplayLine(object):
                     par_step += particle.steps
                     ruby_glyphs += par_glyphs
                 # center the ruby text over the atom
+                if edge_l_px is not None:
+                    atom_x = edge_l_px
                 if edge_px is not None:
                     atom_width = edge_px - atom_x
                 else:

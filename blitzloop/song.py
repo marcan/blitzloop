@@ -46,6 +46,7 @@ class Atom(Particle):
         Particle.__init__(self, text)
         self.particles = None
         self.particle_edge = None
+        self.particle_edge_l = None
 
     @property
     def steps(self):
@@ -84,7 +85,7 @@ class Molecule(object):
         return "Molecule<[%r]" % self.steps + " ".join(map(str, self.atoms)) + ">"
 
 class JapaneseMolecule(Molecule):
-    COMBINE_CHARS = "ぁぃぅぇぉゃゅょァィゥェォャュョ 　？！?!…。、.,-「」―-◇・”\""
+    COMBINE_CHARS = "ぁぃぅぇぉゃゅょァィゥェォャュョ 　？！?!…。、.,-「」『』【】〈〉（）［］《》―-◇・”\""
     SPACE = "　"
 
     def parse(self, source):
@@ -92,6 +93,7 @@ class JapaneseMolecule(Molecule):
         in_furi = False
         in_particle = False
         in_escape = False
+        first_combinable = True
 
         self.break_before = self.break_after = False
         self.row = None
@@ -123,8 +125,12 @@ class JapaneseMolecule(Molecule):
                     in_particle = False
                     if in_furi:
                         self.atoms[-1].particles.append(Particle(particle_text))
+                    elif first_combinable and self.atoms:
+                        self.atoms[-1].particle_edge_l = len(self.atoms[-1].text)
+                        self.atoms[-1].text += particle_text
                     else:
                         self.atoms.append(Atom(particle_text))
+                    first_combinable = False
                     continue
                 elif c in "(（":
                     if in_furi:
@@ -139,9 +145,8 @@ class JapaneseMolecule(Molecule):
                 elif c in ")）" and in_furi:
                     self.atoms[-1].particle_edge = len(self.atoms[-1].text)
                     in_furi = False
+                    first_combinable = False
                     continue
-            else:
-                in_escape = False
             if in_particle:
                 particle_text += c
             elif c in self.COMBINE_CHARS and not in_escape and self.atoms:
@@ -149,10 +154,19 @@ class JapaneseMolecule(Molecule):
                     self.atoms[-1].particles[-1].text += c
                 else:
                     self.atoms[-1].text += c
+            elif first_combinable and self.atoms:
+                self.atoms[-1].particle_edge_l = len(self.atoms[-1].text)
+                self.atoms[-1].text += c
+                first_combinable = c in self.COMBINE_CHARS
             elif in_furi:
                 self.atoms[-1].particles.append(Particle(c))
             else:
                 self.atoms.append(Atom(c))
+                if c not in self.COMBINE_CHARS or in_escape:
+                    first_combinable = False
+            in_escape = False
+            assert not (first_combinable and len(self.atoms) > 1)
+
         if in_particle:
             raise ParseError("Incomplete particle")
         if in_furi:
