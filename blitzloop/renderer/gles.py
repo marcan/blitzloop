@@ -46,7 +46,7 @@ attribute vec3 border_color_on;
 attribute vec3 fill_color_on;
 attribute vec3 outline_color_on;
 
-attribute vec4 times;
+attribute vec3 times;
 
 uniform float time;
 uniform mat4 transform;
