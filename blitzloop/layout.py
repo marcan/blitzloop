@@ -207,7 +207,7 @@ class DisplayLine(object):
     def draw(self, renderer):
         self.rline.draw(renderer)
 
-    def __unicode__(self):
+    def __str__(self):
         return "DisplayLine<[%s]>" % self.text
 
 class SongLayout(object):
@@ -403,15 +403,16 @@ class SongLayout(object):
         prev_l = None
         for i, l in enumerate(lines):
             next_l = lines[i+1] if i < len(lines)-1 else None
+            print(l.start, l.end, max_end, str(l))
             if not top:
                 if l.row == 0:
                     l.x = self.margin + (self.wrapwidth - l.width) # right
-                elif (l.start > max_end or l.row > lastrow) and (max_end > l.end or (next_l and next_l.start < l.end)):
+                elif (l.start >= max_end or l.row > lastrow) and (max_end > l.end or (next_l and next_l.start < l.end)):
                     l.x = self.margin # left
                 else:
                     l.x = self.margin + (self.wrapwidth - l.width) / 2.0 # center
             else:
-                if (l.start > max_end or l.row < lastrow) and (max_end > l.end or (next_l and next_l.start < l.end)):
+                if (l.start >= max_end or l.row < lastrow) and (max_end > l.end or (next_l and next_l.start < l.end)):
                     l.x = self.margin # left
                 elif l.row >= 1 and not (next_l and next_l.row > l.row) and (max_end > l.end or (next_l and next_l.start < l.end)):
                     l.x = self.margin + (self.wrapwidth - l.width) # right
