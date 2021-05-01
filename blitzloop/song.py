@@ -503,6 +503,7 @@ class Style(object):
         self.ruby_font = None
         self.size = 16
         self.ruby_size = None
+        self.ruby_spacing = 0
         self.outline_width = 0.1
         self.border_width = 0.8
         self.colors = ((255, 255, 255), (0, 128, 255), (0, 0, 0))
@@ -512,7 +513,7 @@ class Style(object):
             for key, value in self.data.items():
                 if key in ("font", "ruby_font"):
                     setattr(self, key, value)
-                elif key in ("size", "ruby_size", "outline_width", "border_width"):
+                elif key in ("size", "ruby_size", "ruby_spacing", "outline_width", "border_width"):
                     setattr(self, key, float(value))
                 elif key in ("colors", "colors_on"):
                     setattr(self, key, self._parse_colors(value))
@@ -546,7 +547,10 @@ class TagInfo(object):
         self.layout_options = {}
 
 class Variant(object):
-    LAYOUT_OPTIONS = ["early_limit", "reverse_stagger", "fade_in", "fade_out", "ruby_expand"]
+    LAYOUT_OPTIONS = [
+        "early_limit", "reverse_stagger", "fade_in", "fade_out", "ruby_expand",
+        "margin_x", "margin_y", "line_spacing"
+    ]
     def __init__(self, data):
         self.data = data
         self.name = None
@@ -887,6 +891,13 @@ class Song(object):
             return None
         else:
             return fractions.Fraction(self.song["aspect"])
+
+    @property
+    def no_crop(self):
+        if "no_crop" not in self.song:
+            return False
+        else:
+            return bool(int(self.song["no_crop"]))
 
     @property
     def channels(self):

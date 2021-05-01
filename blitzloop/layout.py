@@ -73,6 +73,9 @@ class DisplayLine(object):
             "early_limit": 5.0,
             "reverse_stagger": 1.5,
             "ruby_expand": 0,
+            "margin_x": 0.07,
+            "margin_y": 0.07,
+            "line_spacing": 0.01,
         }
 
         self.descender = 0
@@ -135,7 +138,8 @@ class DisplayLine(object):
 
         new_ascender = font.ascender
         if ruby_font:
-            new_ascender += ruby_font.ascender - ruby_font.descender
+            ruby_spacing = style.ruby_spacing * (ruby_font.ascender - ruby_font.descender)
+            new_ascender += ruby_spacing + ruby_font.ascender - ruby_font.descender
         self.ascender = max(self.ascender, new_ascender)
         self.descender = min(self.descender, font.descender)
 
@@ -181,7 +185,7 @@ class DisplayLine(object):
             if atom.particles is not None and ruby_font:
                 # ruby pen. we will adjust X later when centering over atom.
                 ruby_px = 0
-                ruby_py = self.display.round_coord(atom_y + font.ascender - ruby_font.descender)
+                ruby_py = self.display.round_coord(atom_y + font.ascender - ruby_font.descender + ruby_spacing)
                 ruby_prev_char = None
                 ruby_glyphs = []
                 par_step = step
@@ -250,10 +254,6 @@ class SongLayout(object):
         self.song = song_obj
         self.variant = song_obj.variants[variant]
         self.renderer = renderer
-
-        self.margin = 0.07
-        self.rowspacing = 0.01
-        self.wrapwidth = 1.0 - self.margin * 2
 
         self.lines = {}
         self.fonts = {}
@@ -431,7 +431,8 @@ class SongLayout(object):
 
         max_ascender = max(l.ascender for l in lines)
         min_descender = min(l.descender for l in lines)
-        row_height = max_ascender - min_descender + self.rowspacing
+        max_spacing = max(l.layout_options["line_spacing"] for l in lines)
+        row_height = (max_ascender - min_descender) + max_spacing
 
         lastrow = 1 if top else -1
         max_end = 0
@@ -452,7 +453,7 @@ class SongLayout(object):
                     l.align = 1.0 # right
                 else:
                     l.align = 0.5 # center
-            l.x = self.margin + l.align * (self.wrapwidth - l.width)
+            l.x = l.layout_options["margin_x"] + l.align * (1.0 - l.layout_options["margin_x"] * 2 - l.width)
             if max_end > l.start and prev_l:
                 orig_start = l.start
                 l.start = max(min(l.start, prev_l.lim_start), l.start - l.layout_options["early_limit"])
@@ -464,9 +465,9 @@ class SongLayout(object):
             max_end = max(max_end, l.end)
             lastrow = l.row
             if not top:
-                l.y = self.margin - min_descender + row_height * l.row
+                l.y = l.layout_options["margin_y"] - min_descender + row_height * l.row
             else:
-                l.y = self.renderer.display.top - self.margin - max_ascender - row_height * l.row
+                l.y = self.renderer.display.top - l.layout_options["margin_y"] - max_ascender - row_height * l.row
             prev_l = l
 
     def draw(self, t, renderer):

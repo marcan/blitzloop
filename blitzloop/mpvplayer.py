@@ -162,12 +162,13 @@ class Player(object):
             aspect = self._getprop("video-params/aspect")
 
             if song.aspect:
-                if song.aspect > aspect:
-                    nh = int(h * (aspect / song.aspect))
-                    self.mpv.set_property("vf", "crop=%d:%d" % (w, nh))
-                elif aspect > song.aspect:
-                    nw = int(w * (song.aspect / aspect))
-                    self.mpv.set_property("vf", "crop=%d:%d" % (nw, h))
+                if not song.no_crop:
+                    if song.aspect > aspect:
+                        nh = int(h * (aspect / song.aspect))
+                        self.mpv.set_property("vf", "crop=%d:%d" % (w, nh))
+                    elif aspect > song.aspect:
+                        nw = int(w * (song.aspect / aspect))
+                        self.mpv.set_property("vf", "crop=%d:%d" % (nw, h))
                 self.aspect = song.aspect
             else:
                 self.mpv.set_property("vf", "")
