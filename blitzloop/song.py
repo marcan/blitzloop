@@ -546,7 +546,7 @@ class TagInfo(object):
         self.layout_options = {}
 
 class Variant(object):
-    LAYOUT_OPTIONS = ["early_limit", "reverse_stagger", "fade_in", "fade_out"]
+    LAYOUT_OPTIONS = ["early_limit", "reverse_stagger", "fade_in", "fade_out", "ruby_expand"]
     def __init__(self, data):
         self.data = data
         self.name = None

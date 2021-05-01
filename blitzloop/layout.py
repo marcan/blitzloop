@@ -41,6 +41,14 @@ class GlyphInstance(object):
     def __repr__(self):
         return "Gl(%.04f,%.04f)" % (self.x, self.y)
 
+class MoleculeInstance(object):
+    def __init__(self, molecule, get_atom_time, style, font, ruby_font):
+        self.molecule = molecule
+        self.get_atom_time = get_atom_time
+        self.style = style
+        self.font = font
+        self.ruby_font = ruby_font
+
 class DisplayLine(object):
     def __init__(self, display):
         self.display = display
@@ -48,8 +56,11 @@ class DisplayLine(object):
         self.text = ""
         self.px = 0
         self.py = 0
+        self.align = 0.0
         self.x = 0.0
         self.y = 0.0
+        self.min_px = 0
+        self.max_px = 0
         self._start_t = None
         self._end_t = None
         self.start = None
@@ -61,6 +72,7 @@ class DisplayLine(object):
             "fade_out": 1.0,
             "early_limit": 5.0,
             "reverse_stagger": 1.5,
+            "ruby_expand": 0,
         }
 
         self.descender = 0
@@ -74,8 +86,11 @@ class DisplayLine(object):
         l.glyphs = list(self.glyphs)
         l.px = self.px
         l.py = self.py
+        l.align = self.align
         l.x = self.x
         l.y = self.y
+        l.min_px = self.min_px
+        l.max_px = self.max_px
         l._start_t = self._start_t
         l._end_t = self._end_t
         l.start = self.start
@@ -105,7 +120,9 @@ class DisplayLine(object):
         return self._end_t + self.layout_options["fade_out"]
 
     def add(self, molecule, get_atom_time, style, font, ruby_font):
-        self.molecules.append((molecule, get_atom_time))
+        mol = MoleculeInstance(molecule, get_atom_time, style, font, ruby_font)
+        self.molecules.append(mol)
+
         # append a space if we are joining with a previous molecule
         space_char = molecule.SPACE
         if self.glyphs:
@@ -202,6 +219,17 @@ class DisplayLine(object):
                     glyph.tx2 += dx
                     glyph.x += dx
                     self.glyphs.append(glyph)
+                if self.layout_options["ruby_expand"] == 1 and dx < 0:
+                    for glyph in self.glyphs:
+                        glyph.tx1 -= dx
+                        glyph.tx2 -= dx
+                        glyph.x -= dx
+                    self.px = ruby_px
+                    dx = 0
+                self.min_px = min(self.min_px, dx)
+                self.max_px = max(self.max_px, dx + ruby_px)
+
+            self.max_px = max(self.max_px, self.px)
             step += atom.steps
 
         self.start = self.lim_start
@@ -410,21 +438,21 @@ class SongLayout(object):
         prev_l = None
         for i, l in enumerate(lines):
             next_l = lines[i+1] if i < len(lines)-1 else None
-            print(l.start, l.end, max_end, str(l))
             if not top:
                 if l.row == 0:
-                    l.x = self.margin + (self.wrapwidth - l.width) # right
+                    l.align = 1.0 # right
                 elif (l.start >= max_end or l.row > lastrow) and (max_end > l.end or (next_l and next_l.start < l.end)):
-                    l.x = self.margin # left
+                    l.align = 0.0 # left
                 else:
-                    l.x = self.margin + (self.wrapwidth - l.width) / 2.0 # center
+                    l.align = 0.5 # center
             else:
                 if (l.start >= max_end or l.row < lastrow) and (max_end > l.end or (next_l and next_l.start < l.end)):
-                    l.x = self.margin # left
+                    l.align = 0.0 # left
                 elif l.row >= 1 and not (next_l and next_l.row > l.row) and (max_end > l.end or (next_l and next_l.start < l.end)):
-                    l.x = self.margin + (self.wrapwidth - l.width) # right
+                    l.align = 1.0 # right
                 else:
-                    l.x = self.margin + (self.wrapwidth - l.width) / 2.0 # center
+                    l.align = 0.5 # center
+            l.x = self.margin + l.align * (self.wrapwidth - l.width)
             if max_end > l.start and prev_l:
                 orig_start = l.start
                 l.start = max(min(l.start, prev_l.lim_start), l.start - l.layout_options["early_limit"])
