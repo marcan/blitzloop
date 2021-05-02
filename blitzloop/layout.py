@@ -149,6 +149,7 @@ class DisplayLine(object):
             edge_px = None
             edge_l_px = None
             glyphs = []
+            first_glyph = len(self.glyphs)
             # add the atom's base text as glyphs
             for i,c in enumerate(atom.text):
                 if atom.particle_edge is not None and i == atom.particle_edge:
@@ -211,25 +212,29 @@ class DisplayLine(object):
                     par_step += particle.steps
                     ruby_glyphs += par_glyphs
                 # center the ruby text over the atom
+                atom_x_edge = atom_x
                 if edge_l_px is not None:
-                    atom_x = edge_l_px
+                    atom_x_edge = edge_l_px
                 if edge_px is not None:
-                    atom_width = edge_px - atom_x
+                    atom_width = edge_px - atom_x_edge
                 else:
-                    atom_width = self.px - atom_x
-                dx = self.display.round_coord(atom_x + (atom_width - ruby_px) / 2.0)
+                    atom_width = self.px - atom_x_edge
+                dx = self.display.round_coord(atom_x_edge + (atom_width - ruby_px) / 2.0)
                 for glyph in ruby_glyphs:
                     glyph.tx1 += dx
                     glyph.tx2 += dx
                     glyph.x += dx
                     self.glyphs.append(glyph)
-                if self.layout_options["ruby_expand"] == 1 and dx < 0:
-                    for glyph in self.glyphs:
-                        glyph.tx1 -= dx
-                        glyph.tx2 -= dx
-                        glyph.x -= dx
-                    self.px = ruby_px
-                    dx = 0
+                if self.layout_options["ruby_expand"] == 1:
+                    if dx < atom_x:
+                        for glyph in self.glyphs[first_glyph:]:
+                            glyph.tx1 += atom_x - dx
+                            glyph.tx2 += atom_x - dx
+                            glyph.x += atom_x - dx
+                        self.px += atom_x - dx
+                        dx = atom_x
+                    if dx + ruby_px > self.px:
+                        self.px = dx + ruby_px
                 self.min_px = min(self.min_px, dx)
                 self.max_px = max(self.max_px, dx + ruby_px)
 
@@ -308,7 +313,8 @@ class SongLayout(object):
                 else:
                     tmp = line.copy()
                     tmp.add(molecule, get_atom_time, tag_info.style, font, ruby_font)
-                    if tmp.px > self.wrapwidth:
+                    wrapwidth = 1.0 - 2 * line.layout_options["margin_x"]
+                    if tmp.px > wrapwidth:
                         line = DisplayLine(self.renderer.display)
                         line.layout_options.update(tag_info.layout_options)
                         line.add(molecule, get_atom_time, tag_info.style, font, ruby_font)
